@@ -14,7 +14,7 @@ pip install -r requirements.txt
 Assumes a GMOD Chado schema installation with the relationship and sequence ontologies loaded.
 
 ```bash
-insert into organism ( abbreviation, genus, species, common_name ) values ( 'H.sapiens', 'Homo', 'sapiens_GRChhuman_GRCh38', 'human_GRCh38');
+insert into organism ( abbreviation, genus, species, common_name ) values ( 'H.sapiens', 'Homo', 'sapiens_GRCh38', 'human_GRCh38');
 insert into organism ( abbreviation, genus, species, common_name ) values ( 'M.musculus', 'Mus', 'musculus_mm10', 'mouse_mm10');
 ```
 
