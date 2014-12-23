@@ -79,6 +79,7 @@ In a browser try http://localhost:9000/bands/cached/human_GRCh38/
 
 To get the caching to work memcache needs to be installed:
 ```
+cp django_template/settings_secret.py.template django_template/settings_secret.py
 sudo apt-get install memcached
 ```
 
