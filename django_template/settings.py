@@ -8,6 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
+from django_template.settings_secret import *
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import sys
@@ -17,9 +18,6 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'django_template/local_apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'pcw(yn@$%+#!9tb5cs(cwhw62my4o46+%_hs&af(m(*l0!l#s3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
