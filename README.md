@@ -11,7 +11,7 @@ mkvirtualenv xxx
 pip install -r requirements.txt
 ```
 
-Assumes a GMOD Chado schema installation with relationshiop and sequence ontologies loaded.
+Assumes a GMOD Chado schema installation with the relationship and sequence ontologies loaded.
 
 ```bash
 insert into organism ( abbreviation, genus, species, common_name ) values ( 'H.sapiens', 'Homo', 'sapiens_GRChhuman_GRCh38', 'human_GRCh38');
@@ -21,11 +21,11 @@ insert into organism ( abbreviation, genus, species, common_name ) values ( 'M.m
 Download chromosome data and populate the database:
 
 ```bash
-curl ftp://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/cytoBand.txt.gz  -o tmp/cytoBand_human.txt.gz
-curl ftp://hgdownload.cse.ucsc.edu/goldenPath/mm10/database/cytoBand.txt.gz  -o tmp/cytoBand_mouse.txt.gz
 curl ftp://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz > tmp/chromInfo_human.txt.gz
 curl ftp://hgdownload.cse.ucsc.edu/goldenPath/mm10/database/chromInfo.txt.gz  > tmp/chromInfo_mouse.txt.gz
 
+curl ftp://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/cytoBand.txt.gz  -o tmp/cytoBand_human.txt.gz
+curl ftp://hgdownload.cse.ucsc.edu/goldenPath/mm10/database/cytoBand.txt.gz  -o tmp/cytoBand_mouse.txt.gz
 
 curl http://www.immunobase.org/regions/htdocs/downloads/Hs_GRCh38-AA-assoc_tableGFF -o tmp/Hs_GRCh38-AA-assoc_table.gff
 curl http://www.immunobase.org/regions/htdocs/downloads/Hs_GRCh38-ATD-assoc_tableGFF -o tmp/Hs_GRCh38-ATD-assoc_table.gff
@@ -39,8 +39,11 @@ curl http://www.immunobase.org/regions/htdocs/downloads/Hs_GRCh38-RA-assoc_table
 curl http://www.immunobase.org/regions/htdocs/downloads/Hs_GRCh38-SLE-assoc_tableGFF -o tmp/Hs_GRCh38-SLE-assoc_table.gff
 curl http://www.immunobase.org/regions/htdocs/downloads/Hs_GRCh38-T1D-assoc_tableGFF -o tmp/Hs_GRCh38-T1D-assoc_table.gff
 curl http://www.immunobase.org/regions/htdocs/downloads/Hs_GRCh38-UC-assoc_tableGFF -o tmp/Hs_GRCh38-UC-assoc_table.gff
+```
 
+Use the populate_db command line argument to load the data:
 
+```bash
 python manage.py populate_db --help
 python manage.py populate_db --chr tmp/chromInfo_human.txt.gz --org human_GRCh38
 python manage.py populate_db --chr tmp/chromInfo_mouse.txt.gz --org mouse_mm10
