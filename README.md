@@ -75,3 +75,8 @@ python manage.py runserver localhost:9000
 
 In a browser try http://localhost:9000/bands/cached/human_GRCh38/
 
+### memcache 
+```
+sudo apt-get install memcached
+```
+
