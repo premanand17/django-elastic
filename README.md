@@ -76,7 +76,7 @@ python manage.py runserver localhost:9000
 In a browser try http://localhost:9000/bands/cached/human_GRCh38/
 
 ```bash
-./manage.py test db -v3
+./manage.py test db.tests.TastypieTests -v3
 ```
 
 ### Cache 
