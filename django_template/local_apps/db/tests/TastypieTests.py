@@ -2,10 +2,10 @@ from tastypie.test import ResourceTestCase
 from db.models import Cvterm, Cv, Db, Dbxref
 
 
-class CvResourceTest(ResourceTestCase):
+class TastypieTest(ResourceTestCase):
 
     def setUp(self):
-        super(CvResourceTest, self).setUp()
+        super(TastypieTest, self).setUp()
 
         # Create a cv
         self.cv = Cv.objects.create(cv_id=12, name='local_test', definition='local definition - test')
