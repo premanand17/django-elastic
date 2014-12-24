@@ -75,7 +75,11 @@ python manage.py runserver localhost:9000
 
 In a browser try http://localhost:9000/bands/cached/human_GRCh38/
 
-### memcache 
+```bash
+./manage.py test db -v3
+```
+
+### Cache 
 
 To get the caching to work memcache needs to be installed:
 ```
