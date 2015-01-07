@@ -6,12 +6,19 @@ export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
 export WORKON_HOME=/XXX/python-env
 source /usr/local/bin/virtualenvwrapper.sh
 export PATH=/usr/local/bin/:$PATH
+```
+Clone the repository from github and set up the python environment and dependencies.
 
+```bash
 mkvirtualenv xxx
 pip install -r requirements.txt
 ```
+This set up assumes a GMOD Chado schema installation with the relationship and sequence ontologies loaded.
+Edit the database settings in django_template/settings_secret.py.template and copy into place.
 
-Assumes a GMOD Chado schema installation with the relationship and sequence ontologies loaded.
+```bash
+cp django_template/settings_secret.py.template  django_template/settings_secret.py
+```
 
 ```bash
 insert into organism ( abbreviation, genus, species, common_name ) values ( 'H.sapiens', 'Homo', 'sapiens_GRCh38', 'human_GRCh38');
