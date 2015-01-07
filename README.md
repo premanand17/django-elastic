@@ -13,7 +13,7 @@ Clone the repository from github and set up the python environment and dependenc
 mkvirtualenv django_template_env
 pip install -r requirements.txt
 ```
-This set up assumes a GMOD Chado schema installation with the relationship and sequence ontologies loaded.
+The following set up assumes a GMOD Chado schema installation with the gene, relationship and sequence ontologies loaded.
 Edit the database settings in django_template/settings_secret.py.template and copy into place.
 
 ```bash
@@ -48,7 +48,7 @@ curl http://www.immunobase.org/regions/htdocs/downloads/Hs_GRCh38-T1D-assoc_tabl
 curl http://www.immunobase.org/regions/htdocs/downloads/Hs_GRCh38-UC-assoc_tableGFF -o tmp/Hs_GRCh38-UC-assoc_table.gff
 ```
 
-Use the populate_db command line argument to load the data:
+Then the populate_db command line argument can be used to load the data:
 
 ```bash
 python manage.py populate_db --help
@@ -74,7 +74,7 @@ python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-UC-assoc_tab
 
 ```
 
-Run the server:
+Run the server, e.g.:
 
 ```bash
 python manage.py runserver localhost:9000
