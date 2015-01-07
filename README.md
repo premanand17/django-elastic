@@ -1,5 +1,5 @@
 
-## Basic Django Project Setup
+## Basic Django Template Project Setup
 
 ```bash
 export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
@@ -10,7 +10,7 @@ export PATH=/usr/local/bin/:$PATH
 Clone the repository from github and set up the python environment and dependencies.
 
 ```bash
-mkvirtualenv xxx
+mkvirtualenv django_template_env
 pip install -r requirements.txt
 ```
 This set up assumes a GMOD Chado schema installation with the relationship and sequence ontologies loaded.
