@@ -55,21 +55,6 @@ ROOT_URLCONF = 'django_template.urls'
 WSGI_APPLICATION = 'django_template.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'chado2',
-        'USER': 'tjc29',
-        'PASSWORD': 'test123',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    }
-}
-
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
