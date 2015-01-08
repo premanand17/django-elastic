@@ -25,63 +25,6 @@ class Cv(models.Model):
         db_table = 'cv'
 
 
-class CvCvtermCount(models.Model):
-    name = models.CharField(max_length=255, blank=True)
-    num_terms_excl_obs = models.BigIntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'cv_cvterm_count'
-
-
-class CvCvtermCountWithObs(models.Model):
-    name = models.CharField(max_length=255, blank=True)
-    num_terms_incl_obs = models.BigIntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'cv_cvterm_count_with_obs'
-
-
-class CvLeaf(models.Model):
-    cv_id = models.IntegerField(blank=True, null=True)
-    cvterm_id = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'cv_leaf'
-
-
-class CvLinkCount(models.Model):
-    cv_name = models.CharField(max_length=255, blank=True)
-    relation_name = models.CharField(max_length=1024, blank=True)
-    relation_cv_name = models.CharField(max_length=255, blank=True)
-    num_links = models.BigIntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'cv_link_count'
-
-
-class CvPathCount(models.Model):
-    cv_name = models.CharField(max_length=255, blank=True)
-    relation_name = models.CharField(max_length=1024, blank=True)
-    relation_cv_name = models.CharField(max_length=255, blank=True)
-    num_paths = models.BigIntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'cv_path_count'
-
-
-class CvRoot(models.Model):
-    cv_id = models.IntegerField(blank=True, null=True)
-    root_cvterm_id = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'cv_root'
-
 
 class Cvprop(models.Model):
     cvprop_id = models.IntegerField(primary_key=True)
@@ -119,32 +62,32 @@ class CvtermDbxref(models.Model):
     is_for_definition = models.IntegerField()
 
     class Meta:
-        managed = False
+#        managed = False
         db_table = 'cvterm_dbxref'
 
 
-class CvtermRelationship(models.Model):
-    cvterm_relationship_id = models.IntegerField(primary_key=True)
-    type = models.ForeignKey(Cvterm, related_name='cvterm_relationship_type')
-    subject = models.ForeignKey(Cvterm, related_name='cvterm_relationship_subject')
-    object = models.ForeignKey(Cvterm, related_name='cvterm_relationship_object')
+# class CvtermRelationship(models.Model):
+#     cvterm_relationship_id = models.IntegerField(primary_key=True)
+#     type = models.ForeignKey(Cvterm, related_name='cvterm_relationship_type')
+#     subject = models.ForeignKey(Cvterm, related_name='cvterm_relationship_subject')
+#     object = models.ForeignKey(Cvterm, related_name='cvterm_relationship_object')
+# 
+#     class Meta:
+# #        managed = False
+#         db_table = 'cvterm_relationship'
 
-    class Meta:
-        managed = False
-        db_table = 'cvterm_relationship'
 
-
-class Cvtermpath(models.Model):
-    cvtermpath_id = models.IntegerField(primary_key=True)
-    type = models.ForeignKey(Cvterm, blank=True, null=True, related_name='cvtermpath_type')
-    subject = models.ForeignKey(Cvterm, related_name='cvtermpath_subject')
-    object = models.ForeignKey(Cvterm, related_name='cvtermpath_object')
-    cv = models.ForeignKey(Cv, related_name='cvtermpath_cv')
-    pathdistance = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'cvtermpath'
+# class Cvtermpath(models.Model):
+#     cvtermpath_id = models.IntegerField(primary_key=True)
+#     type = models.ForeignKey(Cvterm, blank=True, null=True, related_name='cvtermpath_type')
+#     subject = models.ForeignKey(Cvterm, related_name='cvtermpath_subject')
+#     object = models.ForeignKey(Cvterm, related_name='cvtermpath_object')
+#     cv = models.ForeignKey(Cv, related_name='cvtermpath_cv')
+#     pathdistance = models.IntegerField(blank=True, null=True)
+# 
+#     class Meta:
+#         managed = False
+#         db_table = 'cvtermpath'
 
 
 class Cvtermprop(models.Model):
@@ -159,15 +102,15 @@ class Cvtermprop(models.Model):
         db_table = 'cvtermprop'
 
 
-class Cvtermsynonym(models.Model):
-    cvtermsynonym_id = models.IntegerField(primary_key=True)
-    cvterm = models.ForeignKey(Cvterm, related_name='cvtermsynonym_cvterm')
-    synonym = models.CharField(max_length=1024)
-    type = models.ForeignKey(Cvterm, blank=True, null=True, related_name='cvtermsynonym_type')
-
-    class Meta:
-        managed = False
-        db_table = 'cvtermsynonym'
+# class Cvtermsynonym(models.Model):
+#     cvtermsynonym_id = models.IntegerField(primary_key=True)
+#     cvterm = models.ForeignKey(Cvterm, related_name='cvtermsynonym_cvterm')
+#     synonym = models.CharField(max_length=1024)
+#     type = models.ForeignKey(Cvterm, blank=True, null=True, related_name='cvtermsynonym_type')
+# 
+#     class Meta:
+# #        managed = False
+#         db_table = 'cvtermsynonym'
 
 
 class Db(models.Model):
@@ -224,15 +167,7 @@ class Feature(models.Model):
 #        managed = False
         db_table = 'feature'
 
-
-class FeatureContains(models.Model):
-    subject_id = models.IntegerField(blank=True, null=True)
-    object_id = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'feature_contains'
-        
+       
 class FeaturelocQuerySet(models.QuerySet):
 
     def getCytoBands(self, org):
