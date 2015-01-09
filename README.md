@@ -86,8 +86,7 @@ In a browser try http://localhost:9000/bands/cached/human_GRCh38/
 ./manage.py makemigrations
 ./manage.py migrate
 
-./manage.py test db.tests.TastypieTests -v3
-./manage.py test db.tests.DbTests -v3
+./manage.py test db.tests bands.tests -v3
 ```
 
 ### Cache 
