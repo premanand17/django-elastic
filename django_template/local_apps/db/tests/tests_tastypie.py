@@ -14,11 +14,11 @@ class TastypieTest(ResourceTestCase):
         self.cvterm = Cvterm.objects.create(cvterm_id=12, dbxref_id=1, cv_id=12, name='test cvterm', is_obsolete=0, is_relationshiptype=0)
         #Cv(cv_id=12, name='local_test', definition='local definition - test').save()
 
-    def test_get_list_unauthorzied(self):
+    def test_get_list_cv(self):
         resp = self.api_client.get('/api/dev/cv/', format='json')
         self.assertValidJSONResponse(resp)
 
-    def test_get_list_cvterms_unauthorzied(self):
+    def test_get_list_cvterms(self):
         resp = self.api_client.get('/api/dev/cvterm/', format='json', cv='12')
         self.assertValidJSONResponse(resp)
 
