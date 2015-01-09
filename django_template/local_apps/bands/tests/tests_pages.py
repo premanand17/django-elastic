@@ -1,13 +1,10 @@
 from django.test import TestCase
-from django.test.utils import setup_test_environment
-
 
 class BandsViewsTestCase(TestCase):
     """Load fixture"""
     fixtures = ['db2.json']
-    setup_test_environment()
 
-    def test_index(self):
+    def test_band(self):
         resp = self.client.get('/bands/cached/human_GRCh38/')
         self.assertEqual(resp.status_code, 200)
 
@@ -19,3 +16,11 @@ class BandsViewsTestCase(TestCase):
             self.assertTrue(hasattr(feature, 'uniquename'))
 
 
+    def test_cv(self):
+        resp = self.client.get('/bands/cvlist/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('cv_list' in resp.context)
+        cv = resp.context['cv_list'][0]
+        self.assertTrue(hasattr(cv, 'cv_id'))
+        self.assertTrue(hasattr(cv, 'name'))
+            
