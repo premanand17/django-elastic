@@ -6,6 +6,8 @@ from django.db.utils import IntegrityError
 import gzip
 import re
 import logging
+from db.management.VCF import VCFManager
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -15,7 +17,8 @@ class Command(BaseCommand):
     help = "Use to populate the database \n" \
       "python manage.py populate_db --gff loaded/Hs_GRCh38-T1D-assoc_tableGFF.txt.gz  --org human_GRCh38\n" \
       "python manage.py populate_db --bands loaded/mouse_ideogram.gz --org mouse_mm10\n" \
-      "python manage.py populate_db --disease loaded/disease.list"
+      "python manage.py populate_db --disease loaded/disease.list\n" \
+      "python manage.py populate_db --vcf file.vcf.gz --org human_GRCh38"
     
     option_list = BaseCommand.option_list + (
         make_option('--disease',
@@ -33,6 +36,10 @@ class Command(BaseCommand):
         make_option('--gff',
             dest='gff',
             help='GFF file of features'),
+        ) + (
+        make_option('--vcf',
+            dest='vcf',
+            help='VCF file of SNP features'),
         ) + (
         make_option('--chr',
             dest='chr',
@@ -225,6 +232,9 @@ class Command(BaseCommand):
           self._create_bands(**options)
         elif options['gff']:
           self._create_gff_features(**options)
+        elif options['vcf']:
+          vcf = VCFManager()
+          vcf.create_vcf_features(**options)
         elif options['chr']:
           self._create_chr_features(**options)
 
