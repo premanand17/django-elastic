@@ -22,42 +22,45 @@ class VCFManager:
         lastSrc = ""
         n = 0
         transaction.set_autocommit(False)
-        for line in f:
-            line = line.decode("utf-8")
 
-            parts = re.split('\t', line)
-            if(len(parts) != 8 or line.startswith("#")):
-              continue
+        try:
+            for line in f:
+                line = line.decode("utf-8")
+                parts = re.split('\t', line)
+                if(len(parts) != 8 or line.startswith("#")):
+                    continue
 
-            chr = 'chr'+parts[0]
-            fmax = int(parts[1])
-            fmin = fmax - 1
-            uniquename = parts[2]
+                chr = 'chr'+parts[0]
+                fmax = int(parts[1])
+                fmin = fmax - 1
+                uniquename = parts[2]
 
-            if(lastSrc != parts[0]):
-                print('loading SNPs on: '+chr,end=" ...",flush=True)
-                srcfeature = Feature.objects.filter(organism=organism).get(uniquename=chr)
-            lastSrc = parts[0]
+                if(lastSrc != parts[0]):
+                    print('loading SNPs on: '+chr,end=" ...",flush=True)
+                    srcfeature = Feature.objects.filter(organism=organism).get(uniquename=chr)    
+                lastSrc = parts[0]
 
-            feature = Feature(organism=organism, uniquename=uniquename, type=cvterm, is_analysis=0, is_obsolete=0)
-            feature.save()
+                feature = Feature(organism=organism, uniquename=uniquename, type=cvterm, is_analysis=0, is_obsolete=0)
+                feature.save()
 
-            #ref
-            rank = 0
-            Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=fmax, locgroup=0, rank=rank, residue_info=parts[3]).save()
+                #ref
+                rank = 0
+                Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=fmax, locgroup=0, rank=rank, residue_info=parts[3]).save()
 
-            #alt
-            alts = re.split(',', parts[4])
-            for alt in alts:
-                rank += 1
-                Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=fmax, locgroup=0, rank=rank, residue_info=alt).save()
+                #alt
+                alts = re.split(',', parts[4])
+                for alt in alts:
+                    rank += 1
+                    Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=fmax, locgroup=0, rank=rank, residue_info=alt).save()
 
-            n += 1
-            if( n > 1999 ):
-                n = 0
-                print('.',end="",flush=True)
-                transaction.commit()
+                n += 1
+                if( n > 1999 ):
+                    n = 0
+                    print('.',end="",flush=True)
+                    transaction.commit()
 
-        transaction.commit()
+            transaction.commit()
+        finally:
+            transaction.set_autocommit(True)
 
         return
