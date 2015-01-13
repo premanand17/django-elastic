@@ -6,7 +6,8 @@ from django.db.utils import IntegrityError
 import gzip
 import re
 import logging
-from db.management.VCF import VCFManager
+from db.management.loaders.VCF import VCFManager
+from db.management.loaders.GFF import GFFManager
 
 
 # Get an instance of a logger
@@ -46,12 +47,6 @@ class Command(BaseCommand):
             help='Chromosome sequence lengths'),
         )
 
-    def _get_name(self, attributes):
-        parts = re.split(';', attributes)
-        for part in parts:
-            if(part.startswith('Name=')):
-               return part[5:]
-        return ""
 
     def _create_disease_cvterms(self, **options):
         
@@ -170,72 +165,16 @@ class Command(BaseCommand):
             f.save()
 
 
-    def _create_gff_features(self, **options):
-        if options['org']:
-            org = options['org']
-        else:
-            org = 'human'
-        organism = Organism.objects.get(common_name=org)
-
-        disease = None
-        disease_short = None
-        organism = Organism.objects.get(common_name=org)
-        f = gzip.open(options['gff'], 'rb')
-        for line in f:
-            line = line.decode("utf-8")
-            if(line.startswith("##")):
-                if(line.startswith("##Key Disease:")):
-                    disease = line[14:].strip()
-                    #disease_short = "".join(item[0].upper() for item in disease.split())
-
-                    # lookup disease short name
-                    cv = Cv.objects.get(name='disease')
-                    cvterm = Cvterm.objects.get(cv=cv, name=disease)
-                    type = Cvterm.objects.get(name='disease short name')
-                    cvtermprop = Cvtermprop.objects.get(cvterm=cvterm, type=type)
-                    disease_short = cvtermprop.value
-                    self.stdout.write('disease... '+disease)
-                continue
-
-            parts = re.split('\t', line)
-            if(len(parts) != 9):
-              continue
-
-            name = self._get_name(parts[8])
-            uniquename = parts[0]+"_"+name+"_"+parts[3]+"_"+parts[4]+"_"+disease_short
-            feature = self._get_feature(name, uniquename, 'sequence', parts[2], organism) 
-            srcfeature = Feature.objects.filter(organism=organism).get(uniquename=parts[0])
-            self.stdout.write('get srcfeature... '+parts[0])
-            fmin = int(parts[3])-1
-            feature.save()
-            featureloc = Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=parts[4], locgroup=0, rank=0)
-            featureloc.save()
-            self.stdout.write('loaded feature... '+feature.uniquename+' on '+srcfeature.uniquename)
- 
-            if disease:
-                cv = Cv.objects.get(name='disease')
-                cvterm = Cvterm.objects.get(cv=cv, name=disease)
-                feaureprop = Featureprop(feature=feature, type=cvterm, rank=0)
-                feaureprop.save()
-                self.stdout.write('loaded featureprop... '+disease)
-        return
-
-    def _get_feature(self, name, uniquename, cvName, cvtermName, organism):
-        cv = Cv.objects.get(name=cvName)
-        type = Cvterm.objects.get(cv=cv,name=cvtermName)
-        return Feature(organism=organism, name=name, uniquename=uniquename, type=type, is_analysis=0, is_obsolete=0)
-
     def handle(self, *args, **options):
         if options['disease']:
           self._create_disease_cvterms(**options)
         elif options['bands']:
           self._create_bands(**options)
         elif options['gff']:
-          self._create_gff_features(**options)
+          gff = GFFManager()
+          gff.create_gff_features(**options)
         elif options['vcf']:
           vcf = VCFManager()
           vcf.create_vcf_features(**options)
         elif options['chr']:
           self._create_chr_features(**options)
-
-
