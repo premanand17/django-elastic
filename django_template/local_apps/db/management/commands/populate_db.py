@@ -8,6 +8,8 @@ import re
 import logging
 from db.management.loaders.VCF import VCFManager
 from db.management.loaders.GFF import GFFManager
+from db.management.loaders.Bands import BandsManager
+from django_template.local_apps.db.management.loaders.Bands import BandsManager
 
 
 # Get an instance of a logger
@@ -74,71 +76,6 @@ class Command(BaseCommand):
             Cvtermprop(cvterm=cvterm, type=type, value=parts[2], rank=parts[4]).save()
 
                               
-    '''
-    Set up the G-staining ontology and return the CV object
-    '''
-    def _gstain(self):
-        gstainList = []
-        gstains = [ 'gpos100', 'gpos', 'gpos75', 'gpos66', 'gpos50', 'gpos33', 'gpos25', 'gvar', 'gneg', 'acen', 'stalk' ]
-        for gstain in gstains:
-            gstainList.append(Cvterm(name=gstain, definition=gstain))
-        return self._create_cvterms("gstain", "Giemsa banding", gstainList)
-
-
-    '''
-    Create CV and cvterms
-    '''
-    def _create_cvterms(self, cvName, cvDefn, termList):
-        try:
-            cv = Cv.objects.get(name=cvName)
-            logger.warn("WARNING:: "+cvName+" CV EXISTS")
-        except ObjectDoesNotExist as e:
-            logger.warn("WARNING:: ADD "+cvName+" CV")
-            cv = Cv(name=cvName, definition=cvDefn)
-            cv.save()
-        
-        db = Db.objects.get(name='null')
-        for term in termList:
-            try:
-                dbxref = Dbxref(db_id=db.db_id, accession=term.name)
-                dbxref.save()
-                cvterm = Cvterm(dbxref_id=dbxref.dbxref_id, cv_id=cv.cv_id, name=term.name, definition=term.definition, is_obsolete=0, is_relationshiptype=0)
-                cvterm.save()
-            except IntegrityError as ee:
-                logger.warn("WARNING:: "+term.name+" FAILED TO LOAD")
-        return cv
-
-    '''
-    Create cytological band features
-    '''
-    def _create_bands(self, **options):
-        if options['org']:
-            org = options['org']
-        else:
-            org = 'human'
- 
-        cv = self._gstain()
-        organism = Organism.objects.get(common_name=org)
-        f = gzip.open(options['bands'], 'rb')
-        for line in f:
-            #self.stdout.write(line.decode("utf-8"))
-            parts = re.split('\t', line.decode("utf-8"))
-            name = parts[0]+'_'+parts[3]
-            try:
-              cvterm = Cvterm.objects.get(cv=cv, name=parts[4].rstrip())
-              feature = Feature(organism=organism, uniquename=name, name=parts[3], type=cvterm, is_analysis=0, is_obsolete=0)
-              self.stdout.write('create feature... '+name+' on '+parts[0])
-              srcfeature = Feature.objects.get(organism=organism, uniquename=parts[0])
-              self.stdout.write('get srcfeature... '+parts[0])
-              fmin = int(parts[1])-1
-              feature.save()
-              featureloc = Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=parts[2], locgroup=0, rank=0)
-              featureloc.save()
-              self.stdout.write('loaded feature... '+name+' on '+srcfeature.uniquename)
-            except ObjectDoesNotExist as e:
-              logger.warn("WARNING:: NOT LOADED "+name)
-              logger.warn(e)
-        return
 
     def _create_chr_features(self, **options):
         if options['org']:
@@ -169,7 +106,8 @@ class Command(BaseCommand):
         if options['disease']:
           self._create_disease_cvterms(**options)
         elif options['bands']:
-          self._create_bands(**options)
+          bands = BandsManager()
+          bands.create_bands(**options)
         elif options['gff']:
           gff = GFFManager()
           gff.create_gff_features(**options)
