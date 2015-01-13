@@ -21,9 +21,8 @@ class Cv(models.Model):
        return self.name
 
     class Meta:
-#       managed = False
-        db_table = 'cv'
-
+       managed = False
+       db_table = 'cv'
 
 
 class Cvprop(models.Model):
@@ -36,6 +35,7 @@ class Cvprop(models.Model):
     class Meta:
         managed = False
         db_table = 'cvprop'
+ 
 
 
 class Cvterm(models.Model):
@@ -51,8 +51,9 @@ class Cvterm(models.Model):
        return self.name
 
     class Meta:
-#       managed = False
-        db_table = 'cvterm'
+       managed = False
+       db_table = 'cvterm'
+
 
 
 class CvtermDbxref(models.Model):
@@ -62,32 +63,9 @@ class CvtermDbxref(models.Model):
     is_for_definition = models.IntegerField()
 
     class Meta:
-#        managed = False
-        db_table = 'cvterm_dbxref'
+       managed = False
+       db_table = 'cvterm_dbxref'
 
-
-# class CvtermRelationship(models.Model):
-#     cvterm_relationship_id = models.IntegerField(primary_key=True)
-#     type = models.ForeignKey(Cvterm, related_name='cvterm_relationship_type')
-#     subject = models.ForeignKey(Cvterm, related_name='cvterm_relationship_subject')
-#     object = models.ForeignKey(Cvterm, related_name='cvterm_relationship_object')
-# 
-#     class Meta:
-# #        managed = False
-#         db_table = 'cvterm_relationship'
-
-
-# class Cvtermpath(models.Model):
-#     cvtermpath_id = models.IntegerField(primary_key=True)
-#     type = models.ForeignKey(Cvterm, blank=True, null=True, related_name='cvtermpath_type')
-#     subject = models.ForeignKey(Cvterm, related_name='cvtermpath_subject')
-#     object = models.ForeignKey(Cvterm, related_name='cvtermpath_object')
-#     cv = models.ForeignKey(Cv, related_name='cvtermpath_cv')
-#     pathdistance = models.IntegerField(blank=True, null=True)
-# 
-#     class Meta:
-#         managed = False
-#         db_table = 'cvtermpath'
 
 
 class Cvtermprop(models.Model):
@@ -98,8 +76,9 @@ class Cvtermprop(models.Model):
     rank = models.IntegerField()
 
     class Meta:
-        #managed = False
-        db_table = 'cvtermprop'
+       managed = False
+       db_table = 'cvtermprop'
+
 
 
 # class Cvtermsynonym(models.Model):
@@ -121,8 +100,9 @@ class Db(models.Model):
     url = models.CharField(max_length=255, blank=True)
 
     class Meta:
-#       managed = False
-        db_table = 'db'
+       managed = False
+       db_table = 'db'
+
 
 
 class Dbxref(models.Model):
@@ -133,8 +113,9 @@ class Dbxref(models.Model):
     description = models.TextField(blank=True)
 
     class Meta:
-#       managed = False
-        db_table = 'dbxref'
+       managed = False
+       db_table = 'dbxref'
+
 
 
 class FeatureQuerySet(models.QuerySet):
@@ -164,8 +145,9 @@ class Feature(models.Model):
     objects = FeatureQuerySet.as_manager()
     
     class Meta:
-#        managed = False
+        managed = False
         db_table = 'feature'
+ 
 
        
 class FeaturelocQuerySet(models.QuerySet):
@@ -194,8 +176,9 @@ class Featureloc(models.Model):
     objects = FeaturelocQuerySet.as_manager()
 
     class Meta:
-#        managed = False
+        managed = False
         db_table = 'featureloc'
+ 
         
 class Featureprop(models.Model):
     featureprop_id = models.AutoField(primary_key=True)
@@ -205,8 +188,9 @@ class Featureprop(models.Model):
     rank = models.IntegerField()
 
     class Meta:
-#        managed = False
+        managed = False
         db_table = 'featureprop'
+ 
 
 
 class Organism(models.Model):
@@ -221,7 +205,8 @@ class Organism(models.Model):
        return self.common_name
    
     class Meta:
-#        managed = False
+        managed = False
         db_table = 'organism'
+ 
 
 
