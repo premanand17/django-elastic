@@ -20,7 +20,7 @@ class ManagedModelTestRunner(DiscoverRunner):
                     if(line.strip().endswith("FROM stdin;")):
                         continue
                     if(line.strip().endswith(";") or line.strip().endswith("\.")):
-                        print (cmd)
+                        #print (cmd)
                         cur.execute(cmd)
                         cmd = ""
 
