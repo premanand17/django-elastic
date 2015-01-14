@@ -58,19 +58,18 @@ python manage.py populate_db --bands tmp/cytoBand_human.txt.gz --org human_GRCh3
 python manage.py populate_db --bands tmp/cytoBand_mouse.txt.gz --org=mouse_mm10
 python manage.py populate_db --disease tmp/disease.list
 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-AA-assoc_table.gff 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-AA-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-ATD-assoc_table.gff.gz
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-CEL-assoc_table.gff.gz
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-CRO-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-JIA-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-MS-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-PBC-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-PSO-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-RA-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-SLE-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-T1D-assoc_table.gff.gz 
-python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-UC-assoc_table.gff.gz 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-AA-assoc_table.gff
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-ATD-assoc_table.gff
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-CEL-assoc_table.gff
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-CRO-assoc_table.gff 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-JIA-assoc_table.gff 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-MS-assoc_table.gff 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-PBC-assoc_table.gff 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-PSO-assoc_table.gff 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-RA-assoc_table.gff 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-SLE-assoc_table.gff 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-T1D-assoc_table.gff 
+python manage.py populate_db --org human_GRCh38 --gff tmp/Hs_GRCh38-UC-assoc_table.gff 
 
 ```
 
