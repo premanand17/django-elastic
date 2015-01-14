@@ -1,5 +1,6 @@
 from db.models import Cvterm, Cv, Organism, Feature, Featureloc
 from db.management.loaders.Utils import create_cvterms
+from django.core.exceptions import ObjectDoesNotExist
 import gzip
 import re
 
