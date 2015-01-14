@@ -9,7 +9,7 @@ import logging
 from db.management.loaders.VCF import VCFManager
 from db.management.loaders.GFF import GFFManager
 from db.management.loaders.Bands import BandsManager
-from django_template.local_apps.db.management.loaders.Bands import BandsManager
+from db.management.loaders.Utils import create_cvterms
 
 
 # Get an instance of a logger
@@ -55,7 +55,7 @@ class Command(BaseCommand):
         dilList = []
         dilList.append(Cvterm(name='disease short name', definition=''))
         dilList.append(Cvterm(name='colour', definition=''))
-        self._create_cvterms("DIL", "DIL terms", dilList)
+        create_cvterms("DIL", "DIL terms", dilList)
         dil_cv = Cv.objects.get(name="DIL")
 
         # read disease list as two column tab delimited file
@@ -66,7 +66,7 @@ class Command(BaseCommand):
             termList = []
             parts = re.split('\t', line)
             termList.append(Cvterm(name=parts[0], definition=parts[1]))
-            self._create_cvterms("disease", "disease types", termList)
+            create_cvterms("disease", "disease types", termList)
 
             cv = Cv.objects.get(name="disease")
             cvterm = Cvterm.objects.get(cv=cv, name=parts[0])
