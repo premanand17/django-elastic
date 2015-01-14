@@ -38,7 +38,7 @@ class BandsManager:
               featureloc = Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=parts[2], locgroup=0, rank=0)
               featureloc.save()
               print('loaded feature... '+name+' on '+srcfeature.uniquename)
-            except (ObjectDoesNotExist, DoesNotExist) as e:
+            except ObjectDoesNotExist as e:
               logger.warn("WARNING:: NOT LOADED "+name)
               logger.warn(e)
         return
