@@ -1,8 +1,13 @@
 from db.models import Cvterm, Cv, Organism, Feature, Featureloc
 from db.management.loaders.Utils import create_cvterms
 from django.core.exceptions import ObjectDoesNotExist
+import logging
 import gzip
 import re
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+
 
 class BandsManager:
 
@@ -33,7 +38,7 @@ class BandsManager:
               featureloc = Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=parts[2], locgroup=0, rank=0)
               featureloc.save()
               print('loaded feature... '+name+' on '+srcfeature.uniquename)
-            except ObjectDoesNotExist as e:
+            except (ObjectDoesNotExist, DoesNotExist) as e:
               logger.warn("WARNING:: NOT LOADED "+name)
               logger.warn(e)
         return
