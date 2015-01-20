@@ -4,6 +4,7 @@
 {% block content %}
 
 {% if data %}
+	Showing {{ size }} of {{ total }} hits
 	{% for snp in data %}
   		<h2>{{ snp.ID }}</h2>
   		<div class="table-responsive">
