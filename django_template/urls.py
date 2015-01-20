@@ -24,5 +24,6 @@ urlpatterns = patterns('',
     #url(r'^admin/', include(admin.site.urls)),
     url(r'^bands/', include('bands.urls', namespace="bands")),
     url(r'^api/', include(api.urls)),
+    url(r'^search/', include('es.urls', namespace="es")),
 )
 
