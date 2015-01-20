@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}SEARCH{% endblock %}
+
+
+{% block header %}
+<script language="text/javascript" type="text/javascript" src="/static/js/tree.js"></script>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"/>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+{% if ID %}
+	<h2>{{ ID }}</h2>
+	<div class="table-responsive">
+	<table class="table table-striped table-condensed">
+		<tr><td>Chromosome </td><td>{{ SRC }}</td></tr>
+		<tr><td>Position</td><td>{{ POS }}</td></tr>
+		<tr><td>Reference</td><td>{{ REF }}</td></tr>
+		<tr><td>Alternative</td><td>{{ ALT }}</td></tr>
+	</table>
+	</div>
+{% else %}
+    <p>No search results.</p>
+{% endif %}
+
+{% endblock %}
