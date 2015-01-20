@@ -48,6 +48,7 @@ class Command(BaseCommand):
                                             "REF": { "type": "string", "index" : "no" },
                                             "ALT": { "type": "string", "index" : "no" },
                                             "POS": { "type": "integer", "index" : "not_analyzed" },
+                                            "INFO" : {"type": "string", "index" : "no" }
                                         }
                                 }
                         }
@@ -71,28 +72,50 @@ class Command(BaseCommand):
         n = 0
         nn = 0
         lastSrc = ''
+        info = {}
 
         try:
             for line in f:
-                line = line.decode("utf-8")
+                line = line.rstrip().decode("utf-8")
                 parts = re.split('\t', line)
                 if(len(parts) != 8 or line.startswith("#")):
+#                     if(line.startswith("##INFO=<")):
+#                         parts = re.split(',', line[8:-1])
+#                         id = ""
+#                         desc = ""
+#                         for p in parts:
+#                             if(p.startswith("ID=")):
+#                                 id = p[3:]
+#                             elif(p.startswith("Description=")):
+#                                 desc = re.sub(r'^"|"$', '', p[12:])
+#                         if(id):
+#                             info[id] = desc
                     continue
 
                 src = parts[0]
-                pos = int(parts[1])
+                pos = int(parts[1])+1
                 id  = parts[2]
                 ref = parts[3]
                 alt = parts[4]
-                
+#                 infos = re.split(';', parts[7])
+#                 infoprops = []
+#                 
+#                 for i in infos:
+#                     if("=" in i):
+#                         ins = re.split("=", i)
+#                         infoprops.append( {"name":ins[0], "desc": info.get(ins[0]), "value":ins[1] } )
+#                     else:
+#                         infoprops.append( {"name":i, "desc": info.get(i), "value":"FLAG" } )
+
                 data += '{"index": {"_id": "%s"}}\n' % nn
                 data += json.dumps({
                         "ID": parts[2],
                         "SRC": parts[0],
                         "REF": parts[3],
                         "ALT": parts[4],
-                        "POS": int(parts[1])
-                        })+'\n'
+                        "POS": int(parts[1]),
+                        "INFO" : parts[7]
+                        })+'\n'                                  
 
                 n += 1
                 nn += 1
@@ -106,9 +129,6 @@ class Command(BaseCommand):
                     #print (response.text)
                     data = ''
                     lastSrc = src
-                    
-#                 if( nn > 30000):
-#                     return
 
         finally:
             response = requests.put('http://127.0.0.1:9200/'+build+'/snp/_bulk', data=data)
