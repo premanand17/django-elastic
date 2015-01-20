@@ -3,7 +3,6 @@ from django.http import JsonResponse
 import json, requests
 #from django.views.decorators.cache import cache_page
 
-
 def wildcard(request, query):
     data = { "query": { "wildcard" : { "ID" : query+"*" } } }  
     context = _getContext(data)
@@ -15,7 +14,8 @@ def search(request, query):
     return render(request, 'search/elasticsearch.html', context, content_type='text/html')
 
 def _getContext(data):
-    response = requests.post('http://127.0.0.1:9200/dbsnp142/_search', data=json.dumps(data))
+    size = 20;
+    response = requests.post('http://127.0.0.1:9200/dbsnp142/_search?size='+str(size), data=json.dumps(data))
     #print (response.json())
     #print ( len(response.json()['hits']['hits']) )
     context = {}
@@ -24,5 +24,9 @@ def _getContext(data):
         for hit in response.json()['hits']['hits']:
             content.append(hit['_source'])
     context["data"] = content
-
+    context["total"] = response.json()['hits']['total']
+    if(int(response.json()['hits']['total']) < size):
+        context["size"] = response.json()['hits']['total']
+    else:
+        context["size"] = size
     return context;
