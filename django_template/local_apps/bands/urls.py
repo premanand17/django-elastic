@@ -6,6 +6,3 @@ urlpatterns = patterns( 'bands',
     url(r'^(?P<org>\w+)/$', views.cytobands, name='cytobands'),
     url(r'^cached/(?P<org>\w+)/$', views.cytobands2, name='cytobands2'),
 )
-
-
-
