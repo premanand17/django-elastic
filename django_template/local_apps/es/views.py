@@ -4,25 +4,25 @@ import json, requests
 #from django.views.decorators.cache import cache_page
 
 
-def search(request):
-    context = {}
+def wildcard(request, query):
+    data = { "query": { "wildcard" : { "ID" : query+"*" } } }  
+    context = _getContext(data)
     return render(request, 'search/elasticsearch.html', context)
 
-def search2(request, query):
-    
-    data = {
-            "query": {
-                      "query_string": { "query": query }
-                      }
-            }
-    response = requests.post('http://127.0.0.1:9200/dbsnp142/_search', data=json.dumps(data))
-    #print (response.status_code)
-    #print ( len(response.json()['hits']['hits']) )
-    
-    if(len(response.json()['hits']['hits']) < 1):
-        context = {}
-    else:
-        context = response.json()['hits']['hits'][0]['_source']
-    #print (context)
+def search(request, query):
+    data = { "query": { "query_string": { "query": query } } }
+    context = _getContext(data)
     return render(request, 'search/elasticsearch.html', context, content_type='text/html')
 
+def _getContext(data):
+    response = requests.post('http://127.0.0.1:9200/dbsnp142/_search', data=json.dumps(data))
+    #print (response.json())
+    #print ( len(response.json()['hits']['hits']) )
+    context = {}
+    content = []
+    if(len(response.json()['hits']['hits']) >= 1):
+        for hit in response.json()['hits']['hits']:
+            content.append(hit['_source'])
+    context["data"] = content
+
+    return context;
