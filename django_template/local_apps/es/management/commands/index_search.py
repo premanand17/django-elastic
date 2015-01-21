@@ -97,15 +97,6 @@ class Command(BaseCommand):
                 id  = parts[2]
                 ref = parts[3]
                 alt = parts[4]
-#                 infos = re.split(';', parts[7])
-#                 infoprops = []
-#                 
-#                 for i in infos:
-#                     if("=" in i):
-#                         ins = re.split("=", i)
-#                         infoprops.append( {"name":ins[0], "desc": info.get(ins[0]), "value":ins[1] } )
-#                     else:
-#                         infoprops.append( {"name":i, "desc": info.get(i), "value":"FLAG" } )
 
                 data += '{"index": {"_id": "%s"}}\n' % nn
                 data += json.dumps({
