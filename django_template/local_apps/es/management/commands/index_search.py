@@ -25,15 +25,17 @@ class Command(BaseCommand):
         ) + (
         make_option('--loadSNP',
             dest='loadSNP',
-            help='Load SNP data'),
+            help='VCF file to index'),
         ) + (
         make_option('--build',
             dest='build',
             help='Build number'),
         )
 
-    def _create_snp_index(self, **options):
-        
+    '''
+    Create the mapping for snp indexing
+    '''
+    def _create_snp_index(self, **options):    
         if options['build']:
             build = options['build'].lower()
         else:
@@ -57,6 +59,9 @@ class Command(BaseCommand):
         print (response.text)
         return
 
+    '''
+    Index snp data
+    '''
     def _create_load_snp_index(self, **options):
         if options['build']:
             build = options['build'].lower()
@@ -72,7 +77,6 @@ class Command(BaseCommand):
         n = 0
         nn = 0
         lastSrc = ''
-        info = {}
 
         try:
             for line in f:
@@ -91,20 +95,15 @@ class Command(BaseCommand):
 #                         if(id):
 #                             info[id] = desc
                     continue
-
+                
                 src = parts[0]
-                pos = int(parts[1])+1
-                id  = parts[2]
-                ref = parts[3]
-                alt = parts[4]
-
                 data += '{"index": {"_id": "%s"}}\n' % nn
                 data += json.dumps({
                         "ID": parts[2],
-                        "SRC": parts[0],
+                        "SRC": src,
                         "REF": parts[3],
                         "ALT": parts[4],
-                        "POS": int(parts[1]),
+                        "POS": int(parts[1])+1,
                         "INFO" : parts[7]
                         })+'\n'                                  
 
