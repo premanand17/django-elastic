@@ -13,7 +13,13 @@
 			<tr><td>Position</td><td>{{ snp.POS }}</td></tr>
 			<tr><td>Reference</td><td>{{ snp.REF }}</td></tr>
 			<tr><td>Alternative</td><td>{{ snp.ALT }}</td></tr>
-			<tr><td>Info</td><td>{{ snp.INFO }}</td></tr>
+			<tr><td>Info</td><td>
+			{% for key, value in snp.items %}
+				{% if key != 'SRC' and key != 'POS' and key != 'REF' and key != 'ALT' and key != 'INFO' %}
+					{{ key }} {% if value %}: {{ value }}{% endif %}<br>
+				{% endif %}
+			{% endfor %}
+			</td></tr>
 		</table>
 		</div>
 	{% endfor %}
