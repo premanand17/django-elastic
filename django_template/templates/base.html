@@ -35,7 +35,7 @@
 		  		var id = $( "input" ).val();
 		  		var url;
 		  		if(id.indexOf("*") > -1)
-		  			url = location.protocol + '//' + window.location.host +'/search/wildcard/' +id.replace("*","") ;
+		  			url = location.protocol + '//' + window.location.host +'/search/wildcard/' +id.replace(/\*/g,"w") ;
 		  		else
 					url = location.protocol + '//' + window.location.host +'/search/' +id ;
 				window.open(url,"_self");
