@@ -3,14 +3,9 @@ from optparse import make_option
 import gzip, re
 import json, requests
 import logging
-from db.management.loaders.VCF import VCFManager
-from pip.locations import src_prefix
-
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
-
 
 class Command(BaseCommand):
     help = "Use to create an elasticsearch index and add data \n" \
