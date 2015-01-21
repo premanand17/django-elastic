@@ -9,7 +9,7 @@ def wildcard(request, query):
     return render(request, 'search/elasticsearch.html', context)
 
 def search(request, query):
-    data = { "query": { "query_string": { "query": query } } }
+    data = { "query": { "match": { "ID": query } } }
     context = _getContext(data)
     return render(request, 'search/elasticsearch.html', context, content_type='text/html')
 
