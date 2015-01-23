@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.http import JsonResponse
 import json, requests, re
@@ -20,7 +21,7 @@ context dictionary to pass to the template
 '''
 def _getContext(data):
     size = 20;
-    response = requests.post('http://127.0.0.1:9200/dbsnp142/_search?size='+str(size), data=json.dumps(data))
+    response = requests.post(settings.ELASTICSEARCH_URL+'/dbsnp142/_search?size='+str(size), data=json.dumps(data))
     #print (response.json())
     #print ( len(response.json()['hits']['hits']) )
     context = {}
@@ -31,7 +32,7 @@ def _getContext(data):
             _addInfo(content, hit)
             content.append(hit['_source'])
             #print(hit['_source'])
-
+ 
     context["data"] = content
     context["total"] = response.json()['hits']['total']
     if(int(response.json()['hits']['total']) < size):

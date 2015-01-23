@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from optparse import make_option
 import gzip, re
@@ -50,7 +51,7 @@ class Command(BaseCommand):
                                 }
                         }
                 }
-        response = requests.put('http://127.0.0.1:9200/'+build+'/', data=json.dumps(data))
+        response = requests.put(settings.ELASTICSEARCH_URL+'/'+build+'/', data=json.dumps(data))
         print (response.text)
         return
 
@@ -110,13 +111,13 @@ class Command(BaseCommand):
                     if(lastSrc != src):
                         print ('\nLoading '+src)
                     print('.',end="",flush=True)
-                    response = requests.put('http://127.0.0.1:9200/'+build+'/snp/_bulk', data=data)
+                    response = requests.put(settings.ELASTICSEARCH_URL+'/'+build+'/snp/_bulk', data=data)
                     #print (response.text)
                     data = ''
                     lastSrc = src
 
         finally:
-            response = requests.put('http://127.0.0.1:9200/'+build+'/snp/_bulk', data=data)
+            response = requests.put(settings.ELASTICSEARCH_URL+'/'+build+'/snp/_bulk', data=data)
 
         return
 

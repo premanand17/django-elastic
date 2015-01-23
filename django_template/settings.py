@@ -31,6 +31,8 @@ FIXTURE_DIRS = os.path.join(BASE_DIR, 'django_template/local_apps/db/fixtures')
 TEST_RUNNER = 'db.scripts.testrunner.ManagedModelTestRunner'
 TEST_DB_UNMANAGED_TABLES_SCHEMA_FILE = os.path.join(BASE_DIR, 'django_template/local_apps/db/scripts/public_schema.pgdump')
 
+ELASTICSEARCH_URL = 'http://127.0.0.1:9200/'
+
 # Application definition
 
 INSTALLED_APPS = (
