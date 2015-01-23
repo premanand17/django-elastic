@@ -23,4 +23,9 @@ class BandsViewsTestCase(TestCase):
         cv = resp.context['cv_list'][0]
         self.assertTrue(hasattr(cv, 'cv_id'))
         self.assertTrue(hasattr(cv, 'name'))
+        
+    def test_not_found(self):
+        resp = self.client.get('/xxx/')
+        self.assertEqual(resp.status_code, 404)
+
             
