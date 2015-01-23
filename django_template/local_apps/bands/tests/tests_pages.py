@@ -5,7 +5,7 @@ class BandsViewsTestCase(TestCase):
     fixtures = ['db2.json']
 
     def test_band(self):
-        resp = self.client.get('/bands/cached/human_GRCh38/')
+        resp = self.client.get('/human_GRCh38/')
         self.assertEqual(resp.status_code, 200)
 
         if resp.context is not None:  # if none it is cached
@@ -17,7 +17,7 @@ class BandsViewsTestCase(TestCase):
 
 
     def test_cv(self):
-        resp = self.client.get('/bands/cvlist/')
+        resp = self.client.get('/cvlist/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('cv_list' in resp.context)
         cv = resp.context['cv_list'][0]
