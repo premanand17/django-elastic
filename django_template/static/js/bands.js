@@ -15,8 +15,8 @@
 	}
 
 	// seqArr - contains uniquename and seqlen
-	cytobands.drawChromosome = function (seqArr, maxlen, id) {
-		d3.select("#"+id).selectAll("div")
+	cytobands.drawChromosome = function (seqArr, maxlen, chartId) {
+		d3.select("#"+chartId).selectAll("div")
 		.data(seqArr)
 		.enter()
 		.append("p")
@@ -30,9 +30,9 @@
 			return barwidth + "%";
 		});
 	}
-	
+
 	// add the g-stain cytobands
-	cytobands.addBands = function addBands(chr, srcseqlen, bands) {
+	cytobands.addBands = function(chr, srcseqlen, bands) {
 		var width = $("#"+chr).width();
 		d3.select("#"+chr).selectAll("div")
 	    	.data(bands)
@@ -53,61 +53,5 @@
 	   	 		var fmax = width-((d.fmax / srcseqlen) * width);
 	   	 		return fmax +"px"; 
 	   	 	});
-	}
-
-	cytobands.ajaxCall = function(chr, seqlen, org) {
-		var url_band_terms = "/api/dev/cvterm/?format=json&cv__name=gstain&limit=0";
-		$.ajax({
-			url: url_band_terms,
-			contentType: 'application/json',
-			success: function(data, textStatus, jqXHR) {
-
-				var gstainCvterms = data.objects;
-				var bandTypes = "";
-				for (var i = 0; i < gstainCvterms.length; i++) {
-					bandTypes += gstainCvterms[i].cvterm_id;
-					if(i < gstainCvterms.length-1)
-						bandTypes += ",";
-				}
-
-		  		var url = '/api/dev/featurelocfull/?format=json'+
-				  '&feature__type__in='+bandTypes+
-				  '&srcfeature__uniquename='+chr+
-				  '&srcfeature__organism__common_name='+org+
-				  '&limit=0';
-				$.ajax({
-					url: url,
-					contentType: 'application/json',
-					success: function(res, textStatus, jqXHR) {
-						cytobands.addBands(chr, seqlen, getAjaxBands(res, gstainCvterms));
-					}
-				});
-				
-			}
-		});
-	}
-
-	function getAjaxBands(data, gstainCvterms) {
-  		var bands = [];
-  		for (var i = 0; i < data.objects.length; i++) {
-  			var d = data.objects[i];
-  			var fmin = d.fmin+1;
-  			var fmax = d.fmax;
-  			var fname = getCvtermName(d.feature.type, gstainCvterms);
-
-  			var colour = cytobands.col[ fname ];
-  			var seqlen = fmax - fmin;
-		    var band = { seqlen:(fmax - fmin), fmin:fmin, fmax:fmax, col: colour };
-	    	bands.push(band);
-		}
-		return bands;
-	}
-
-	function getCvtermName(type_id, cvterms) {
-		for (var i = 0; i < cvterms.length; i++) {
-			if(type_id.indexOf( cvterms[i].cvterm_id ) > -1)
-				return cvterms[i].name;
-		}
-		return undefined;
 	}
 }( window.cytobands = window.cytobands || {}, jQuery ));
