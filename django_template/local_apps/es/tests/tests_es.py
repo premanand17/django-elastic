@@ -11,5 +11,5 @@ class EsTest(TestCase):
     '''
     def test_es(self):
         resp = requests.get(settings.ELASTICSEARCH_URL+'/_cluster/health')
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue((resp.json()['status'] == 'yellow' or resp.json()['status'] == 'green'), "Elasticsearch status check")
+        self.assertEqual(resp.status_code, 200, "Health page status code")
+        self.assertFalse(resp.json()['status'] == 'red', "Elasticsearch status check")
