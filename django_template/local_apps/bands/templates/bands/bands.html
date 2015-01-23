@@ -5,20 +5,16 @@
 {% block header %}
 
 <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"/>
-
-<script src="/static/js/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="/static/js/bands.js" charset="utf-8"></script>
 <script src="/static/js/diseases.js" charset="utf-8"></script>
-
 
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
 <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 <link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
 
-
 <script src="/static/js/qtip/jquery.qtip.min.js" charset="utf-8"></script>
 <link rel="stylesheet" href="/static/css/jquery.qtip.min.css ">
-
 
 <style type="text/css">
 div.chr {
@@ -33,9 +29,9 @@ div.chr {
 }
 
 div#chart p {
-	margin: 12px 0px 0px;
- 	font-size:small;
- 	font-weight: bold;
+        margin: 12px 0px 0px;
+        font-size:small;
+        font-weight: bold;
 }
 
 div.band {
@@ -46,66 +42,83 @@ div.band {
     display: inline-block;
     margin: 0px;
     position:absolute;
- 	top:0;
- 	right:0;
- 	opacity: 0.7;
- 	z-index: 10;
+    top:0;
+    right:0;
+    opacity: 0.7;
+    z-index: 10;
 }
+
 
 div.region {
     width: 20px;
-    height: 23px;  
+    height: 23px;
     background-color: yellow;
     display: inline-block;
     margin: 0px;
     position:absolute;
- 	top:0;
- 	right:0;
- 	opacity: 0.55;
- 	z-index: 20;
+    top:0;
+    right:0;
+    opacity: 0.55;
+    z-index: 20;
 }
 
 #diseases { margin-top: 2em; }
+
 </style>
   
 <script>
-
 $(document).ready(function() {
 	var maxlen = 0;
 	var residues = [];
 	var residues_left = [];
-	var residues_right = [];
-	var idx = 0;
-    {% for f in srcfeatures %}
-       residues.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-       if(idx % 2 == 0)
-    	   residues_left.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-       else
-    	   residues_right.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-       
-       if(maxlen < {{ f.seqlen }})
-    	   maxlen = {{ f.seqlen }};
-       idx++;
-    {% endfor %}
-    
-    var dilCvterms = [];
-    {% for term in cvtermDIL %}
-    	dilCvterms.push({ type_id: "{{ term.cvterm_id }}", name: "{{ term.name }}"});
+        var residues_right = [];
+        var idx = 0;
+
+	{% for f in srcfeatures %}
+		residues.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
+		if(idx % 2 == 0)
+			residues_left.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
+		else
+			residues_right.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
+
+		if(maxlen < {{ f.seqlen }}) {
+			maxlen = {{ f.seqlen }};
+		}
+		idx++;
 	{% endfor %}
 
-	// add disease buttons
-	diseases.addDiseaseButtons("{{org}}", dilCvterms, residues);
-	
-	// disease regions
-	diseases.diseaseButtonClick("Type 1 Diabetes", 'T1D', "blue", "{{org}}", residues);
-	
-	// add chromosomes and bands
-    cytobands.drawChromosome(residues_left, maxlen, "chart-left");
-    cytobands.drawChromosome(residues_right, maxlen, "chart-right");
-    
+	cytobands.drawChromosome(residues_left, maxlen, "chart-left");
+	cytobands.drawChromosome(residues_right, maxlen, "chart-right");
+
   	{% for f in srcfeatures %}
-  		cytobands.ajaxCall("{{ f.uniquename }}", {{ f.seqlen }}, "{{ org }}");
+  		var chr = "{{ f.uniquename }}";
+  		cytobands.addBands(chr, {{ f.seqlen }}, getBands(chr))
 	{% endfor %}
+
+	var dilCvterms = [];
+		{% for term in cvtermDIL %}
+        	dilCvterms.push({ type_id: "{{ term.cvterm_id }}", name: "{{ term.name }}"});
+    	{% endfor %}
+
+        // add disease buttons
+        diseases.addDiseaseButtons("{{org}}", dilCvterms, residues);
+       
+    	// disease regions
+    	diseases.diseaseButtonClick("Type 1 Diabetes", 'T1D', "blue", "{{org}}", residues);
+
+	function getBands(chr) {
+  		var bands = [];
+  		{% for floc in bands %}
+		    var src = "{{ floc.srcfeature.uniquename }}";
+		    if(src === chr) {
+		    	var seqlen = {{ floc.fmax }} - {{ floc.fmin }} + 1;
+		    	var colour = cytobands.col.{{ floc.feature.type }};
+		    	var band = { seqlen:seqlen, fmin:{{ floc.fmin }}, fmax: {{ floc.fmax }}, col: colour };
+	    		bands.push(band);
+	   		}
+		{% endfor %}
+		return bands;
+	}
 });    
 </script>
 
@@ -115,11 +128,7 @@ $(document).ready(function() {
 
 
 <div id="diseases" class="btn-group btn-group-xs pull-right" role="group" style="margin: 0px;"></div>
-
 <h3 style="margin: 0px">{{ org }}</h3>
-<span class="clearfix"></span>
-
-
 <div id="chart" class="row" style="margin: 0px">
   <div class="col-md-6" id="chart-left"></div>
   <div class="col-md-6" id="chart-right"></div>
