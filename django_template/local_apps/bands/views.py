@@ -15,9 +15,7 @@ def cvlist(request):
 
 # 60 mins cache
 @cache_page(60 * 60)
-def cytobands(request, org):
-    #bands = Featureloc.objects.getCytoBands(org)
-
+def cytobands_ws(request, org):
     srcfeatureIds = Featureloc.objects.getSrcFeatures(org)
     srcfeatures = Feature.objects.filter(featureloc_srcfeature=srcfeatureIds)
     
@@ -31,11 +29,11 @@ def cytobands(request, org):
     context = {'srcfeatures': srcfeatures, 
                'org':org,
                'cvtermDIL':cvtermDIL }
-    return render(request, 'bands/bands.html', context, content_type='text/html')
+    return render(request, 'bands/bands-ws.html', context, content_type='text/html')
 
 # 60 mins cache
 @cache_page(60 * 60)
-def cytobands2(request, org):
+def cytobands(request, org):
     bands = Featureloc.objects.getCytoBands(org)
     srcfeatureIds = bands.distinct('srcfeature_id')
     srcfeatures = Feature.objects.filter(featureloc_srcfeature=srcfeatureIds)
@@ -48,5 +46,4 @@ def cytobands2(request, org):
     cvtermDIL = Cvterm.objects.filter(cv=cv)
 
     context = {'bands': bands, 'srcfeatures': srcfeatures, 'org':org, 'cvtermDIL':cvtermDIL}
-    return render(request, 'bands/bands2.html', context)
-
+    return render(request, 'bands/bands.html', context)
