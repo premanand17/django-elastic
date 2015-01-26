@@ -70,25 +70,17 @@ div.region {
 $(document).ready(function() {
 	var maxlen = 0;
 	var residues = [];
-	var residues_left = [];
-        var residues_right = [];
-        var idx = 0;
+	var idx = 0;
 
 	{% for f in srcfeatures %}
 		residues.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-		if(idx % 2 == 0)
-			residues_left.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-		else
-			residues_right.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-
 		if(maxlen < {{ f.seqlen }}) {
 			maxlen = {{ f.seqlen }};
 		}
 		idx++;
 	{% endfor %}
 
-	cytobands.drawChromosome(residues_left, maxlen, "chart-left");
-	cytobands.drawChromosome(residues_right, maxlen, "chart-right");
+	cytobands.drawChromosome(residues, maxlen, "chart");
 
   	{% for f in srcfeatures %}
   		var chr = "{{ f.uniquename }}";
@@ -96,15 +88,15 @@ $(document).ready(function() {
 	{% endfor %}
 
 	var dilCvterms = [];
-		{% for term in cvtermDIL %}
-        	dilCvterms.push({ type_id: "{{ term.cvterm_id }}", name: "{{ term.name }}"});
-    	{% endfor %}
+	{% for term in cvtermDIL %}
+       	dilCvterms.push({ type_id: "{{ term.cvterm_id }}", name: "{{ term.name }}"});
+    {% endfor %}
 
-        // add disease buttons
-        diseases.addDiseaseButtons("{{org}}", dilCvterms, residues);
+    // add disease buttons
+    diseases.addDiseaseButtons("{{org}}", dilCvterms, residues);
        
-    	// disease regions
-    	diseases.diseaseButtonClick("Type 1 Diabetes", 'T1D', "blue", "{{org}}", residues);
+    // disease regions
+    diseases.diseaseButtonClick("Type 1 Diabetes", 'T1D', "blue", "{{org}}", residues);
 
 	function getBands(chr) {
   		var bands = [];
@@ -129,9 +121,5 @@ $(document).ready(function() {
 
 <div id="diseases" class="btn-group btn-group-xs pull-right" role="group" style="margin: 0px;"></div>
 <h3 style="margin: 0px">{{ org }}</h3>
-<div id="chart" class="row" style="margin: 0px">
-  <div class="col-md-6" id="chart-left"></div>
-  <div class="col-md-6" id="chart-right"></div>
-</div>
+<div id="chart" class="row" style="margin: 0px"></div>
 {% endblock %}
-

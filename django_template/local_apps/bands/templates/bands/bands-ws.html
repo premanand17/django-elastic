@@ -73,16 +73,9 @@ div.region {
 $(document).ready(function() {
 	var maxlen = 0;
 	var residues = [];
-	var residues_left = [];
-	var residues_right = [];
 	var idx = 0;
     {% for f in srcfeatures %}
        residues.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-       if(idx % 2 == 0)
-    	   residues_left.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-       else
-    	   residues_right.push({ uniquename:"{{ f.uniquename }}", seqlen:{{ f.seqlen }} });
-       
        if(maxlen < {{ f.seqlen }})
     	   maxlen = {{ f.seqlen }};
        idx++;
@@ -100,9 +93,7 @@ $(document).ready(function() {
 	diseases.diseaseButtonClick("Type 1 Diabetes", 'T1D', "blue", "{{org}}", residues);
 	
 	// add chromosomes and bands
-    cytobands.drawChromosome(residues_left, maxlen, "chart-left");
-    cytobands.drawChromosome(residues_right, maxlen, "chart-right");
-    
+    cytobands.drawChromosome(residues, maxlen, "chart");    
   	{% for f in srcfeatures %}
   		cytobands.ajaxCall("{{ f.uniquename }}", {{ f.seqlen }}, "{{ org }}");
 	{% endfor %}
@@ -120,9 +111,6 @@ $(document).ready(function() {
 <span class="clearfix"></span>
 
 
-<div id="chart" class="row" style="margin: 0px">
-  <div class="col-md-6" id="chart-left"></div>
-  <div class="col-md-6" id="chart-right"></div>
-</div>
+<div id="chart" class="row" style="margin: 0px"></div>
 {% endblock %}
 
