@@ -19,6 +19,8 @@
 		d3.select("#"+id).selectAll("div")
 		.data(seqArr)
 		.enter()
+		.append("div")
+		.attr("class", "col-md-6")
 		.append("p")
 		.text(function(d) { return d.uniquename; })
 		.append("div")
