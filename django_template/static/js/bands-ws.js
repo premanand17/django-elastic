@@ -50,8 +50,9 @@
 	   	 	})
 	   	 	.style("right", function(d) {
 	   	 		//console.log( (d.fmax / maxlen) + " " +width + " " + d.seqlen);
-	   	 		var fmax = width-((d.fmax / srcseqlen) * width);
-	   	 		return fmax +"px"; 
+	   	 		//var fmax = width-((d.fmax / srcseqlen) * width);
+	   	 	    var fmax = (width-((d.fmax / srcseqlen) * width))/width * 100;
+	   	 		return fmax +"%"; 
 	   	 	});
 	}
 

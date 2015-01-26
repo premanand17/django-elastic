@@ -126,14 +126,14 @@
 	  				// get the srcfeature seqlen from residues array
 	  				var result = $.grep(residues, function(e){ return e.uniquename == res[0]; });
 	  				var width = $("#"+res[0]).width();
-	  				var fmax = width-((f.featurelocs[0].fmax / result[0].seqlen) * width);
+	  				var fmax = (width-((f.featurelocs[0].fmax / result[0].seqlen) * width))/width * 100;
 	  				var rwidth = (seqlen / result[0].seqlen) * 100;
 
 	  				$("#"+res[0]).append("<div class='region' title='"+f.name+"' id='"+regionId+i+"'></div>");
 	  				$("#region_"+abbr+"_"+i).css( { 
 	  					"background-color":bgcolour,
-	  					"right":fmax+"px",
-	  					"width":rwidth+"px",
+	  					"right":fmax+"%",
+	  					"width":rwidth+"%",
 	  					"border": "2px solid " +bgcolour,
 	  				});
 				}
