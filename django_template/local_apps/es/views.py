@@ -28,7 +28,7 @@ def _getContext(data):
     content = []
     if(len(response.json()['hits']['hits']) >= 1):
         for hit in response.json()['hits']['hits']:
-            #print(hit['_source']['INFO'])
+            #print(hit['_source']['REF'])
             _addInfo(content, hit)
             content.append(hit['_source'])
             #print(hit['_source'])
@@ -49,6 +49,8 @@ def _addInfo(content, hit):
     for info in infos:
         if "=" in info:
             parts = re.split('=', info)
-            hit['_source'][parts[0]] = parts[1]
+            if parts[0] not in hit['_source']:
+                hit['_source'][parts[0]] = parts[1]
         else:
-            hit['_source'][info] = ""
+            if info not in hit['_source']:
+                hit['_source'][info] = ""
