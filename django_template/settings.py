@@ -78,19 +78,13 @@ CACHES = {
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = False
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "django_template/static"),
@@ -101,6 +95,8 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'django_template/templates/'),
 )
 
+# writes all request logging from the django.request logger to a local file
+LOG_FILE = os.path.join(BASE_DIR, 'tmp/debug.log')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -108,7 +104,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/tmp/debug.log',
+            'filename': LOG_FILE,
         },
     },
     'loggers': {
@@ -119,4 +115,3 @@ LOGGING = {
         },
     },
 }
-
