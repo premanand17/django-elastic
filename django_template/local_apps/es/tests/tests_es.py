@@ -1,9 +1,8 @@
 from django.test import TestCase
 from django.conf import settings
 import requests
-#from django.views.decorators.cache import cache_page
 
-# models test
+# elasticsearch test
 class EsTest(TestCase):
 
     '''
