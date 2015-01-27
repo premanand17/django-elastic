@@ -47,3 +47,7 @@ def cytobands(request, org):
 
     context = {'bands': bands, 'srcfeatures': srcfeatures, 'org':org, 'cvtermDIL':cvtermDIL}
     return render(request, 'bands/bands.html', context)
+
+# 60 mins cache
+def cytobandsHuman(request):
+    return cytobands(request, 'human_GRCh38')
