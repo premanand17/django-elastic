@@ -9,9 +9,19 @@ class EsTest(TestCase):
     Test elasticsearch server is running and status
     '''
     def test_es(self):
-        resp = requests.get(settings.ELASTICSEARCH_URL+'/_cluster/health')
-        self.assertEqual(resp.status_code, 200, "Health page status code")
-        self.assertFalse(resp.json()['status'] == 'red', "Elasticsearch status check")
+        try:
+            resp = requests.get(settings.ELASTICSEARCH_URL+'/_cluster/health')
+            self.assertEqual(resp.status_code, 200, "Health page status code")
+            self.assertFalse(resp.json()['status'] == 'red', "Elasticsearch status check")
+        except requests.exceptions.Timeout:
+            self.assertTrue(False, 'timeout exception')
+        except requests.exceptions.TooManyRedirects:
+            self.assertTrue(False, 'too many redirects exception')
+        except requests.exceptions.ConnectionError:
+            self.assertTrue(False, 'request connection exception')
+        except requests.exceptions.RequestException as e:
+            self.assertTrue(False, 'request exception')
+
         
     '''
     Test a single SNP search
