@@ -84,8 +84,7 @@ In a browser try http://localhost:9000/bands/cached/human_GRCh38/
 ```bash
 ./manage.py makemigrations
 ./manage.py migrate
-
-./manage.py test db.tests bands.tests -v3
+./manage.py test db.tests bands.tests es.tests -v3
 ```
 
 ### Using Caching
@@ -95,3 +94,25 @@ To get the caching to work memcache needs to be installed:
 sudo apt-get install memcached
 ```
 
+### Elasticsearch
+
+Download the latest version (http://www.elasticsearch.org/download). Install and start, e.g.
+
+```
+sudo dpkg -i elasticsearch-1.4.2.deb
+sudo /etc/init.d/elasticsearch start
+```
+
+Check the server is running:
+
+```
+curl http://127.0.0.1:9200/
+curl 'http://127.0.0.1:9200/_cat/indices?v'
+```
+
+Edit the configuration file (i.e. elasticsearch.yml). As an example of indexing see the following 
+help command:
+
+```
+python manage.py index_search --help
+```
