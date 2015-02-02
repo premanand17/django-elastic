@@ -35,9 +35,6 @@ FIXTURE_DIRS = os.path.join(BASE_DIR, 'django_template/local_apps/db/fixtures')
 TEST_RUNNER = 'db.scripts.testrunner.ManagedModelTestRunner'
 TEST_DB_UNMANAGED_TABLES_SCHEMA_FILE = os.path.join(BASE_DIR, 'django_template/local_apps/db/scripts/public_schema.pgdump')
 
-# elastic search engine
-ELASTICSEARCH_URL = 'http://127.0.0.1:9200/'
-
 # Application definition
 INSTALLED_APPS = (
 #    'django.contrib.admin',
@@ -65,13 +62,6 @@ ROOT_URLCONF = 'django_template.urls'
 
 WSGI_APPLICATION = 'django_template.wsgi.application'
 
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
