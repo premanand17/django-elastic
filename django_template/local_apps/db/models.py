@@ -10,7 +10,8 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from datetime import datetime 
+from datetime import datetime
+
 
 class Cv(models.Model):
     cv_id = models.AutoField(primary_key=True)
@@ -18,11 +19,11 @@ class Cv(models.Model):
     definition = models.TextField(blank=True)
 
     def __str__(self):
-       return self.name
+        return self.name
 
     class Meta:
-       managed = False
-       db_table = 'cv'
+        managed = False
+        db_table = 'cv'
 
 
 class Cvprop(models.Model):
@@ -35,7 +36,6 @@ class Cvprop(models.Model):
     class Meta:
         managed = False
         db_table = 'cvprop'
- 
 
 
 class Cvterm(models.Model):
@@ -48,12 +48,11 @@ class Cvterm(models.Model):
     is_relationshiptype = models.IntegerField()
 
     def __str__(self):
-       return self.name
+        return self.name
 
     class Meta:
-       managed = False
-       db_table = 'cvterm'
-
+        managed = False
+        db_table = 'cvterm'
 
 
 class CvtermDbxref(models.Model):
@@ -63,24 +62,27 @@ class CvtermDbxref(models.Model):
     is_for_definition = models.IntegerField()
 
     class Meta:
-       managed = False
-       db_table = 'cvterm_dbxref'
+        managed = False
+        db_table = 'cvterm_dbxref'
 
 
 class CvtermRelationship(models.Model):
     cvterm_relationship_id = models.IntegerField(primary_key=True)
     type = models.ForeignKey(Cvterm, related_name='cvterm_relationship_type')
-    subject = models.ForeignKey(Cvterm, related_name='cvterm_relationship_subject')
-    object = models.ForeignKey(Cvterm, related_name='cvterm_relationship_object')
+    subject = models.ForeignKey(Cvterm,
+                                related_name='cvterm_relationship_subject')
+    object = models.ForeignKey(Cvterm,
+                               related_name='cvterm_relationship_object')
 
     class Meta:
         managed = False
         db_table = 'cvterm_relationship'
-        
-        
+
+
 class Cvtermpath(models.Model):
     cvtermpath_id = models.IntegerField(primary_key=True)
-    type = models.ForeignKey(Cvterm, blank=True, null=True, related_name='cvtermpath_type')
+    type = models.ForeignKey(Cvterm, blank=True, null=True,
+                             related_name='cvtermpath_type')
     subject = models.ForeignKey(Cvterm, related_name='cvtermpath_subject')
     object = models.ForeignKey(Cvterm, related_name='cvtermpath_object')
     cv = models.ForeignKey(Cv, related_name='cvtermpath_cv')
@@ -99,17 +101,17 @@ class Cvtermprop(models.Model):
     rank = models.IntegerField()
 
     class Meta:
-       managed = False
-       db_table = 'cvtermprop'
-
+        managed = False
+        db_table = 'cvtermprop'
 
 
 class Cvtermsynonym(models.Model):
     cvtermsynonym_id = models.IntegerField(primary_key=True)
     cvterm = models.ForeignKey(Cvterm, related_name='cvtermsynonym_cvterm')
     synonym = models.CharField(max_length=1024)
-    type = models.ForeignKey(Cvterm, blank=True, null=True, related_name='cvtermsynonym_type')
- 
+    type = models.ForeignKey(Cvterm, blank=True, null=True,
+                             related_name='cvtermsynonym_type')
+
     class Meta:
         managed = False
         db_table = 'cvtermsynonym'
@@ -123,9 +125,8 @@ class Db(models.Model):
     url = models.CharField(max_length=255, blank=True)
 
     class Meta:
-       managed = False
-       db_table = 'db'
-
+        managed = False
+        db_table = 'db'
 
 
 class Dbxref(models.Model):
@@ -136,9 +137,8 @@ class Dbxref(models.Model):
     description = models.TextField(blank=True)
 
     class Meta:
-       managed = False
-       db_table = 'dbxref'
-
+        managed = False
+        db_table = 'dbxref'
 
 
 class FeatureQuerySet(models.QuerySet):
@@ -150,6 +150,7 @@ class FeatureQuerySet(models.QuerySet):
         cvterms = Cvterm.objects.filter(cv=cv)
         organism = Organism.objects.filter(common_name=org)
         return self.filter(type=cvterms, organism=organism)
+
 
 class Feature(models.Model):
     feature_id = models.AutoField(primary_key=True)
@@ -166,13 +167,12 @@ class Feature(models.Model):
     timeaccessioned = models.DateTimeField(default=datetime.now, blank=True)
     timelastmodified = models.DateTimeField(default=datetime.now, blank=True)
     objects = FeatureQuerySet.as_manager()
-    
+
     class Meta:
         managed = False
         db_table = 'feature'
- 
 
-       
+
 class FeaturelocQuerySet(models.QuerySet):
 
     def getCytoBands(self, org):
@@ -182,11 +182,13 @@ class FeaturelocQuerySet(models.QuerySet):
     def getSrcFeatures(self, org):
         organism = Organism.objects.filter(common_name=org)
         return self.filter(srcfeature=Feature.objects.filter(organism=organism)).distinct('srcfeature_id')
-    
+
+
 class Featureloc(models.Model):
     featureloc_id = models.AutoField(primary_key=True)
     feature = models.ForeignKey(Feature, related_name="featureloc_feature")
-    srcfeature = models.ForeignKey(Feature, blank=True, null=True, related_name="featureloc_srcfeature")
+    srcfeature = models.ForeignKey(Feature, blank=True, null=True,
+                                   related_name="featureloc_srcfeature")
     fmin = models.IntegerField(blank=True, null=True)
     is_fmin_partial = models.BooleanField(default=False)
     fmax = models.IntegerField(blank=True, null=True)
@@ -201,8 +203,8 @@ class Featureloc(models.Model):
     class Meta:
         managed = False
         db_table = 'featureloc'
- 
-        
+
+
 class Featureprop(models.Model):
     featureprop_id = models.AutoField(primary_key=True)
     feature = models.ForeignKey(Feature)
@@ -213,7 +215,6 @@ class Featureprop(models.Model):
     class Meta:
         managed = False
         db_table = 'featureprop'
- 
 
 
 class Organism(models.Model):
@@ -224,12 +225,9 @@ class Organism(models.Model):
     common_name = models.CharField(max_length=255, blank=True)
     comment = models.TextField(blank=True)
 
-    def __str__(self):
-       return self.common_name
-   
     class Meta:
         managed = False
         db_table = 'organism'
- 
 
-
+    def __str__(self):
+        return self.common_name
