@@ -2,9 +2,8 @@ from django.test import TestCase
 from django.conf import settings
 import requests
 
-# elasticsearch test
-class EsTest(TestCase):
 
+class EsTest(TestCase):
     '''
     Test elasticsearch server is running and status
     '''
@@ -12,17 +11,17 @@ class EsTest(TestCase):
         try:
             resp = requests.get(settings.ELASTICSEARCH_URL+'/_cluster/health')
             self.assertEqual(resp.status_code, 200, "Health page status code")
-            self.assertFalse(resp.json()['status'] == 'red', "Elasticsearch status check")
+            self.assertFalse(resp.json()['status'] == 'red',
+                             "Elasticsearch status check")
         except requests.exceptions.Timeout:
             self.assertTrue(False, 'timeout exception')
         except requests.exceptions.TooManyRedirects:
             self.assertTrue(False, 'too many redirects exception')
         except requests.exceptions.ConnectionError:
             self.assertTrue(False, 'request connection exception')
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             self.assertTrue(False, 'request exception')
 
-        
     '''
     Test a single SNP search
     '''
@@ -32,7 +31,7 @@ class EsTest(TestCase):
         self.assertTrue('data' in resp.context)
         snp = resp.context['data'][0]
         self._SNPtest(snp)
-        
+
     '''
     Test a wild card search
     '''
@@ -43,7 +42,7 @@ class EsTest(TestCase):
 
         for snp in resp.context['data']:
             self._SNPtest(snp)
-     
+
     '''
     Test the elements of a SNP result
     '''
@@ -53,5 +52,5 @@ class EsTest(TestCase):
         self.assertTrue(snp['REF'])
         self.assertTrue(snp['ALT'])
         self.assertTrue(snp['SRC'])
-        
-        self.assertTrue(isinstance(snp['POS'], int ))
+
+        self.assertTrue(isinstance(snp['POS'], int))
