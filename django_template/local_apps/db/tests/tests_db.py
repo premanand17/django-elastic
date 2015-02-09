@@ -1,6 +1,7 @@
 from django.test import TestCase
 from db.models import Cv
 
+
 # models test
 class CvTest(TestCase):
 
@@ -11,4 +12,3 @@ class CvTest(TestCase):
         cv = self.create_cv()
         self.assertTrue(isinstance(cv, Cv))
         self.assertEqual(cv.__str__(), cv.name)
-
