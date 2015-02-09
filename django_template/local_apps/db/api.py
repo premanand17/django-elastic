@@ -5,10 +5,6 @@ from tastypie.cache import SimpleCache
 
 from db.models import Cvterm, Cv, Cvtermprop, Feature, Featureloc, Featureprop
 from db.models import Organism
-#import logging
-
-# Get an instance of a logger
-#logger = logging.getLogger(__name__)
 
 
 class CvResource(ModelResource):
@@ -33,7 +29,6 @@ class CvtermFullResource(ModelResource):
 
 
 class CvtermResource(ModelResource):
-    #logger.error("HERE")
     cv = fields.ForeignKey(CvResource, 'cv')
 
     class Meta:
@@ -128,7 +123,9 @@ class FeaturelocFullResource(ModelResource):
     srcfeature = fields.ForeignKey(FeatureResource, 'srcfeature', null=True)
 
     class Meta:
-        queryset = Featureloc.objects.select_related("feature", "srcfeature")  # @UndefinedVariable
+        queryset = (Featureloc.objects
+                    .select_related("feature",  # @UndefinedVariable
+                                    "srcfeature"))
         excludes = ['is_fmax_partial', 'is_fmin_partial',
                     'locgroup', 'residue_info', 'phase']
         filtering = {
