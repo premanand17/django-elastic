@@ -3,6 +3,7 @@ from django.db import transaction
 import gzip
 import re
 
+
 class VCFManager:
 
     def create_vcf_features(self, **options):
@@ -13,7 +14,7 @@ class VCFManager:
         organism = Organism.objects.get(common_name=org)
         cv = Cv.objects.get(name='sequence')
         cvterm = Cvterm.objects.get(cv=cv, name='SNP')
-        
+
         if options['vcf'].endswith('.gz'):
             f = gzip.open(options['vcf'], 'rb')
         else:
@@ -30,33 +31,39 @@ class VCFManager:
                 if(len(parts) != 8 or line.startswith("#")):
                     continue
 
-                chr = 'chr'+parts[0]
+                chrom = 'chr'+parts[0]
                 fmax = int(parts[1])
                 fmin = fmax - 1
                 uniquename = parts[2]
 
                 if(lastSrc != parts[0]):
-                    print('loading SNPs on: '+chr,end=" ...",flush=True)
-                    srcfeature = Feature.objects.filter(organism=organism).get(uniquename=chr)    
+                    print('loading SNPs on: ' +
+                          chrom, end=" ...", flush=True)
+                    srcfeature = (Feature.objects
+                                  .filter(organism=organism)  # @UndefinedVariable @IgnorePep8
+                                  .get(uniquename=chrom))  # @UndefinedVariable
                 lastSrc = parts[0]
 
-                feature = Feature(organism=organism, uniquename=uniquename, type=cvterm, is_analysis=0, is_obsolete=0)
+                feature = Feature(organism=organism, uniquename=uniquename,
+                                  type=cvterm, is_analysis=0, is_obsolete=0)
                 feature.save()
 
-                #ref
                 rank = 0
-                Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=fmax, locgroup=0, rank=rank, residue_info=parts[3]).save()
+                Featureloc(feature=feature, srcfeature=srcfeature,
+                           fmin=fmin, fmax=fmax, locgroup=0, rank=rank,
+                           residue_info=parts[3]).save()
 
-                #alt
                 alts = re.split(',', parts[4])
                 for alt in alts:
                     rank += 1
-                    Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=fmax, locgroup=0, rank=rank, residue_info=alt).save()
+                    Featureloc(feature=feature, srcfeature=srcfeature,
+                               fmin=fmin, fmax=fmax, locgroup=0, rank=rank,
+                               residue_info=alt).save()
 
                 n += 1
-                if( n > 1999 ):
+                if(n > 1999):
                     n = 0
-                    print('.',end="",flush=True)
+                    print('.', end="", flush=True)
                     transaction.commit()
 
             transaction.commit()
