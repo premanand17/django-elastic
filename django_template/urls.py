@@ -1,6 +1,9 @@
 from django.conf.urls import patterns, include, url
-from django.contrib import admin
-from db.api import CvtermResource, CvtermFullResource, CvResource, CvtermpropResource, FeaturelocResource, FeaturelocFullResource, FeatureResource, FeatureFullResource, FeaturepropResource, FeaturepropFullResource, OrganismResource
+from db.api import CvtermResource, CvtermFullResource, CvResource
+from db.api import CvtermpropResource, FeaturelocResource
+from db.api import FeaturelocFullResource, FeatureResource, FeatureFullResource
+from db.api import FeaturepropResource, FeaturepropFullResource
+from db.api import OrganismResource
 from tastypie.api import Api
 
 # register tastypie api
@@ -19,8 +22,7 @@ api.register(CvtermpropResource())
 
 
 urlpatterns = patterns('',
-    url(r'^', include('bands.urls', namespace="bands")),
-    url(r'^api/', include(api.urls)),
-    url(r'^search/', include('es.urls', namespace="es")),
-)
-
+                       url(r'^', include('bands.urls', namespace="bands")),
+                       url(r'^api/', include(api.urls)),
+                       url(r'^search/', include('es.urls', namespace="es")),
+                       )
