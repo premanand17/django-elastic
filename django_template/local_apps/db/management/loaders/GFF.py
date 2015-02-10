@@ -1,16 +1,67 @@
-from db.models import Cvterm, Cvtermprop, Cv, Organism, Feature, Featureloc, Featureprop
-from django.db import transaction
+from db.models import Cv, Cvterm, Cvtermprop, Feature, Featureloc, Featureprop
+from db.models import Organism
 import gzip
 import re
+import sys
+
 
 class GFFManager:
-
-    def create_gff_features(self, **options):
+    ''' Create features based on transcript ranges '''
+    def create_gff_refseq_features(self, **options):
         if options['org']:
             org = options['org']
         else:
             org = 'human'
         organism = Organism.objects.get(common_name=org)
+
+        if options['gff_refseq'].endswith('.gz'):
+            f = gzip.open(options['gff_refseq'], 'rb')
+        else:
+            f = open(options['gff_refseq'], 'rb')
+
+        genes = {}
+        for line in f:
+            gff = GFF(line.decode("utf-8").rstrip())
+
+            if(gff.type != 'CDS'):
+                continue
+
+            attrs = gff.getAttributes()
+
+            if(attrs['EntrezGene'] in genes):
+                gene = genes[attrs['EntrezGene']]
+                if(gene.start > gff.start):
+                    gene.start = gff.start
+                if(gene.end < gff.end):
+                    gene.end = gff.end
+            else:
+                genes[attrs['EntrezGene']] = gff
+
+        # load gene spans
+        for key in genes:
+            gene = genes[key]
+            print(gene.seqid+' '+str(gene.start)+'..'+str(gene.end)+' ' +
+                  gene.getAttributes()['Native_id'] + ' ' +
+                  gene.getAttributes()['EntrezGene'])
+
+            feature = self._get_feature(gene.getAttributes()['EntrezGene'],
+                                        gene.getAttributes()['EntrezGene'],
+                                        'sequence', gene.type, organism)
+            srcfeature = (Feature.objects
+                          .filter(organism=organism)  # @UndefinedVariable
+                          .get(uniquename=gene.seqid))  # @UndefinedVariable
+            feature.save()
+            featureloc = Featureloc(feature=feature, srcfeature=srcfeature,
+                                    fmin=gene.start-1, fmax=gene.end,
+                                    locgroup=0, rank=0)
+            featureloc.save()
+
+    ''' Create disease region features '''
+    def create_gff_disease_region_features(self, **options):
+        if options['org']:
+            org = options['org']
+        else:
+            org = 'human'
 
         disease = None
         disease_short = None
@@ -19,39 +70,45 @@ class GFFManager:
             f = gzip.open(options['gff'], 'rb')
         else:
             f = open(options['gff'], 'rb')
-        
-        
+
         for line in f:
             line = line.decode("utf-8")
             if(line.startswith("##")):
                 if(line.startswith("##Key Disease:")):
                     disease = line[14:].strip()
-                    #disease_short = "".join(item[0].upper() for item in disease.split())
 
                     # lookup disease short name
                     cv = Cv.objects.get(name='disease')
                     cvterm = Cvterm.objects.get(cv=cv, name=disease)
-                    type = Cvterm.objects.get(name='disease short name')
-                    cvtermprop = Cvtermprop.objects.get(cvterm=cvterm, type=type)
+                    termtype = Cvterm.objects.get(name='disease short name')
+                    cvtermprop = Cvtermprop.objects.get(cvterm=cvterm,
+                                                        type=termtype)
                     disease_short = cvtermprop.value
                     print('disease... '+disease)
                 continue
 
             parts = re.split('\t', line)
             if(len(parts) != 9):
-              continue
+                continue
 
             name = self._get_name(parts[8])
-            uniquename = parts[0]+"_"+name+"_"+parts[3]+"_"+parts[4]+"_"+disease_short
-            feature = self._get_feature(name, uniquename, 'sequence', parts[2], organism) 
-            srcfeature = Feature.objects.filter(organism=organism).get(uniquename=parts[0])
+            uniquename = (parts[0] + "_" + name + "_" + parts[3] + "_" +
+                          parts[4] + "_" + disease_short)
+            feature = self._get_feature(name, uniquename, 'sequence',
+                                        parts[2], organism)
+            srcfeature = (Feature.objects
+                          .filter(organism=organism)  # @UndefinedVariable
+                          .get(uniquename=parts[0]))  # @UndefinedVariable
             print('get srcfeature... '+parts[0])
             fmin = int(parts[3])-1
             feature.save()
-            featureloc = Featureloc(feature=feature, srcfeature=srcfeature, fmin=fmin, fmax=parts[4], locgroup=0, rank=0)
+            featureloc = Featureloc(feature=feature, srcfeature=srcfeature,
+                                    fmin=fmin, fmax=parts[4],
+                                    locgroup=0, rank=0)
             featureloc.save()
-            print('loaded feature... '+feature.uniquename+' on '+srcfeature.uniquename)
- 
+            print('loaded feature... ' + feature.uniquename + ' on ' +
+                  srcfeature.uniquename)
+
             if disease:
                 cv = Cv.objects.get(name='disease')
                 cvterm = Cvterm.objects.get(cv=cv, name=disease)
@@ -59,16 +116,56 @@ class GFFManager:
                 feaureprop.save()
                 print('loaded featureprop... '+disease)
         return
-    
+
     def _get_name(self, attributes):
         parts = re.split(';', attributes)
         for part in parts:
             if(part.startswith('Name=')):
-               return part[5:]
+                return part[5:]
         return ""
-    
+
     def _get_feature(self, name, uniquename, cvName, cvtermName, organism):
         cv = Cv.objects.get(name=cvName)
-        type = Cvterm.objects.get(cv=cv,name=cvtermName)
-        return Feature(organism=organism, name=name, uniquename=uniquename, type=type, is_analysis=0, is_obsolete=0)
-   
+        termtype = Cvterm.objects.get(cv=cv, name=cvtermName)
+        return Feature(organism=organism, name=name, uniquename=uniquename,
+                       type=termtype, is_analysis=0, is_obsolete=0)
+
+
+class GFF:
+
+    def __init__(self, line='dummy\tdummy\tregion\t' + str(sys.maxsize) +
+                 '\t-1\t.\t.\t.\t'):
+        parts = re.split('\t', line)
+        if(len(parts) < 9):
+            raise GFFError("GFF error: wrong number of columns")
+
+        self.seqid = parts[0]
+        self.source = parts[1]
+        self.type = parts[2]
+        self.start = int(parts[3])
+        self.end = int(parts[4])
+        self.score = parts[5]
+        self.strand = parts[6]
+        self.phase = parts[7]
+        self.attrStr = parts[8]
+        self.attrs = {}
+        self._parseAttributes()
+
+    def _parseAttributes(self):
+        parts = re.split(';', self.attrStr)
+        for p in parts:
+            if(p == ''):
+                continue
+            at = re.split(' ', p)
+            self.attrs[at[0]] = at[1]
+
+    def getAttributes(self):
+        return self.attrs
+
+
+class GFFError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
