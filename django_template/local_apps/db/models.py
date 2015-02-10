@@ -176,6 +176,30 @@ class Feature(models.Model):
         db_table = 'feature'
 
 
+class FeatureDbxref(models.Model):
+    feature_dbxref_id = models.AutoField(primary_key=True)
+    feature = models.ForeignKey(Feature)
+    dbxref = models.ForeignKey(Dbxref)
+    is_current = models.BooleanField(default=True)
+
+    class Meta:
+        managed = False
+        db_table = 'feature_dbxref'
+
+
+class FeatureSynonym(models.Model):
+    feature_synonym_id = models.AutoField(primary_key=True)
+    synonym = models.ForeignKey('Synonym')
+    feature = models.ForeignKey(Feature)
+    pub = models.ForeignKey('Pub')
+    is_current = models.BooleanField(default=False)
+    is_internal = models.BooleanField(default=False)
+
+    class Meta:
+        managed = False
+        db_table = 'feature_synonym'
+
+
 class FeaturelocQuerySet(models.QuerySet):
 
     def getCytoBands(self, org):
@@ -236,3 +260,35 @@ class Organism(models.Model):
 
     def __str__(self):
         return self.common_name
+
+
+class Pub(models.Model):
+    pub_id = models.AutoField(primary_key=True)
+    title = models.TextField(blank=True)
+    volumetitle = models.TextField(blank=True)
+    volume = models.CharField(max_length=255, blank=True)
+    series_name = models.CharField(max_length=255, blank=True)
+    issue = models.CharField(max_length=255, blank=True)
+    pyear = models.CharField(max_length=255, blank=True)
+    pages = models.CharField(max_length=255, blank=True)
+    miniref = models.CharField(max_length=255, blank=True)
+    uniquename = models.TextField(unique=True)
+    type = models.ForeignKey(Cvterm)
+    is_obsolete = models.NullBooleanField()
+    publisher = models.CharField(max_length=255, blank=True)
+    pubplace = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pub'
+
+
+class Synonym(models.Model):
+    synonym_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    type = models.ForeignKey(Cvterm)
+    synonym_sgml = models.CharField(max_length=255)
+
+    class Meta:
+        managed = False
+        db_table = 'synonym'

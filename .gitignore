@@ -3,4 +3,9 @@ __pycache__/
 *.py[cod]
 
 # 
-django_template/settings_secret.py
+.project
+.pydevproject
+.settings
+settings_secret.py
+*_initial.py
+tmp
