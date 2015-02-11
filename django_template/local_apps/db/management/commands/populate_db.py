@@ -9,7 +9,7 @@ from db.management.loaders.VCF import VCFManager
 from db.management.loaders.GFF import GFFManager
 from db.management.loaders.Bands import BandsManager
 from db.management.loaders.Genenames import GenenameManager
-from db.management.loaders.Utils import create_cvterms
+from db.management.loaders.Utils import UtilsManager
 
 
 # Get an instance of a logger
@@ -64,7 +64,8 @@ class Command(BaseCommand):
         dilList = []
         dilList.append(Cvterm(name='disease short name', definition=''))
         dilList.append(Cvterm(name='colour', definition=''))
-        create_cvterms("DIL", "DIL terms", dilList)
+        utils = UtilsManager()
+        utils.create_cvterms("DIL", "DIL terms", dilList)
         dil_cv = Cv.objects.get(name="DIL")
 
         # read disease list as two column tab delimited file
@@ -75,7 +76,7 @@ class Command(BaseCommand):
             termList = []
             parts = re.split('\t', line)
             termList.append(Cvterm(name=parts[0], definition=parts[1]))
-            create_cvterms("disease", "disease types", termList)
+            utils.create_cvterms("disease", "disease types", termList)
 
             cv = Cv.objects.get(name="disease")
             cvterm = Cvterm.objects.get(cv=cv, name=parts[0])
@@ -122,8 +123,8 @@ class Command(BaseCommand):
             gff = GFFManager()
             gff.create_gff_disease_region_features(**options)
         elif options['gff_refseq']:
-            gff = GFFManager()
-            gff.create_gff_refseq_features(**options)
+            utils = UtilsManager()
+            utils.create_refseq_features(**options)
         elif options['genenames']:
             genes = GenenameManager()
             genes.create_genename_features(**options)
