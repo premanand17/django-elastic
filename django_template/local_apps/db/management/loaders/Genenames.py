@@ -7,16 +7,11 @@ import re
 class GenenameManager:
 
     '''
-    Create features based on genenames.org. The file is assumed to include the
-    following columns:
-    hgnc id
-    approved symbol
-    status
-    locus type
-    previous symbols
-    synonyms
-    entrez gene id
-    ensembl gene id
+    Create features based on genenames.org download file for names
+    (http://www.genenames.org/cgi-bin/download).
+    The file is assumed to include the following columns:
+    hgnc id, approved symbol, status, locus type, previous symbols
+    synonyms, entrez gene id, ensembl gene id
     '''
     def create_genename_features(self, **options):
         if options['org']:
@@ -30,49 +25,49 @@ class GenenameManager:
         else:
             f = open(options['genenames'], 'rb')
 
-#         col = ["hgnc", "symbol", "name", "status", "loc_type", "prev_sym",
-#                "syns", "chr", "acc", "entrez", "ensembl", "mg_id",
-#                "PMID", "refseq"]
         col = []
-        synonymColumns = ["previous symbols", "syns", "acc"]
-        dbxrefColumns = ["entrez", "ensembl", "mg_id", "refseq"]
+        synonymColumns = ["previous symbols", "synonyms",
+                          "approved name",
+                          "accession numbers", "locus type"]
+        dbxrefColumns = ["entrez", "ensembl", "mgi", "refseq"]
 
         for line in f:
             parts = re.split('\t', line.decode("utf-8").rstrip())
-
             ''' Use table header to identify column names '''
             if(len(col) == 0):
                 for part in parts:
-                    col.append(part.lower().replace(' gene id', ''))
+                    col.append(part.lower()
+                               .replace(' gene id', '')
+                               .replace(' ids', '')
+                               .replace('mouse genome database id', 'mgi'))
+                continue
 
-            syn = {}
+            columnDict = {}
             for idx, part in enumerate(parts):
-                syn[col[idx]] = part
+                if part != '':
+                    columnDict[col[idx]] = part
 
-            if("status" in syn and syn["status"] == 'Approved'):
-                print("loading... "+syn["approved symbol"]+"\t" +
-                      syn["locus type"]+"\t" +
-                      syn["previous symbols"]+"\t"+syn["synonyms"])
+            if("status" in columnDict and columnDict["status"] == 'Approved'):
+                print("loading... "+columnDict["approved symbol"])
 
-                feature = self._get_feature(syn["hgnc id"][5:],
-                                            syn["approved symbol"],
+                feature = self._get_feature(columnDict["hgnc id"][5:],
+                                            columnDict["approved symbol"],
                                             'sequence', "gene", organism)
                 feature.save()
                 pub = Pub.objects.get(uniquename="null")
 
                 for dbType in dbxrefColumns:
-                    if(dbType in syn and syn[dbType].strip() != ''):
+                    if(dbType in columnDict and
+                       columnDict[dbType].strip() != ''):
                         # split and strip
                         dbxrefs = re.sub(r'\s', '',
-                                         syn[dbType].strip()).split(',')
+                                         columnDict[dbType].strip()).split(',')
                         for acc in dbxrefs:
                             self._create_feature_dbxref(dbType, feature, acc)
 
                 for synType in synonymColumns:
-                    if(synType in syn and syn[synType].strip() != ''):
-                        # split and strip
-                        syns = re.sub(r'\s', '',
-                                      syn[synType].strip()).split(',')
+                    if(synType in columnDict):
+                        syns = columnDict[synType].strip().split(',')
                         for syn in syns:
                             self._create_feature_synonym(syn, feature, pub)
 
@@ -87,9 +82,14 @@ class GenenameManager:
             synonym.save()
         else:
             synonym = synonyms[0]
-        feature_synonym = FeatureSynonym(feature=feature, synonym=synonym,
-                                         pub=pub, is_current=True)
-        feature_synonym.save()
+
+        feature_synonyms = FeatureSynonym.objects.filter(feature=feature,
+                                                         synonym=synonym,
+                                                         pub=pub)
+        if len(feature_synonyms) == 0:
+            feature_synonym = FeatureSynonym(feature=feature, synonym=synonym,
+                                             pub=pub, is_current=True)
+            feature_synonym.save()
 
     ''' Create a feature_dbxref for a feature '''
     def _create_feature_dbxref(self, dbName, feature, acc):
@@ -99,10 +99,17 @@ class GenenameManager:
             db.save()
         else:
             db = dbs[0]
-        dbxref = Dbxref(db=db, accession=acc)
-        dbxref.save()
-        feature_dbxref = FeatureDbxref(dbxref=dbxref, feature=feature)
-        feature_dbxref.save()
+        dbxrefs = Dbxref.objects.filter(db=db, accession=acc)
+        if len(dbxrefs) == 0:
+            dbxref = Dbxref(db=db, accession=acc)
+            dbxref.save()
+        else:
+            dbxref = dbxrefs[0]
+        feature_dbxrefs = FeatureDbxref.objects.filter(dbxref=dbxref,
+                                                       feature=feature)
+        if len(feature_dbxrefs) == 0:
+            feature_dbxref = FeatureDbxref(dbxref=dbxref, feature=feature)
+            feature_dbxref.save()
 
     ''' Get a new feature object '''
     def _get_feature(self, name, uniquename, cvName, cvtermName, organism):
