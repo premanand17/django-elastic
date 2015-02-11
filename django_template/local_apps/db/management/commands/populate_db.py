@@ -20,12 +20,10 @@ class Command(BaseCommand):
     help = "Use to populate the database \n" \
            "python manage.py populate_db --gff " \
            "Hs_GRCh38-T1D-assoc_tableGFF.txt.gz --org human_GRCh38\n" \
-           "python manage.py populate_db --gff_refseq RefSeq_GRCh38.gff " \
-           "--org human_GRCh38\n" \
-           "python manage.py populate_db --bands loaded/mouse_ideogram.gz " \
-           "--org mouse_mm10\n" \
+           "python manage.py populate_db --gff_refseq RefSeq_GRCh38.gff --org human_GRCh38\n" \
+           "python manage.py populate_db --bands loaded/mouse_ideogram.gz --org mouse_mm10\n" \
            "python manage.py populate_db --disease loaded/disease.list\n" \
-           "python manage.py populate_db --genenames loaded/genenames.org.txt\n" \
+           "python manage.py populate_db --genenames loaded/genenames.org.txt --org human_GRCh38\n" \
            "python manage.py populate_db --vcf file.vcf --org human_GRCh38"
 
     option_list = BaseCommand.option_list + (
