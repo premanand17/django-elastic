@@ -1,4 +1,4 @@
-from db.models import Cvterm, Cv, Dbxref, Db, Organism, FeatureDbxref, Feature,\
+from db.models import Cvterm, Cv, Dbxref, Db, Organism, FeatureDbxref, Feature, \
     Featureloc
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
@@ -12,15 +12,14 @@ logger = logging.getLogger(__name__)
 
 class UtilsManager:
 
+    ''' Create CV and cvterms. '''
     def create_cvterms(self, cvName, cvDefn, termList):
-        '''
-        Create CV and cvterms.
-        '''
+
         try:
             cv = Cv.objects.get(name=cvName)
-            logger.warn("WARNING:: "+cvName+" CV EXISTS")
+            logger.warn("WARNING:: " + cvName + " CV EXISTS")
         except ObjectDoesNotExist:
-            logger.warn("WARNING:: ADD "+cvName+" CV")
+            logger.warn("WARNING:: ADD " + cvName + " CV")
             cv = Cv(name=cvName, definition=cvDefn)
             cv.save()
 
@@ -34,14 +33,15 @@ class UtilsManager:
                                 is_obsolete=0, is_relationshiptype=0)
                 cvterm.save()
             except IntegrityError:
-                logger.warn("WARNING:: "+term.name+" FAILED TO LOAD")
+                logger.warn("WARNING:: " + term.name + " FAILED TO LOAD")
         return cv
 
+    '''
+    For existing features in the database, create featurelocs
+    based on transcript ranges.
+    '''
     def create_refseq_features(self, **options):
-        '''
-        For existing features in the database, create featurelocs
-        based on transcript ranges.
-        '''
+
         if options['org']:
             org = options['org']
         else:
@@ -72,7 +72,8 @@ class UtilsManager:
         # load gene spans
         for key in genes:
             gene = genes[key]
-            print(gene.seqid+' '+str(gene.start)+'..'+str(gene.end)+' ' +
+            print(gene.seqid + ' ' + str(gene.start) + '..' +
+                  str(gene.end) + ' ' +
                   gene.getAttributes()['Native_id'] + ' ' +
                   gene.getAttributes()['EntrezGene'])
             dbxrefs = Dbxref.objects.filter(accession=
@@ -90,6 +91,6 @@ class UtilsManager:
                           .filter(organism=organism)  # @UndefinedVariable
                           .get(uniquename=gene.seqid))  # @UndefinedVariable
             featureloc = Featureloc(feature=feature, srcfeature=srcfeature,
-                                    fmin=gene.start-1, fmax=gene.end,
+                                    fmin=gene.start - 1, fmax=gene.end,
                                     locgroup=0, rank=0)
             featureloc.save()
