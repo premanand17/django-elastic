@@ -6,7 +6,7 @@
 {% if data %}
 	Showing {{ size }} of {{ total }} hits
 	{% for snp in data %}
-  		<h2>{{ snp.ID }}</h2>
+  		<h2><a href="/marker/{{ snp.ID }}">{{ snp.ID }}</a></h2>
   		<div class="table-responsive">
 		<table class="table table-striped table-condensed">
 			<tr><td>Chromosome </td><td>{{ snp.SRC }}</td></tr>

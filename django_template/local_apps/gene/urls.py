@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
-from genes import views
+from gene import views
 
 urlpatterns = patterns('genes',
-                       url(r'^(?P<query>[-\w]+)/$', views.search),
+                       url(r'^(?P<gene>[-\w]+)/$', views.gene_page),
                        )
