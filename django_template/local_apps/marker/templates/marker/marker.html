@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Marker</h2>
+
+{% if data %}
+  	<h2>{{ data.0.ID }}</h2>
+  	<div class="table-responsive">
+	<table class="table table-striped table-condensed">
+		<tr><td>Chromosome </td><td>{{ data.0.SRC }}</td></tr>
+		<tr><td>Position</td><td>{{ data.0.POS }}</td></tr>
+		<tr><td>Reference</td><td>{{ data.0.REF }}</td></tr>
+		<tr><td>Alternative</td><td>{{ data.0.ALT }}</td></tr>
+		{% if data.0.VC %}
+		<tr><td>Variant Class</td><td>{{ data.0.VC }}</td></tr>
+		{% endif %}
+		<tr><td>Info</td><td>
+		{% for key, value in data.0.items %}
+			{% if key != 'SRC' and key != 'POS' and key != 'REF' and key != 'ALT' and key != 'INFO' and key != 'VC' %}
+				{{ key }} {% if value %}: {{ value }}{% endif %}<br>
+			{% endif %}
+		{% endfor %}
+		</td></tr>
+	</table>
+	</div>
+{% else %}
+    <p>No search results.</p>
+{% endif %}
+    
+{% endblock %}
