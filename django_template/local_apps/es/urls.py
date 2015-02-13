@@ -6,6 +6,5 @@ urlpatterns = patterns('es',
                        url(r'^wildcard/(?P<query>\w+)/$', views.wildcard,
                            name='wildcard'),
                        url(r'^(?P<src>\w+):(?P<start>[\w]+)-(?P<stop>[\w]+)/$',
-                           views.rangeSearch,
-                           name='rangeSearch')
+                           views.range_search, name='range_search')
                        )

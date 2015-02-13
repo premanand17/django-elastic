@@ -19,7 +19,7 @@ def search(request, query):
                   content_type='text/html')
 
 
-def rangeSearch(request, src, start, stop):
+def range_search(request, src, start, stop):
 
     must = [{"match": {"SRC": src.replace('chr', '')}},
             {"range": {"POS": {"gte": start, "lte": stop, "boost": 2.0}}}]
