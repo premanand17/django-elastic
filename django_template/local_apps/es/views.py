@@ -9,13 +9,13 @@ def wildcard(request, query):
     query = query.replace("w", "*")
     data = {"query": {"wildcard": {"ID": query}}}
     context = _getContext(data)
-    return render(request, 'search/elasticsearch.html', context)
+    return render(request, 'search/searchresults.html', context)
 
 
 def search(request, query):
     data = {"query": {"match": {"ID": query}}}
     context = _getContext(data)
-    return render(request, 'search/elasticsearch.html', context,
+    return render(request, 'search/searchresults.html', context,
                   content_type='text/html')
 
 
@@ -29,7 +29,7 @@ def range_search(request, src, start, stop):
     context["chromosome"] = src
     context["start"] = start
     context["stop"] = stop
-    return render(request, 'search/elasticsearch.html', context,
+    return render(request, 'search/searchresults.html', context,
                   content_type='text/html')
 
 
