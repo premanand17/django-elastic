@@ -46,7 +46,8 @@ INSTALLED_APPS = (
     'db',
     'bands',
     'es',
-    'genes',
+    'gene',
+    'marker',
 )
 
 MIDDLEWARE_CLASSES = (
