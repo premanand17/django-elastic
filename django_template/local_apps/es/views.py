@@ -19,6 +19,20 @@ def search(request, query):
                   content_type='text/html')
 
 
+def rangeSearch(request, src, start, stop):
+
+    must = [{"match": {"SRC": src.replace('chr', '')}},
+            {"range": {"POS": {"gte": start, "lte": stop, "boost": 2.0}}}]
+    query = {"bool": {"must": must}}
+    data = {"query": query}
+    context = _getContext(data)
+    context["chromosome"] = src
+    context["start"] = start
+    context["stop"] = stop
+    return render(request, 'search/elasticsearch.html', context,
+                  content_type='text/html')
+
+
 def _getContext(data):
     '''
     Query the elasticsearch server for given search data and return the

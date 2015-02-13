@@ -6,55 +6,6 @@ import sys
 
 
 class GFFManager:
-    ''' Create features based on transcript ranges '''
-    def create_gff_refseq_features(self, **options):
-        if options['org']:
-            org = options['org']
-        else:
-            org = 'human'
-        organism = Organism.objects.get(common_name=org)
-
-        if options['gff_refseq'].endswith('.gz'):
-            f = gzip.open(options['gff_refseq'], 'rb')
-        else:
-            f = open(options['gff_refseq'], 'rb')
-
-        genes = {}
-        for line in f:
-            gff = GFF(line.decode("utf-8").rstrip())
-
-            if(gff.type != 'CDS'):
-                continue
-
-            attrs = gff.getAttributes()
-
-            if(attrs['EntrezGene'] in genes):
-                gene = genes[attrs['EntrezGene']]
-                if(gene.start > gff.start):
-                    gene.start = gff.start
-                if(gene.end < gff.end):
-                    gene.end = gff.end
-            else:
-                genes[attrs['EntrezGene']] = gff
-
-        # load gene spans
-        for key in genes:
-            gene = genes[key]
-            print(gene.seqid+' '+str(gene.start)+'..'+str(gene.end)+' ' +
-                  gene.getAttributes()['Native_id'] + ' ' +
-                  gene.getAttributes()['EntrezGene'])
-
-            feature = self._get_feature(gene.getAttributes()['EntrezGene'],
-                                        gene.getAttributes()['EntrezGene'],
-                                        'sequence', gene.type, organism)
-            srcfeature = (Feature.objects
-                          .filter(organism=organism)  # @UndefinedVariable
-                          .get(uniquename=gene.seqid))  # @UndefinedVariable
-            feature.save()
-            featureloc = Featureloc(feature=feature, srcfeature=srcfeature,
-                                    fmin=gene.start-1, fmax=gene.end,
-                                    locgroup=0, rank=0)
-            featureloc.save()
 
     ''' Create disease region features '''
     def create_gff_disease_region_features(self, **options):

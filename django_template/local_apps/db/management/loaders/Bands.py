@@ -1,5 +1,5 @@
 from db.models import Cvterm, Organism, Feature, Featureloc
-from db.management.loaders.Utils import create_cvterms
+from db.management.loaders.Utils import UtilsManager
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 import gzip
@@ -57,4 +57,5 @@ class BandsManager:
                    'gpos33', 'gpos25', 'gvar', 'gneg', 'acen', 'stalk']
         for gstain in gstains:
             gstainList.append(Cvterm(name=gstain, definition=gstain))
-        return create_cvterms("gstain", "Giemsa banding", gstainList)
+        utils = UtilsManager()
+        return utils.create_cvterms("gstain", "Giemsa banding", gstainList)

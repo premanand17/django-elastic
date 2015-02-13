@@ -44,6 +44,17 @@ class EsTest(TestCase):
             self._SNPtest(snp)
 
     '''
+    Test a range query
+    '''
+    def test_range(self):
+        resp = self.client.get('/search/chr4:10000-10050/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('data' in resp.context)
+
+        for snp in resp.context['data']:
+            self._SNPtest(snp)
+
+    '''
     Test the elements of a SNP result
     '''
     def _SNPtest(self, snp):

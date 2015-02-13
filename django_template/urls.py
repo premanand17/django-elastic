@@ -25,4 +25,5 @@ urlpatterns = patterns('',
                        url(r'^', include('bands.urls', namespace="bands")),
                        url(r'^api/', include(api.urls)),
                        url(r'^search/', include('es.urls', namespace="es")),
+                       url(r'^genes/', include('genes.urls')),
                        )
