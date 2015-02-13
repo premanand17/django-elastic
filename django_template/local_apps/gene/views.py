@@ -3,13 +3,13 @@ from db.models import Feature, FeatureDbxref, FeatureSynonym, Featureloc
 from django.core.exceptions import ObjectDoesNotExist
 
 
-def search(request, query):
+def gene_page(request, gene):
     ''' Gene search'''
     try:
-        feature = Feature.objects.get(uniquename=query)  # @UndefinedVariable
+        feature = Feature.objects.get(uniquename=gene)  # @UndefinedVariable
     except ObjectDoesNotExist:
-        context = {'error': 'Gene ('+query+') not found.'}
-        return render(request, 'genes/genes.html', context,
+        context = {'error': 'Gene ('+gene+') not found.'}
+        return render(request, 'gene/gene.html', context,
                       content_type='text/html')
 
     feature_dbxrefs = FeatureDbxref.objects.filter(feature=feature)
@@ -28,5 +28,5 @@ def search(request, query):
         locs.append(loc)
     context = {'feature': feature, 'dbxrefs': dbxrefs,
                'synonyms': synonyms, 'locs': locs}
-    return render(request, 'genes/genes.html', context,
+    return render(request, 'gene/gene.html', context,
                   content_type='text/html')
