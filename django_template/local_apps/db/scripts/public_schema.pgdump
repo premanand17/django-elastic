@@ -67,6 +67,20 @@ CREATE TABLE featureprop (
     value text,
     rank integer DEFAULT 0 NOT NULL
 );
+CREATE TABLE feature_dbxref (
+    feature_dbxref_id integer NOT NULL,
+    feature_id integer NOT NULL,
+    dbxref_id integer NOT NULL,
+    is_current boolean DEFAULT true NOT NULL
+);
+CREATE TABLE feature_synonym (
+    feature_synonym_id integer NOT NULL,
+    synonym_id integer NOT NULL,
+    feature_id integer NOT NULL,
+    pub_id integer NOT NULL,
+    is_current boolean DEFAULT false NOT NULL,
+    is_internal boolean DEFAULT false NOT NULL
+);
 CREATE TABLE cv (
     cv_id integer NOT NULL,
     name character varying(255) NOT NULL,
