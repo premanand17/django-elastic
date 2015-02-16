@@ -247,7 +247,7 @@ class Featureprop(models.Model):
 
 
 class Organism(models.Model):
-    organism_id = models.IntegerField(primary_key=True)
+    organism_id = models.AutoField(primary_key=True)
     abbreviation = models.CharField(max_length=255, blank=True)
     genus = models.CharField(max_length=255)
     species = models.CharField(max_length=255)
