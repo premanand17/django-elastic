@@ -1,12 +1,12 @@
 from django.shortcuts import render
-from es.views import _getContext
+from es.views import elastic_search
 from db.models import Featureloc
 
 
 def marker_page(request, marker):
 
     data = {"query": {"match": {"ID": marker}}}
-    context = _getContext(data)
+    context = elastic_search(data)
 
     # get gene(s) overlapping position
     position = context['data'][0]['RSPOS']
