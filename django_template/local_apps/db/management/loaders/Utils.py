@@ -1,10 +1,10 @@
-from db.models import Cvterm, Cv, Dbxref, Db, Organism, FeatureDbxref, Feature, \
-    Featureloc
+from db.models import Cvterm, Cv, Dbxref, Db, Organism
+from db.models import Feature, Featureloc, FeatureDbxref
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
+from db.management.loaders import GFF
 import logging
 import gzip
-from db.management.loaders import GFF
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
