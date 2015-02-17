@@ -175,6 +175,13 @@ CREATE SEQUENCE featureprop_featureprop_id_seq
     NO MAXVALUE
     CACHE 1;
 ALTER SEQUENCE featureprop_featureprop_id_seq OWNED BY featureprop.featureprop_id;
+CREATE SEQUENCE feature_dbxref_feature_dbxref_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER SEQUENCE feature_dbxref_feature_dbxref_id_seq OWNED BY feature_dbxref.feature_dbxref_id;
 CREATE TABLE organism (
     organism_id integer NOT NULL,
     abbreviation character varying(255),
@@ -200,6 +207,7 @@ ALTER TABLE ONLY dbxref ALTER COLUMN dbxref_id SET DEFAULT nextval('dbxref_dbxre
 ALTER TABLE ONLY feature ALTER COLUMN feature_id SET DEFAULT nextval('feature_feature_id_seq'::regclass);
 ALTER TABLE ONLY featureloc ALTER COLUMN featureloc_id SET DEFAULT nextval('featureloc_featureloc_id_seq'::regclass);
 ALTER TABLE ONLY featureprop ALTER COLUMN featureprop_id SET DEFAULT nextval('featureprop_featureprop_id_seq'::regclass);
+ALTER TABLE ONLY feature_dbxref ALTER COLUMN feature_dbxref_id SET DEFAULT nextval('feature_dbxref_feature_dbxref_id_seq'::regclass);
 ALTER TABLE ONLY organism ALTER COLUMN organism_id SET DEFAULT nextval('organism_organism_id_seq'::regclass);
 SELECT pg_catalog.setval('cv_cv_id_seq', 1, true);
 SELECT pg_catalog.setval('cvprop_cvprop_id_seq', 1, false);
