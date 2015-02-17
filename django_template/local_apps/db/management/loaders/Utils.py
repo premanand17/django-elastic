@@ -76,8 +76,8 @@ class UtilsManager:
                   str(gene.end) + ' ' +
                   gene.getAttributes()['Native_id'] + ' ' +
                   gene.getAttributes()['EntrezGene'])
-            dbxrefs = Dbxref.objects.filter(accession=
-                                            gene.getAttributes()['EntrezGene'])
+            dbxrefs = (Dbxref.objects
+                       .filter(accession=gene.getAttributes()['EntrezGene']))
             if len(dbxrefs) == 0:
                 continue
 
