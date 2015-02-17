@@ -1,5 +1,6 @@
 from django.test import TestCase
 from db.models import Feature, Cv, Cvterm, Organism, Db, Dbxref
+from django.core.urlresolvers import reverse
 
 
 class GenesTestCase(TestCase):
@@ -19,5 +20,8 @@ class GenesTestCase(TestCase):
         self.feature.save()
 
     def test_genes(self):
-        resp = self.client.get('/gene/PTPN22/')
+        resp = self.client.get(reverse('gene_page',
+                                       kwargs={'gene': 'PTPN22'}))
         self.assertEqual(resp.status_code, 200)
+        # check we've used the right template
+        self.assertTemplateUsed(resp, 'gene/gene.html')
