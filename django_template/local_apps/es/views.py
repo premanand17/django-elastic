@@ -8,13 +8,13 @@ import re
 def wildcard(request, query):
     query = query.replace("w", "*")
     data = {"query": {"wildcard": {"ID": query}}}
-    context = _getContext(data)
+    context = elastic_search(data)
     return render(request, 'search/searchresults.html', context)
 
 
 def search(request, query):
     data = {"query": {"match": {"ID": query}}}
-    context = _getContext(data)
+    context = elastic_search(data)
     return render(request, 'search/searchresults.html', context,
                   content_type='text/html')
 
@@ -25,7 +25,7 @@ def range_search(request, src, start, stop):
             {"range": {"POS": {"gte": start, "lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}
     data = {"query": query}
-    context = _getContext(data)
+    context = elastic_search(data)
     context["chromosome"] = src
     context["start"] = start
     context["stop"] = stop
@@ -33,7 +33,7 @@ def range_search(request, src, start, stop):
                   content_type='text/html')
 
 
-def _getContext(data):
+def elastic_search(data):
     '''
     Query the elasticsearch server for given search data and return the
     context dictionary to pass to the template

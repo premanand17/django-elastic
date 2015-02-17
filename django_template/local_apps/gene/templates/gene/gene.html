@@ -1,33 +1,17 @@
 {% extends "base.html" %}
+{% load gene_tags %}
 
 {% block content %}
 
 <h2>Gene</h2>
 
+{% show_gene_section feature %}
+
 {% if feature %}
-
-<table class="table table-striped table-condensed">
-	<tr><td>gene </td><td>{{ feature.uniquename }}</td></tr>
-	<tr><td>hgnc </td><td>{{ feature.name }}</td></tr>
-
-
-{% for dbxref in dbxrefs %}
-	<tr><td>{{ dbxref.db.name }}</td><td>{{ dbxref.accession }}</td></tr>
-{% endfor %}
-
-<tr><td>synonyms </td><td>
-{% for synonym in synonyms %}
-	{{ synonym.name }}; 
-{% endfor %}
-</td></tr>
-
-</table>
-
-<h2>SNPs</h2>
-{% for loc in locs %}
- <a href="/search/{{ loc.srcfeature.uniquename }}:{{ loc.fmin }}-{{ loc.fmax }}">{{ loc.srcfeature.uniquename }}:{{ loc.fmin }}-{{ loc.fmax }}</a>
-{% endfor %}
-
+	<h2>SNPs</h2>
+	{% for loc in locs %}
+ 		<a href="/search/{{ loc.srcfeature.uniquename }}:{{ loc.fmin }}-{{ loc.fmax }}">{{ loc.srcfeature.uniquename }}:{{ loc.fmin }}-{{ loc.fmax }}</a>
+	{% endfor %}
 {% else %}
 	{{ error }}
 {% endif %}

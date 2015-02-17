@@ -1,11 +1,10 @@
 {% extends "base.html" %}
+{% load gene_tags %}
 
 {% block content %}
 
-<h2>Marker</h2>
-
 {% if data %}
-  	<h2>{{ data.0.ID }}</h2>
+  	<h3>Marker: {{ data.0.ID }}</h3>
   	<div class="table-responsive">
 	<table class="table table-striped table-condensed">
 		<tr><td>Chromosome </td><td>{{ data.0.SRC }}</td></tr>
@@ -13,7 +12,7 @@
 		<tr><td>Reference</td><td>{{ data.0.REF }}</td></tr>
 		<tr><td>Alternative</td><td>{{ data.0.ALT }}</td></tr>
 		{% if data.0.VC %}
-		<tr><td>Variant Class</td><td>{{ data.0.VC }}</td></tr>
+			<tr><td>Variant Class</td><td>{{ data.0.VC }}</td></tr>
 		{% endif %}
 		<tr><td>Info</td><td>
 		{% for key, value in data.0.items %}
@@ -24,8 +23,15 @@
 		</td></tr>
 	</table>
 	</div>
+	
+	{% if genes|length > 0 %}
+		<h3>Overlapping Gene{{ genes|length|pluralize }}</h3>
+		{% for gene in genes %}
+			{% show_gene_section gene %}
+		{% endfor %}
+	{% endif %}
 {% else %}
     <p>No search results.</p>
 {% endif %}
-    
+
 {% endblock %}
