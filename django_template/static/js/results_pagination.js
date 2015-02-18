@@ -15,6 +15,10 @@
 			results_pagination.updateResults(this, db, size, query);
 		});
 		results_pagination.updateResults($('.active'), db, size, query);
+		if(npages === 1) {
+			$('#search-pagination').children("li").first().addClass("disabled");
+			$('#search-pagination').children("li").last().addClass("disabled");
+		}
 	}
 	
 	results_pagination.updateResults = function(thisPage, db, size, query) {
