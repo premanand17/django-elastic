@@ -2,54 +2,11 @@
 {% block title %}SEARCH{% endblock %}
 
 {% block header %}
+<script type="text/javascript" src="/static/js/results_pagination.js"></script>
 <script type='text/javascript'>
 $(document).ready(function() {
-	var npages = {{ total }} / {{ size }};
-	$('#pagination').append('<ul class="pagination" id="search-pagination"></ul>');
-	$('#search-pagination').append('<li><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
-	$('#search-pagination').append('<li class="active"><a href="#">1<span class="sr-only">(current)</span></a></li>');
-	for (i = 2; i < npages+1; i++) {
-		$('#search-pagination').append('<li><a href="#">'+i+'</a></li>');
-	}
-	$('#search-pagination').append('<li><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');
-	
-	$('#pagination').on( "click", "li", function() {
-		updateResults(this);
-	});
-	updateResults($('.active'));
-	
-	function updateResults(thisPage){
-		var url = 'http://'+window.location.host +
-        '/{{ db }}/' +
-        '_search?';
-        var page = $( thisPage ).text().match(/[0-9]+/)[0];
-        var es_from = (((page-1)*{{ size }}));
-        var es_data = JSON.stringify({
-				"from" : es_from, "size" : {{ size }},
-				"query": {% autoescape off %}{{ query }}.query{% endautoescape %}
-				});
-        $('.active').removeClass('active');
-        $(thisPage).addClass('active');
-        $.ajax({
-        	url: url,
-        	dataType: "json",
-        	type: "POST",
-        	data: es_data,
-        	success: function(json){
-        		$('#results').empty();
-        		var hits = json.hits.hits;
-        		for(var i=0; i<hits.length; i++) {
-        			var hit = hits[i]._source;
-        			$('#results').append(
-					'<ul class="list-group">' +
-					'<li class="list-group-item"><a href="/marker/'+hit.ID+'">'+hit.ID+'</a></li>'+
-					'<li class="list-group-item">Chromosome: '+hit.SRC+'; Position: '+hit.POS+'; '+
-					                        hit.REF+'/'+hit.ALT+'</li>'+
-			  		'</ul>');	
-        		}
-        	}
-        });
-	}
+	var query = {% autoescape off %}{{ query }}.query{% endautoescape %};
+	results_pagination.build('pagination', query, "{{ db }}", {{ size }}, {{ total }});
 });
 </script>
 {% endblock %}
