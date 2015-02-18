@@ -5,6 +5,8 @@ from db.api import FeaturelocFullResource, FeatureResource, FeatureFullResource
 from db.api import FeaturepropResource, FeaturepropFullResource
 from db.api import OrganismResource
 from tastypie.api import Api
+from django_template import settings
+from es.views import reverse_proxy
 
 # register tastypie api
 api = Api(api_name='dev')
@@ -28,3 +30,7 @@ urlpatterns = patterns('',
                        url(r'^gene/', include('gene.urls')),
                        url(r'^marker/', include('marker.urls')),
                        )
+
+if(settings.DEBUG):
+    urlpatterns.append(url(r'^'+settings.MARKERDB+'/_search',
+                           reverse_proxy),)
