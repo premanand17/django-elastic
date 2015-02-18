@@ -3,7 +3,7 @@
 	
 	results_pagination.build = function(paginationId, query, db, size, total) {
 		var npages = total / size;
-		$('#'+paginationId).append('<ul class="pagination" id="search-pagination"></ul>');
+		$('#'+paginationId).append('<ul class="pagination pagination-sm" id="search-pagination"></ul>');
 		$('#search-pagination').append('<li><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
 		$('#search-pagination').append('<li class="active"><a href="#">1</a></li>');
 		for (i = 2; i < npages+1; i++) {
@@ -19,8 +19,19 @@
 	
 	results_pagination.updateResults = function(thisPage, db, size, query) {
 		var url = 'http://'+window.location.host +'/'+db+'/_search?';
-        var page = $( thisPage ).text().match(/[0-9]+/)[0];
-        var es_from = (((page-1)*size));
+
+		var page = $( thisPage ).text().match(/[0-9]+/);
+		if( page === null ) {
+			var label = $( thisPage ).children('a').first().attr('aria-label');
+			if(label === 'Next') {
+				$('.active').next().trigger('click');
+			} else {
+				$('.active').prev().trigger('click');
+			}
+			return;
+		}
+
+        var es_from = (((page[0]-1)*size));
         var es_data = JSON.stringify({
 				"from" : es_from, "size" : size,
 				"query": query
