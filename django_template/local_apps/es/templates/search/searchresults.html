@@ -2,7 +2,6 @@
 {% block title %}SEARCH{% endblock %}
 
 {% block header %}
-{% load settings_value %}
 <script type='text/javascript'>
 $(document).ready(function() {
 	var npages = {{ total }} / {{ size }};
@@ -21,7 +20,7 @@ $(document).ready(function() {
 	
 	function updateResults(thisPage){
 		var url = 'http://'+window.location.host +
-        '/{% settings_value "MARKERDB" %}/' +
+        '/{{ db }}/' +
         '_search?';
         var page = $( thisPage ).text().match(/[0-9]+/)[0];
         var es_from = (((page-1)*{{ size }}));

@@ -66,6 +66,7 @@ def elastic_search(data, search_from=0):
     response = requests.post(url, data=json.dumps(data))
 
     context = {"query": data}
+    context["db"] = settings.MARKERDB
     content = []
     if(len(response.json()['hits']['hits']) >= 1):
         for hit in response.json()['hits']['hits']:
