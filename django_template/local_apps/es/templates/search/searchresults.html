@@ -6,7 +6,7 @@
 <script type='text/javascript'>
 $(document).ready(function() {
 	var query = {% autoescape off %}{{ query }}.query{% endautoescape %};
-	results_pagination.build('pagination', query, "{{ db }}", {{ size }}, {{ total }});
+	results_pagination.build('pagination', 'result-overview', query, "{{ db }}", {{ size }}, {{ total }});
 });
 </script>
 {% endblock %}
@@ -15,7 +15,7 @@ $(document).ready(function() {
 
 <div class="row">
 	<div class="col-md-4"></div>
-	<div class="col-md-8">Showing {{ size }} of {{ total }} hits</div>
+	<div class="col-md-8" id="result-overview"></div>
 </div>
 <div class="row">
 	<div class="col-md-4">
