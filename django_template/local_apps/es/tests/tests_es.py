@@ -9,10 +9,11 @@ class EsTest(TestCase):
     '''
     def test_es(self):
         try:
-            resp = requests.get(settings.ELASTICSEARCH_URL+'/_cluster/health')
+            resp = requests.get(settings.ELASTICSEARCH_URL +
+                                '/_cluster/health/'+settings.MARKERDB)
             self.assertEqual(resp.status_code, 200, "Health page status code")
             self.assertFalse(resp.json()['status'] == 'red',
-                             "Elasticsearch status check")
+                             resp.json())
         except requests.exceptions.Timeout:
             self.assertTrue(False, 'timeout exception')
         except requests.exceptions.TooManyRedirects:

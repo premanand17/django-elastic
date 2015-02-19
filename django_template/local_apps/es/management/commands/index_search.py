@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "Use to create an elasticsearch index and add data \n" \
            "python manage.py index_search --snp --build dbSNP142\n" \
-           "python manage.py index_search --loadSNP --build dbSNP142 All.vcf"
+           "python manage.py index_search --build dbSNP142 --loadSNP All.vcf"
 
     option_list = BaseCommand.option_list + (
         make_option('--snp',
