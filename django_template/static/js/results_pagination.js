@@ -12,18 +12,18 @@
 		$('#search-pagination').append('<li><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');
 		
 		$('#'+paginationId).on( "click", "li", function() {
-			results_pagination.updateResults(this, db, size, query);
+			updateResults(this, db, size, query);
 		});
-		results_pagination.updateResults($('.active'), db, size, query);
+		updateResults($('.active'), db, size, query);
 		if(npages === 1) {
 			$('#search-pagination').children("li").first().addClass("disabled");
 			$('#search-pagination').children("li").last().addClass("disabled");
 		}
 	}
 	
-	results_pagination.updateResults = function(thisPage, db, size, query) {
+	// update results when a new page number is clicked
+	updateResults = function(thisPage, db, size, query) {
 		var url = 'http://'+window.location.host +'/'+db+'/_search?';
-
 		var page = $( thisPage ).text().match(/[0-9]+/);
 		if( page === null ) {
 			var label = $( thisPage ).children('a').first().attr('aria-label');
@@ -64,4 +64,5 @@
         	}
         });
 	}
+
 }( window.results_pagination = window.results_pagination || {}, jQuery ));
