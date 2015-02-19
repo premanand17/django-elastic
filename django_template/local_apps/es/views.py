@@ -53,12 +53,11 @@ def range_search(request, src, start, stop):
                   content_type='text/html')
 
 
-def elastic_search(data, search_from=0):
+def elastic_search(data, search_from=0, size=20):
     '''
     Query the elasticsearch server for given search data and return the
     context dictionary to pass to the template
     '''
-    size = 20
     url = (settings.ELASTICSEARCH_URL + '/' +
            settings.MARKERDB + '/' +
            '_search?size=' + str(size) +
