@@ -7,11 +7,7 @@ from django_template import settings
 
 class MarkerManager:
 
-    ''' Create disease region features '''
-    def create_gff_disease_region_features(self, **options):
-            '''
-    Index snp data
-    '''
+    ''' Index snp data '''
     def create_load_snp_index(self, **options):
         if options['build']:
             build = options['build'].lower()
