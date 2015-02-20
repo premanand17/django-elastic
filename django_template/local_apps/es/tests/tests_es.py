@@ -13,7 +13,7 @@ class EsTest(TestCase):
                                 '/_cluster/health/'+settings.MARKERDB)
             self.assertEqual(resp.status_code, 200, "Health page status code")
             self.assertFalse(resp.json()['status'] == 'red',
-                             resp.json())
+                             'Health report - red')
         except requests.exceptions.Timeout:
             self.assertTrue(False, 'timeout exception')
         except requests.exceptions.TooManyRedirects:
