@@ -9,8 +9,9 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = "Use to create an elasticsearch index and add data \n" \
-           "python manage.py index_search --mapSNP --build dbSNP142\n" \
-           "python manage.py index_search --build dbSNP142 --indexSNP All.vcf"
+           "python manage.py index_search --mapSNP --indexName dbSNP142\n" \
+           "python manage.py index_search --indexName dbSNP142 --indexSNP " \
+           "All.vcf"
 
     option_list = BaseCommand.option_list + (
         make_option('--mapSNP',
@@ -22,9 +23,9 @@ class Command(BaseCommand):
                     dest='indexSNP',
                     help='VCF file to index'),
         ) + (
-        make_option('--build',
-                    dest='build',
-                    help='Build number'),
+        make_option('--indexName',
+                    dest='indexName',
+                    help='Index Name'),
         )
 
     def handle(self, *args, **options):
