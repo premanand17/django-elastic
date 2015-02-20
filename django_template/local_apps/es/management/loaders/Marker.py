@@ -14,10 +14,10 @@ class MarkerManager:
         else:
             build = "snp"
 
-        if options['loadSNP'].endswith('.gz'):
-            f = gzip.open(options['loadSNP'], 'rb')
+        if options['indexSNP'].endswith('.gz'):
+            f = gzip.open(options['indexSNP'], 'rb')
         else:
-            f = open(options['loadSNP'], 'rb')
+            f = open(options['indexSNP'], 'rb')
 
         data = ''
         n = 0
