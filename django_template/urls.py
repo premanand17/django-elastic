@@ -32,5 +32,7 @@ urlpatterns = patterns('',
                        )
 
 if(settings.DEBUG):
-    urlpatterns.append(url(r'^'+settings.MARKERDB+'/_search',
+    urlpatterns.append(url(r'^'+settings.MARKERDB+'|' +
+                           settings.MARKERDB+',\w+/_search'+'|' +
+                           settings.GENEDB,
                            reverse_proxy),)
