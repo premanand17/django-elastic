@@ -21,6 +21,31 @@
 			$('#search-pagination').children("li").last().addClass("disabled");
 		}
 		addDropDownSize(paginationId, overviewId, query, db, size, total);
+		
+		var dbs = db.split(',');
+		for(var i=0; i<dbs.length; i++) {
+			addCounter(query, dbs[i]);
+		}
+	}
+	
+	addCounter = function(query, db) {
+		var url = 'http://'+window.location.host +'/'+db+'/_search?';
+		var es_data = JSON.stringify({
+			"from" : 0, "size" : 1,
+			"query": query
+		});
+
+		$.ajax({
+	       	url: url,
+	       	dataType: "json",
+	       	type: "POST",
+	       	data: es_data,
+	       	success: function(json){
+	       		console.log(json.hits);
+	       		$('#'+db+' span').replaceWith("<span class='badge'>"+
+	       				json.hits.total+"</span>");
+	       	}
+	    });
 	}
 	
 	addDropDownSize = function(paginationId, overviewId, query, db, size, total) {
@@ -64,6 +89,7 @@
         $('span .pagination-sr').remove();
         $(thisPage).addClass('active');
         $(thisPage).siblings('a').append('<span class="sr-only" id="pagination-sr">(current)</span>');
+
         $.ajax({
         	url: url,
         	dataType: "json",
@@ -76,12 +102,20 @@
 
         		for(var i=0; i<hits.length; i++) {
         			var hit = hits[i]._source;
-        			$('#results').append(
-					'<ul class="list-group">' +
-					'<li class="list-group-item"><a href="/marker/'+hit.ID+'">'+hit.ID+'</a></li>'+
-					'<li class="list-group-item">Chromosome: '+hit.SRC+'; Position: '+hit.POS+'; '+
+        			
+        			if(hit.ID)
+        				$('#results').append(
+        						'<ul class="list-group">' +
+        						'<li class="list-group-item"><a href="/marker/'+hit.ID+'">'+hit.ID+'</a></li>'+
+        						'<li class="list-group-item">Chromosome: '+hit.SRC+'; Position: '+hit.POS+'; '+
 					                        hit.REF+'/'+hit.ALT+'</li>'+
-			  		'</ul>');	
+        				'</ul>');
+        			else
+        				$('#results').append(
+        						'<ul class="list-group">' +
+        						'<li class="list-group-item"><a href="/gene/'+hit.gene_symbol+'">'+hit.gene_symbol+'</a></li>'+
+        						'<li class="list-group-item">HGNC: '+hit.hgnc+'</li>'+
+        				'</ul>');
         		}
         	}
         });
