@@ -120,8 +120,11 @@ class GenenameManager:
                   }
                  }
 
-        data = {"mappings": {indexName: props}}
-        response = requests.put(settings.ELASTICSEARCH_URL+'/'+indexName+'/',
+        data = {"gene": props}
+        ''' create index and add mapping '''
+        requests.put(settings.ELASTICSEARCH_URL+'/' + indexName)
+        response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+                                indexName+'/_mapping/gene',
                                 data=json.dumps(data))
         print (response.text)
         return

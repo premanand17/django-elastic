@@ -50,13 +50,14 @@ class MarkerManager:
                         print ('\nLoading '+src)
                     print('.', end="", flush=True)
                     response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                            indexName+'/snp/_bulk', data=data)
+                                            indexName+'/marker/_bulk',
+                                            data=data)
                     data = ''
                     lastSrc = src
 
         finally:
             response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                    indexName+'/snp/_bulk', data=data)
+                                    indexName+'/marker/_bulk', data=data)
         return response
 
     '''
@@ -80,8 +81,12 @@ class MarkerManager:
                                          "index": "no"}
                                 }}
 
-        data = {"mappings": {indexName: props}}
-        response = requests.put(settings.ELASTICSEARCH_URL+'/'+indexName+'/',
+        data = {"marker": props}
+
+        ''' create index and add mapping '''
+        requests.put(settings.ELASTICSEARCH_URL+'/' + indexName)
+        response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+                                indexName+'/_mapping/marker',
                                 data=json.dumps(data))
         print (response.text)
         return
