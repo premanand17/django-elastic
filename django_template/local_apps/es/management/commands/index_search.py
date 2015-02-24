@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "Use to create an elasticsearch index and add data \n" \
            "./manage.py index_search --mapSNP --indexName [index name]\n" \
-           "./manage.py index_search --indexName [index name] --indexSNP All.vcf" \
+           "./manage.py index_search --indexName [index name] --indexSNP All.vcf\n" \
            "./manage.py index_search --mapGene --indexName [index name]\n" \
            "./manage.py index_search --indexName [index name] --indexGene " \
            "genenames.org.txt --org=human"
