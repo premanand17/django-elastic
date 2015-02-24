@@ -111,11 +111,7 @@ class GeneManager:
                  {"gene_symbol": {"type": "string", "boost": 4},
                   "organism": {"type": "string"},
                   "hgnc": {"type": "string"},
-                  "dbxrefs": {"properties":
-                              {"dbname": {"type": "string"},
-                               "accession": {"type": "string"}
-                               }
-                              },
+                  "dbxrefs": {"type": "object"},
                   "synonyms": {"type": "string"}
                   }
                  }
