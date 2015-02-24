@@ -25,11 +25,6 @@ def reverse_proxy(request):
                         content_type=proxy_resp.headers.get('content-type'))
 
 
-def wildcard(request, query):
-    query = query.replace("w", "*")
-    return search(request, query)
-
-
 def search(request, query):
     fields = ["gene_symbol", "hgnc", "synonyms", "ID", "dbxrefs.*"]
     data = {"query": {"query_string": {"query": query, "fields": fields}}}
@@ -40,7 +35,6 @@ def search(request, query):
 
 
 def range_search(request, src, start, stop):
-
     must = [{"match": {"SRC": src.replace('chr', '')}},
             {"range": {"POS": {"gte": start, "lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}
