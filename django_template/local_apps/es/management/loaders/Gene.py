@@ -5,7 +5,7 @@ from django_template import settings
 import json
 
 
-class GenenameManager:
+class GeneManager:
 
     '''
     Create index based on genenames.org download file for names
