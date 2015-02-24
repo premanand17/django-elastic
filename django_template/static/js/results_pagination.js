@@ -41,7 +41,6 @@
 	       	type: "POST",
 	       	data: es_data,
 	       	success: function(json){
-	       		console.log(json.hits);
 	       		$('#'+db+' span').replaceWith("<span class='badge'>"+
 	       				json.hits.total+"</span>");
 	       	}
