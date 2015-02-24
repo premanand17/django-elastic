@@ -9,8 +9,8 @@ class MarkerManager:
 
     ''' Index snp data '''
     def create_load_snp_index(self, **options):
-        if options['indexName']:
-            build = options['indexName'].lower()
+        if options['build']:
+            build = options['build'].lower()
         else:
             build = "snp"
 
@@ -63,8 +63,8 @@ class MarkerManager:
     Create the mapping for snp indexing
     '''
     def create_snp_index(self, **options):
-        if options['indexName']:
-            build = options['indexName'].lower()
+        if options['build']:
+            build = options['build'].lower()
         else:
             build = "snp"
 
