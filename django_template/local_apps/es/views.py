@@ -27,11 +27,7 @@ def reverse_proxy(request):
 
 def wildcard(request, query):
     query = query.replace("w", "*")
-    fields = ["gene_symbol", "hgnc", "synonyms", "ID", "dbxrefs.*"]
-    data = {"query": {"query_string": {"query": query, "fields": fields}}}
-    context = elastic_search(data, 0, 20,
-                             settings.MARKERDB+','+settings.GENEDB)
-    return render(request, 'search/searchresults.html', context)
+    return search(request, query)
 
 
 def search(request, query):
