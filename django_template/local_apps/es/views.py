@@ -25,17 +25,9 @@ def reverse_proxy(request):
                         content_type=proxy_resp.headers.get('content-type'))
 
 
-def wildcard(request, query):
-    query = query.replace("w", "*")
-    fields = ["gene_symbol", "hgnc", "synonyms", "ID"]
-    data = {"query": {"query_string": {"query": query, "fields": fields}}}
-    context = elastic_search(data, 0, 20,
-                             settings.MARKERDB+','+settings.GENEDB)
-    return render(request, 'search/searchresults.html', context)
-
-
 def search(request, query):
-    data = {"query": {"match": {"ID": query}}}
+    fields = ["gene_symbol", "hgnc", "synonyms", "ID", "dbxrefs.*"]
+    data = {"query": {"query_string": {"query": query, "fields": fields}}}
     context = elastic_search(data, 0, 20,
                              settings.MARKERDB+','+settings.GENEDB)
     return render(request, 'search/searchresults.html', context,
@@ -43,7 +35,6 @@ def search(request, query):
 
 
 def range_search(request, src, start, stop):
-
     must = [{"match": {"SRC": src.replace('chr', '')}},
             {"range": {"POS": {"gte": start, "lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}

@@ -37,7 +37,7 @@ class EsTest(TestCase):
     Test a wild card search
     '''
     def test_snp_wildcard(self):
-        resp = self.client.get('/search/wildcard/rs33311w/')
+        resp = self.client.get('/search/rs33311*/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
 
