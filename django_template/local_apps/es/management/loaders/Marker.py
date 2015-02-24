@@ -9,10 +9,15 @@ class MarkerManager:
 
     ''' Index snp data '''
     def create_load_snp_index(self, **options):
+<<<<<<< HEAD
         if options['build']:
             build = options['build'].lower()
+=======
+        if options['indexName']:
+            indexName = options['indexName'].lower()
+>>>>>>> upstream/master
         else:
-            build = "snp"
+            indexName = "snp"
 
         if options['indexSNP'].endswith('.gz'):
             f = gzip.open(options['indexSNP'], 'rb')
@@ -50,23 +55,29 @@ class MarkerManager:
                         print ('\nLoading '+src)
                     print('.', end="", flush=True)
                     response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                            build+'/snp/_bulk', data=data)
+                                            indexName+'/marker/_bulk',
+                                            data=data)
                     data = ''
                     lastSrc = src
 
         finally:
             response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                    build+'/snp/_bulk', data=data)
+                                    indexName+'/marker/_bulk', data=data)
         return response
 
     '''
     Create the mapping for snp indexing
     '''
     def create_snp_index(self, **options):
+<<<<<<< HEAD
         if options['build']:
             build = options['build'].lower()
+=======
+        if options['indexName']:
+            indexName = options['indexName'].lower()
+>>>>>>> upstream/master
         else:
-            build = "snp"
+            indexName = "snp"
 
         props = {"properties": {"ID": {"type": "string", "boost": 4},
                                 "SRC": {"type": "string"},
@@ -80,8 +91,12 @@ class MarkerManager:
                                          "index": "no"}
                                 }}
 
-        data = {"mappings": {build: props}}
-        response = requests.put(settings.ELASTICSEARCH_URL+'/'+build+'/',
+        data = {"marker": props}
+
+        ''' create index and add mapping '''
+        requests.put(settings.ELASTICSEARCH_URL+'/' + indexName)
+        response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+                                indexName+'/_mapping/marker',
                                 data=json.dumps(data))
         print (response.text)
         return

@@ -33,11 +33,7 @@
 		$(document).ready(function(){
 			$( "form" ).submit(function( event ) {
 		  		var id = $( "input" ).val();
-		  		var url;
-		  		if(id.indexOf("*") > -1)
-		  			url = location.protocol + '//' + window.location.host +'/search/wildcard/' +id.replace(/\*/g,"w") ;
-		  		else
-					url = location.protocol + '//' + window.location.host +'/search/' +id ;
+		  		var url = location.protocol + '//' + window.location.host +'/search/' +id ;
 				window.open(url,"_self");
 				event.preventDefault();
 			});

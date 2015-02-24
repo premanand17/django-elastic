@@ -3,11 +3,6 @@
 	
 	results_pagination.build = function(paginationId, overviewId, query, db, size, total) {
 		var npages = total / size;
-		if(size < total) {
-			$('#'+overviewId).html('Showing '+size+' of '+total+' hits');
-		} else {
-			$('#'+overviewId).html('Showing '+total+' of '+total+' hits');
-		}
 		$('#'+paginationId).empty();
 		$('#'+paginationId).append('<ul class="pagination pagination-sm" id="search-pagination" style="margin: 0;"></ul>');
 		$('#search-pagination').append('<li><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
@@ -18,14 +13,38 @@
 		$('#search-pagination').append('<li><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');
 		
 		$('#search-pagination').on( "click", "li", function() {
-			updateResults(this, db, size, query);
+			updateResults(this, overviewId, db, size, total, query);
 		});
-		updateResults($('.active'), db, size, query);
+		updateResults($('.active'), overviewId, db, size, total, query);
 		if(npages === 1) {
 			$('#search-pagination').children("li").first().addClass("disabled");
 			$('#search-pagination').children("li").last().addClass("disabled");
 		}
 		addDropDownSize(paginationId, overviewId, query, db, size, total);
+		
+		var dbs = db.split(',');
+		for(var i=0; i<dbs.length; i++) {
+			addCounter(query, dbs[i]);
+		}
+	}
+	
+	addCounter = function(query, db) {
+		var url = 'http://'+window.location.host +'/'+db+'/_search?';
+		var es_data = JSON.stringify({
+			"from" : 0, "size" : 1,
+			"query": query
+		});
+
+		$.ajax({
+	       	url: url,
+	       	dataType: "json",
+	       	type: "POST",
+	       	data: es_data,
+	       	success: function(json){
+	       		$('#'+db+' span').replaceWith("<span class='badge'>"+
+	       				json.hits.total+"</span>");
+	       	}
+	    });
 	}
 	
 	addDropDownSize = function(paginationId, overviewId, query, db, size, total) {
@@ -47,7 +66,7 @@
 	}
 	
 	// update results when a new page number is clicked
-	updateResults = function(thisPage, db, size, query) {
+	updateResults = function(thisPage, overviewId, db, size, total, query) {
 		var url = 'http://'+window.location.host +'/'+db+'/_search?';
 		var page = $( thisPage ).text().match(/[0-9]+/);
 		if( page === null ) {
@@ -69,6 +88,7 @@
         $('span .pagination-sr').remove();
         $(thisPage).addClass('active');
         $(thisPage).siblings('a').append('<span class="sr-only" id="pagination-sr">(current)</span>');
+
         $.ajax({
         	url: url,
         	dataType: "json",
@@ -77,14 +97,24 @@
         	success: function(json){
         		$('#results').empty();
         		var hits = json.hits.hits;
+        		$('#'+overviewId).html('Showing '+hits.length+' of '+total+' hits');
+
         		for(var i=0; i<hits.length; i++) {
         			var hit = hits[i]._source;
-        			$('#results').append(
-					'<ul class="list-group">' +
-					'<li class="list-group-item"><a href="/marker/'+hit.ID+'">'+hit.ID+'</a></li>'+
-					'<li class="list-group-item">Chromosome: '+hit.SRC+'; Position: '+hit.POS+'; '+
+        			
+        			if(hit.ID)
+        				$('#results').append(
+        						'<ul class="list-group">' +
+        						'<li class="list-group-item"><a href="/marker/'+hit.ID+'">'+hit.ID+'</a></li>'+
+        						'<li class="list-group-item">Chromosome: '+hit.SRC+'; Position: '+hit.POS+'; '+
 					                        hit.REF+'/'+hit.ALT+'</li>'+
-			  		'</ul>');	
+        				'</ul>');
+        			else
+        				$('#results').append(
+        						'<ul class="list-group">' +
+        						'<li class="list-group-item"><a href="/gene/'+hit.gene_symbol+'">'+hit.gene_symbol+'</a></li>'+
+        						'<li class="list-group-item">HGNC: '+hit.hgnc+'</li>'+
+        				'</ul>');
         		}
         	}
         });

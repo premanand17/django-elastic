@@ -25,22 +25,16 @@ def reverse_proxy(request):
                         content_type=proxy_resp.headers.get('content-type'))
 
 
-def wildcard(request, query):
-    query = query.replace("w", "*")
-    data = {"query": {"wildcard": {"ID": query}}}
-    context = elastic_search(data)
-    return render(request, 'search/searchresults.html', context)
-
-
 def search(request, query):
-    data = {"query": {"match": {"ID": query}}}
-    context = elastic_search(data)
+    fields = ["gene_symbol", "hgnc", "synonyms", "ID", "dbxrefs.*"]
+    data = {"query": {"query_string": {"query": query, "fields": fields}}}
+    context = elastic_search(data, 0, 20,
+                             settings.MARKERDB+','+settings.GENEDB)
     return render(request, 'search/searchresults.html', context,
                   content_type='text/html')
 
 
 def range_search(request, src, start, stop):
-
     must = [{"match": {"SRC": src.replace('chr', '')}},
             {"range": {"POS": {"gte": start, "lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}
@@ -53,24 +47,33 @@ def range_search(request, src, start, stop):
                   content_type='text/html')
 
 
-def elastic_search(data, search_from=0, size=20):
+def elastic_search(data, search_from=0, size=20, db=settings.MARKERDB):
     '''
     Query the elasticsearch server for given search data and return the
     context dictionary to pass to the template
     '''
     url = (settings.ELASTICSEARCH_URL + '/' +
-           settings.MARKERDB + '/' +
-           '_search?size=' + str(size) +
+           db + '/_search?size=' + str(size) +
            '&from='+str(search_from))
     response = requests.post(url, data=json.dumps(data))
 
     context = {"query": data}
-    context["db"] = settings.MARKERDB
+    c_dbs = {}
+    dbs = db.split(",")
+    for this_db in dbs:
+        stype = "Gene"
+        if "snp" in this_db:
+            stype = "Marker"
+        c_dbs[this_db] = stype
+    context["dbs"] = c_dbs
+    context["db"] = db
+
     content = []
+    #print(response.json()) @IgnorePep8
     if(len(response.json()['hits']['hits']) >= 1):
         for hit in response.json()['hits']['hits']:
-            #print(hit['_source']['REF']) @IgnorePep8
             _addInfo(content, hit)
+            hit['_source']['type'] = hit['_type']
             content.append(hit['_source'])
             #print(hit['_source']) @IgnorePep8
 
@@ -84,9 +87,9 @@ def elastic_search(data, search_from=0, size=20):
 
 
 def _addInfo(content, hit):
-    '''
-    Split and add INFO tags and values
-    '''
+    if 'INFO' not in hit['_source']:
+        return
+    ''' Split and add INFO tags and values '''
     infos = re.split(';', hit['_source']['INFO'])
     for info in infos:
         if "=" in info:

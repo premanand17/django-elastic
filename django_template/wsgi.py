@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/1.7/howto/deployment/wsgi/
 
 import os
 import sys
+<<<<<<< HEAD
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_template.settings")
 
+=======
+>>>>>>> upstream/master
 from django.core.wsgi import get_wsgi_application
 
 path = os.path.join(os.path.dirname(__file__), "../")

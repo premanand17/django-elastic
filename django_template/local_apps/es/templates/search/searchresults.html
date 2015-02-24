@@ -20,11 +20,14 @@ $(document).ready(function() {
 <div class="row">
 	<div class="col-md-4">
 	&nbsp;
-	<ul class="list-group">
+	<ul class="list-group" id="type-counter">
   		<li class="list-group-item">
     	<span class="badge">{{ total }}</span>
-    	Markers
+    	All
   		</li>
+  		{% for key, type in dbs.items %}
+  			<li class="list-group-item" id="{{ key }}">{{ type }}<span class='badge'></span></li>
+  		{% endfor %}
 	</ul>
 	</div>
 	
