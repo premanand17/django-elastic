@@ -94,6 +94,6 @@ class Command(BaseCommand):
             gene.load_genename(**options)
         elif options['indexGeneGFF']:
             gene = GeneManager()
-            gene.load_gene_GFF(**options)
+            gene.update_gene(**options)
         else:
             print(help)
