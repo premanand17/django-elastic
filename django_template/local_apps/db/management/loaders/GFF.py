@@ -85,11 +85,10 @@ class GFFManager:
 class GFF:
 
     def __init__(self, line='dummy\tdummy\tregion\t' + str(sys.maxsize) +
-                 '\t-1\t.\t.\t.\t'):
+                 '\t-1\t.\t.\t.\t\t'):
         parts = re.split('\t', line)
-        if(len(parts) < 9):
+        if(len(parts) != 9):
             raise GFFError("GFF error: wrong number of columns")
-
         self.seqid = parts[0]
         self.source = parts[1]
         self.type = parts[2]
@@ -107,7 +106,7 @@ class GFF:
         for p in parts:
             if(p == ''):
                 continue
-            at = re.split(' ', p)
+            at = re.split('=', p)
             self.attrs[at[0]] = at[1]
 
     def getAttributes(self):
