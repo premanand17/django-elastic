@@ -66,3 +66,44 @@ class EsTest(TestCase):
         self.assertTrue(snp['SRC'])
 
         self.assertTrue(isinstance(snp['POS'], int))
+
+    '''
+    Test Region Index
+    '''
+    def test_region_index(self):
+        index_name = settings.REGIONDB
+        try:
+            # Test if region index exists
+            resp = requests.head(settings.ELASTICSEARCH_URL + '/' + index_name)
+            self.assertEqual(resp.status_code, 200, "Region Index " +
+                             index_name + "exists")
+            # Test if type aa exists
+            index_type = 'aa'
+            resp = requests.head(settings.ELASTICSEARCH_URL +
+                                 '/' + index_name +
+                                 '/' + index_type)
+            self.assertEqual(resp.status_code, 200, "Region Index: " +
+                             index_name + " and Region Index Type: " +
+                             index_type + " exists")
+            # Test if type celiac exists
+            index_type = 'cel'
+            resp = requests.head(settings.ELASTICSEARCH_URL +
+                                 '/' + index_name +
+                                 '/' + index_type)
+            self.assertEqual(resp.status_code, 200, "Region Index: " +
+                             index_name + " and Region Index Type: " +
+                             index_type + " exists")
+            # Test if type t1d exists
+            index_type = 't1d'
+            resp = requests.head(settings.ELASTICSEARCH_URL + '/' +
+                                 index_name + '/' + index_type)
+            self.assertEqual(resp.status_code, 200, "Region Index " +
+                             index_name + "exists")
+        except requests.exceptions.Timeout:
+            self.assertTrue(False, 'timeout exception')
+        except requests.exceptions.TooManyRedirects:
+            self.assertTrue(False, 'too many redirects exception')
+        except requests.exceptions.ConnectionError:
+            self.assertTrue(False, 'request connection exception')
+        except requests.exceptions.RequestException:
+            self.assertTrue(False, 'request exception')
