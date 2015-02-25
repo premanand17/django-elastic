@@ -14,7 +14,9 @@ class Command(BaseCommand):
            "./manage.py index_search --indexName [index name] --indexSNP All.vcf\n" \
            "./manage.py index_search --mapGene --indexName [index name]\n" \
            "./manage.py index_search --indexName [index name] --indexGene " \
-           "genenames.org.txt --org=human"
+           "genenames.org.txt --org=human" \
+           "./manage.py index_search --indexName [index name] --indexGeneGFF " \
+           "gene.gff"
 
     option_list = BaseCommand.option_list + (
         make_option('--mapSNP',
@@ -33,6 +35,10 @@ class Command(BaseCommand):
         ) + (
         make_option('--indexGene',
                     dest='indexGene',
+                    help='Genename.org file to index'),
+        ) + (
+        make_option('--indexGeneGFF',
+                    dest='indexGeneGFF',
                     help='Genename.org file to index'),
         ) + (
         make_option('--org',
@@ -57,5 +63,8 @@ class Command(BaseCommand):
         elif options['indexGene']:
             gene = GeneManager()
             gene.load_genename(**options)
+        elif options['indexGeneGFF']:
+            gene = GeneManager()
+            gene.load_gene_GFF(**options)
         else:
             print(help)
