@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 from marker import views
 
-urlpatterns = patterns('gene',
+urlpatterns = patterns('marker',
                        url(r'^(?P<marker>[-\w]+)/$', views.marker_page),
                        )
