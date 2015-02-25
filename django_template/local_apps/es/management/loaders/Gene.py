@@ -3,6 +3,8 @@ import re
 import requests
 from django_template import settings
 import json
+from db.management.loaders.GFF import GFF
+from es.views import elastic_search
 
 
 class GeneManager:
@@ -68,14 +70,14 @@ class GeneManager:
                                              col_dict[dbType]
                                              .strip()).split(',')
                             for acc in dbxrefs:
-                                dbxref_data[dbType] = acc
+                                dbxref_data[dbType] = acc.strip()
 
                     synonym_data = []
                     for synType in synonymColumns:
                         if(synType in col_dict):
                             syns = col_dict[synType].strip().split(',')
                             for syn in syns:
-                                synonym_data.append(syn)
+                                synonym_data.append(syn.strip())
 
                     data += '{"index": {"_id": "%s"}}\n' % nn
                     data += json.dumps({"gene_symbol":
@@ -100,6 +102,34 @@ class GeneManager:
                                     indexName+'/gene/_bulk', data=data)
             return response
 
+    def load_gene_GFF(self, **options):
+        if options['indexName']:
+            indexName = options['indexName'].lower()
+        else:
+            indexName = "gene"
+
+        if options['indexGeneGFF'].endswith('.gz'):
+            f = gzip.open(options['indexGeneGFF'], 'rb')
+        else:
+            f = open(options['indexGeneGFF'], 'rb')
+        for line in f:
+            line = line.decode("utf-8").rstrip()
+            if(line.startswith("##")):
+                continue
+            gff = GFF(line)
+            print(gff.seqid+" "+str(gff.start)+".."+str(gff.end) +
+                  " "+gff.attrs["Name"])
+
+            fields = ["gene_symbol"]
+            data = {"query": {"query_string": {"query": gff.attrs["Name"],
+                                               "fields": fields}}}
+            context = elastic_search(data, 0, 20, indexName)
+            if context["total"] != 1:
+                print ("ERROR ")
+            print (context["data"][0])
+
+        return
+
     ''' Create the mapping for gene names indexing '''
     def create_genename_index(self, **options):
         if options['indexName']:
@@ -112,7 +142,14 @@ class GeneManager:
                   "organism": {"type": "string"},
                   "hgnc": {"type": "string"},
                   "dbxrefs": {"type": "object"},
-                  "synonyms": {"type": "string"}
+                  "synonyms": {"type": "string"},
+                  "biotype": {"type": "string"},
+                  "featureloc": {"properties":
+                                 {"fmin": {"type": "integer"},
+                                  "fmax": {"type": "integer"},
+                                  "parent": {"type": "string"}
+                                  }
+                                 }
                   }
                  }
 
