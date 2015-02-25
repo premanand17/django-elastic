@@ -144,12 +144,15 @@ class GeneManager:
                     continue
 
             esid = gdata["_id"]
-            data = json.dumps({"doc": {"featureloc":
-                                       {"start": gff.start,
-                                        "end": gff.end,
-                                        "parent": gff.seqid,
-                                        "build": build},
-                               "biotype": gff.attrs["biotype"]}})
+            data = json.dumps({"doc":
+                               {"featureloc":
+                                {"start": gff.start,
+                                 "end": gff.end,
+                                 "parent": gff.seqid,
+                                 "build": build
+                                 },
+                                "biotype": gff.attrs["biotype"]}
+                               })
             response = requests.post(settings.ELASTICSEARCH_URL+'/' +
                                      indexName+'/gene/'+esid+'/_update',
                                      data=data)
