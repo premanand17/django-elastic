@@ -8,7 +8,7 @@ import logging
 from db.management.loaders.VCF import VCFManager
 from db.management.loaders.GFF import GFFManager
 from db.management.loaders.Bands import BandsManager
-from db.management.loaders.Genenames import GenenameManager
+from db.management.loaders.Genename import GenenameManager
 from db.management.loaders.Utils import UtilsManager
 
 

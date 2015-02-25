@@ -3,7 +3,8 @@ from optparse import make_option
 import logging
 from es.management.loaders.Marker import MarkerManager
 from es.management.loaders.Region import RegionManager
-from es.management.loaders.Genenames import GenenameManager
+from es.management.loaders.Gene import GeneManager
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -80,10 +81,10 @@ class Command(BaseCommand):
             region.create_load_region_index(**options)
 
         elif options['mapGene']:
-            gene = GenenameManager()
+            gene = GeneManager()
             gene.create_genename_index(**options)
         elif options['indexGene']:
-            gene = GenenameManager()
+            gene = GeneManager()
             gene.load_genename(**options)
         else:
             print(help)
