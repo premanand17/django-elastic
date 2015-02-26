@@ -72,7 +72,11 @@ def elastic_search(data, search_from=0, size=20, db=settings.MARKERDB):
     context["db"] = db
 
     content = []
-    #print(response.json()) @IgnorePep8
+    if response.status_code != 200:
+        context["error"] = ("Error: elasticsearch response " +
+                            json.dumps(response.json()))
+        return context
+
     if(len(response.json()['hits']['hits']) >= 1):
         for hit in response.json()['hits']['hits']:
             _addInfo(content, hit)
