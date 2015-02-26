@@ -69,7 +69,11 @@ class RegionManager:
     '''
     def create_region_index(self, **options):
         index_name = self.create_index_name(**options)
-        print('Mapping created for  ' + index_name)
+        if options['disease']:
+            disease = options['disease'].lower()
+        else:
+            disease = "all"
+        print('START Mapping for index ' + index_name + ' and type ' + disease)
         props = {"properties": {"seqid": {"type": "string",
                                 "index": "no"},
                                 "source": {"type": "string",
@@ -80,21 +84,29 @@ class RegionManager:
                                           "not_analyzed"},
                                 "end": {"type": "integer",
                                         "index": "not_analyzed"},
+                                "score": {"type": "string",
+                                          "index": "no"},
+                                "strand": {"type": "string",
+                                           "index": "no"},
+                                "phase": {"type": "string",
+                                          "index": "no"},
                                 "attr": {"properties":
                                          {"tag": {"type": "string",
                                                   "index": "not_analyzed"},
-                                          "value":
-                                          {"type": "string",
-                                           "index": "not_analyzed"}
+                                          "value": {"type": "string"}
                                           }
                                          }
                                 }
                  }
 
-        data = {"mappings": {index_name: props}}
-        print(data)
-        response = requests.put(settings.ELASTICSEARCH_URL+'/'
-                                + index_name + '/',
+        # check if index exists
+        response = requests.get(settings.ELASTICSEARCH_URL + '/' + index_name)
+        print('Response status code ' + str(response.status_code))
+        if(response.status_code != 200):
+            requests.put(settings.ELASTICSEARCH_URL + '/' + index_name)
+        data = {disease: props}
+        response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+                                index_name+'/_mapping/' + disease,
                                 data=json.dumps(data))
         print (response.text)
         return
