@@ -35,9 +35,31 @@ class GenesTestCase(TestCase):
         self.assertTemplateUsed(resp, 'gene/gene.html')
 
     ''' Test the show_gene_section tag. '''
-    def test_inclusion_tag(self):
+    def test_inclusion_tag1(self):
         t = Template('{% load gene_tags %}{% show_gene_section feature %}')
         context = {'feature': self.feature}
+        c = Context(context)
+        rendered = t.render(c)
+        self.assertIn("PTPN22", rendered)
+        self.assertIn("9652", rendered)
+        self.assertIn("ENSG00000134242", rendered)
+
+    ''' Test the show_es_gene_section tag - given a gene symbol '''
+    def test_inclusion_tag2(self):
+        t = Template('{% load gene_tags %}' +
+                     '{% show_es_gene_section gene_symbol=gene %}')
+        context = {'gene': 'PTPN22'}
+        c = Context(context)
+        rendered = t.render(c)
+        self.assertIn("PTPN22", rendered)
+        self.assertIn("9652", rendered)
+        self.assertIn("ENSG00000134242", rendered)
+
+    ''' Test the show_es_gene_section tag - given a position on a sequence '''
+    def test_inclusion_tag3(self):
+        t = Template('{% load gene_tags %}' +
+                     '{% show_es_gene_section seqid=seqid pos=pos %}')
+        context = {'seqid': '1', 'pos': 113834947}
         c = Context(context)
         rendered = t.render(c)
         self.assertIn("PTPN22", rendered)
