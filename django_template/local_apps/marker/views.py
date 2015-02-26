@@ -5,12 +5,12 @@ from db.models import Featureloc
 
 def marker_page(request, marker):
 
-    data = {"query": {"match": {"ID": marker}}}
+    data = {"query": {"match": {"id": marker}}}
     context = elastic_search(data)
 
     # get gene(s) overlapping position
-    position = context['data'][0]['RSPOS']
-    chrom = 'chr'+context['data'][0]['SRC']
+    position = context['data'][0]['pos']
+    chrom = 'chr'+context['data'][0]['src']
     featurelocs = (Featureloc.objects
                    .filter(fmin__lt=position)  # @UndefinedVariable
                    .filter(fmax__gt=position)  # @UndefinedVariable

@@ -102,12 +102,12 @@
         		for(var i=0; i<hits.length; i++) {
         			var hit = hits[i]._source;
         			
-        			if(hit.ID)
+        			if(hit.id)
         				$('#results').append(
         						'<ul class="list-group">' +
-        						'<li class="list-group-item"><a href="/marker/'+hit.ID+'">'+hit.ID+'</a></li>'+
-        						'<li class="list-group-item">Chromosome: '+hit.SRC+'; Position: '+hit.POS+'; '+
-					                        hit.REF+'/'+hit.ALT+'</li>'+
+        						'<li class="list-group-item"><a href="/marker/'+hit.id+'">'+hit.id+'</a></li>'+
+        						'<li class="list-group-item">Chromosome: '+hit.src+'; Position: '+hit.pos+'; '+
+					                        hit.ref+'/'+hit.alt+'</li>'+
         				'</ul>');
         			else
         				$('#results').append(

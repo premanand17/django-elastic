@@ -33,12 +33,12 @@ class MarkerManager:
 
                 src = parts[0]
                 data += '{"index": {"_id": "%s"}}\n' % nn
-                data += json.dumps({"ID": parts[2],
-                                    "SRC": src,
-                                    "REF": parts[3],
-                                    "ALT": parts[4],
-                                    "POS": int(parts[1])+1,
-                                    "INFO": parts[7]
+                data += json.dumps({"id": parts[2],
+                                    "src": src,
+                                    "ref": parts[3],
+                                    "alt": parts[4],
+                                    "pos": int(parts[1])+1,
+                                    "info": parts[7]
                                     })+'\n'
 
                 n += 1
@@ -69,15 +69,15 @@ class MarkerManager:
         else:
             indexName = "snp"
 
-        props = {"properties": {"ID": {"type": "string", "boost": 4},
-                                "SRC": {"type": "string"},
-                                "REF": {"type": "string",
+        props = {"properties": {"id": {"type": "string", "boost": 4},
+                                "src": {"type": "string"},
+                                "ref": {"type": "string",
                                         "index": "no"},
-                                "ALT": {"type": "string",
+                                "alt": {"type": "string",
                                         "index": "no"},
-                                "POS": {"type": "integer",
+                                "pos": {"type": "integer",
                                         "index": "not_analyzed"},
-                                "INFO": {"type": "string",
+                                "info": {"type": "string",
                                          "index": "no"}
                                 }}
 
