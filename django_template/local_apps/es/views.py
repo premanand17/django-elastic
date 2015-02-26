@@ -26,10 +26,11 @@ def reverse_proxy(request):
 
 
 def search(request, query):
-    fields = ["gene_symbol", "hgnc", "synonyms", "ID", "dbxrefs.*"]
+    fields = ["gene_symbol", "hgnc", "synonyms", "ID", "dbxrefs.*", "attr.*"]
     data = {"query": {"query_string": {"query": query, "fields": fields}}}
     context = elastic_search(data, 0, 20,
-                             settings.MARKERDB+','+settings.GENEDB)
+                             settings.MARKERDB + ',' + settings.GENEDB+',' +
+                             settings.REGIONDB)
     return render(request, 'search/searchresults.html', context,
                   content_type='text/html')
 
@@ -39,7 +40,8 @@ def range_search(request, src, start, stop):
             {"range": {"POS": {"gte": start, "lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}
     data = {"query": query}
-    context = elastic_search(data)
+    context = elastic_search(data, db=settings.MARKERDB + ',' +
+                             settings.GENEDB + ',' + settings.REGIONDB)
     context["chromosome"] = src
     context["start"] = start
     context["stop"] = stop
@@ -56,7 +58,6 @@ def elastic_search(data, search_from=0, size=20, db=settings.MARKERDB):
            db + '/_search?size=' + str(size) +
            '&from='+str(search_from))
     response = requests.post(url, data=json.dumps(data))
-
     context = {"query": data}
     c_dbs = {}
     dbs = db.split(",")
@@ -64,6 +65,8 @@ def elastic_search(data, search_from=0, size=20, db=settings.MARKERDB):
         stype = "Gene"
         if "snp" in this_db:
             stype = "Marker"
+        if "region" in this_db:
+            stype = "Region"
         c_dbs[this_db] = stype
     context["dbs"] = c_dbs
     context["db"] = db
