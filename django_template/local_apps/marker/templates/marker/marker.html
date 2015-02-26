@@ -23,13 +23,10 @@
 		</td></tr>
 	</table>
 	</div>
-	
-	{% if genes|length > 0 %}
-		<h3>Overlapping Gene{{ genes|length|pluralize }}</h3>
-		{% for gene in genes %}
-			{% show_gene_section gene %}
-		{% endfor %}
-	{% endif %}
+
+	<h3>Overlapping Gene(s)</h3>
+	{% show_es_gene_section seqid=data.0.SRC pos=data.0.POS %}
+
 {% else %}
     <p>No search results.</p>
 {% endif %}
