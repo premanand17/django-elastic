@@ -3,6 +3,9 @@ import re
 import requests
 from django_template import settings
 import json
+from db.management.loaders.GFF import GFF
+from es.views import elastic_search
+import sys
 
 
 class GeneManager:
@@ -68,14 +71,14 @@ class GeneManager:
                                              col_dict[dbType]
                                              .strip()).split(',')
                             for acc in dbxrefs:
-                                dbxref_data[dbType] = acc
+                                dbxref_data[dbType] = acc.strip()
 
                     synonym_data = []
                     for synType in synonymColumns:
                         if(synType in col_dict):
                             syns = col_dict[synType].strip().split(',')
                             for syn in syns:
-                                synonym_data.append(syn)
+                                synonym_data.append(syn.strip())
 
                     data += '{"index": {"_id": "%s"}}\n' % nn
                     data += json.dumps({"gene_symbol":
@@ -100,6 +103,66 @@ class GeneManager:
                                     indexName+'/gene/_bulk', data=data)
             return response
 
+    def update_gene(self, **options):
+        if options['indexName']:
+            indexName = options['indexName'].lower()
+        else:
+            indexName = "gene"
+
+        if options['build']:
+            build = options['build']
+        else:
+            print("Please supply a build version!")
+            sys.exit()
+
+        if options['indexGeneGFF'].endswith('.gz'):
+            f = gzip.open(options['indexGeneGFF'], 'rb')
+        else:
+            f = open(options['indexGeneGFF'], 'rb')
+        for line in f:
+            line = line.decode("utf-8").rstrip()
+            if(line.startswith("##")):
+                continue
+            gff = GFF(line)
+
+            context = self._call_elasticsearch(gff.attrs["Name"],
+                                               ["gene_symbol"], indexName)
+            if context["total"] != 1:
+                context = self._call_elasticsearch(gff.attrs["Name"],
+                                                   ["synonyms"], indexName)
+            if context["total"] != 1:
+                print ("IGNORE "+gff.attrs["Name"]+" "+gff.attrs["biotype"])
+                continue
+
+            gdata = context["data"][0]
+            if "entrezGene_id" in gff.attrs and "entrez" in gdata["dbxrefs"]:
+                if gff.attrs["entrezGene_id"] != gdata["dbxrefs"]["entrez"]:
+                    print ("Entrez ID not matching "+gff.attrs["Name"] + " " +
+                           gff.attrs["biotype"] + " Entrez:" +
+                           gff.attrs["entrezGene_id"] + " != " +
+                           gdata["dbxrefs"]["entrez"])
+                    continue
+
+            esid = gdata["_id"]
+            data = json.dumps({"doc":
+                               {"featureloc":
+                                {"start": gff.start,
+                                 "end": gff.end,
+                                 "parent": gff.seqid,
+                                 "build": build
+                                 },
+                                "biotype": gff.attrs["biotype"]}
+                               })
+            response = requests.post(settings.ELASTICSEARCH_URL+'/' +
+                                     indexName+'/gene/'+esid+'/_update',
+                                     data=data)
+        return response
+
+    def _call_elasticsearch(self, name, fields, indexName):
+        data = {"query": {"query_string": {"query": name,
+                                           "fields": fields}}}
+        return elastic_search(data, 0, 20, indexName)
+
     ''' Create the mapping for gene names indexing '''
     def create_genename_index(self, **options):
         if options['indexName']:
@@ -108,11 +171,20 @@ class GeneManager:
             indexName = "genename"
 
         props = {"properties":
-                 {"gene_symbol": {"type": "string", "boost": 4},
+                 {"gene_symbol": {"type": "string", "boost": 4,
+                                  "index": "not_analyzed"},
                   "organism": {"type": "string"},
                   "hgnc": {"type": "string"},
                   "dbxrefs": {"type": "object"},
-                  "synonyms": {"type": "string"}
+                  "synonyms": {"type": "string"},
+                  "biotype": {"type": "string"},
+                  "featureloc": {"properties":
+                                 {"start": {"type": "integer"},
+                                  "end": {"type": "integer"},
+                                  "parent": {"type": "string"},
+                                  "build": {"type": "string"}
+                                  }
+                                 }
                   }
                  }
 

@@ -107,7 +107,10 @@ class GFF:
             if(p == ''):
                 continue
             at = re.split('=', p)
-            self.attrs[at[0]] = at[1]
+            if len(at) == 2:
+                self.attrs[at[0]] = at[1]
+            else:
+                self.attrs[at[0]] = ""
 
     def getAttributes(self):
         return self.attrs

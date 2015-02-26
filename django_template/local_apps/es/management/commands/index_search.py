@@ -11,14 +11,18 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Use to create an elasticsearch index and add data \n" \
+    help = "Use to create elasticsearch index mappings and add data.\n\nFor regions:\n" \
            "./manage.py index_search --mapRegion --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
            "./manage.py index_search --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
+           "\nFor markers:\n" \
            "./manage.py index_search --mapSNP --indexName [index name]\n" \
            "./manage.py index_search --indexName [index name] --indexSNP All.vcf\n" \
+           "\nFor genes:\n" \
            "./manage.py index_search --mapGene --indexName [index name]\n" \
            "./manage.py index_search --indexName [index name] --indexGene " \
-           "genenames.org.txt --org=human"
+           "genenames.org.txt --org=human\n" \
+           "./manage.py index_search --indexName [index name] --indexGeneGFF " \
+           "gene.gff --build GRCh38"
 
     option_list = BaseCommand.option_list + (
         make_option('--mapSNP',
@@ -37,6 +41,10 @@ class Command(BaseCommand):
         ) + (
         make_option('--indexGene',
                     dest='indexGene',
+                    help='Genename.org file to index'),
+        ) + (
+        make_option('--indexGeneGFF',
+                    dest='indexGeneGFF',
                     help='Genename.org file to index'),
         ) + (
         make_option('--org',
@@ -86,5 +94,8 @@ class Command(BaseCommand):
         elif options['indexGene']:
             gene = GeneManager()
             gene.load_genename(**options)
+        elif options['indexGeneGFF']:
+            gene = GeneManager()
+            gene.update_gene(**options)
         else:
             print(help)
