@@ -1,0 +1,25 @@
+<!-- elasticsearch gene section -->
+{% for es_gene in es_genes %}
+
+<table class="table table-striped table-condensed">
+	<tr><td>Gene </td><td>{{ es_gene.gene_symbol }}</td></tr>
+	<tr><td>HGNC </td><td>{{ es_gene.hgnc }}</td></tr>
+
+{% for db, acc in es_gene.dbxrefs.items %}
+	<tr><td>{{ db|capfirst }}</td><td>{{ acc }}</td></tr>
+{% endfor %}
+
+	<tr><td>Synonyms </td><td>
+{% for synonym in es_gene.synonyms %}
+	{{ synonym }}; 
+{% endfor %}
+	</td></tr>
+
+	<tr><td>Location  </td><td>
+{% with loc=es_gene.featureloc %}
+	<a href="/search/{{ loc.seqid }}:{{ loc.start }}-{{ loc.end }}">{{ loc.seqid }}:{{ loc.start }}-{{ loc.end }}</a>
+{% endwith %}
+	</td></tr>
+</table>
+
+{% endfor %}

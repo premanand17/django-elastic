@@ -4,32 +4,29 @@
 {% block content %}
 
 {% if data %}
-  	<h3>Marker: {{ data.0.ID }}</h3>
+  	<h3>Marker: {{ data.0.id }}</h3>
   	<div class="table-responsive">
 	<table class="table table-striped table-condensed">
-		<tr><td>Chromosome </td><td>{{ data.0.SRC }}</td></tr>
-		<tr><td>Position</td><td>{{ data.0.POS }}</td></tr>
-		<tr><td>Reference</td><td>{{ data.0.REF }}</td></tr>
-		<tr><td>Alternative</td><td>{{ data.0.ALT }}</td></tr>
+		<tr><td>Chromosome </td><td>{{ data.0.src }}</td></tr>
+		<tr><td>Position</td><td>{{ data.0.pos }}</td></tr>
+		<tr><td>Reference</td><td>{{ data.0.ref }}</td></tr>
+		<tr><td>Alternative</td><td>{{ data.0.alt }}</td></tr>
 		{% if data.0.VC %}
 			<tr><td>Variant Class</td><td>{{ data.0.VC }}</td></tr>
 		{% endif %}
 		<tr><td>Info</td><td>
 		{% for key, value in data.0.items %}
-			{% if key != 'SRC' and key != 'POS' and key != 'REF' and key != 'ALT' and key != 'INFO' and key != 'VC' %}
+			{% if key != 'id' and key != 'src' and key != 'pos' and key != 'ref' and key != 'alt' and key != 'info' and key != 'vc' %}
 				{{ key }} {% if value %}: {{ value }}{% endif %}<br>
 			{% endif %}
 		{% endfor %}
 		</td></tr>
 	</table>
 	</div>
-	
-	{% if genes|length > 0 %}
-		<h3>Overlapping Gene{{ genes|length|pluralize }}</h3>
-		{% for gene in genes %}
-			{% show_gene_section gene %}
-		{% endfor %}
-	{% endif %}
+
+	<h3>Overlapping Gene(s)</h3>
+	{% show_es_gene_section seqid=data.0.src pos=data.0.pos %}
+
 {% else %}
     <p>No search results.</p>
 {% endif %}

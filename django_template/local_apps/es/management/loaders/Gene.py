@@ -148,7 +148,7 @@ class GeneManager:
                                {"featureloc":
                                 {"start": gff.start,
                                  "end": gff.end,
-                                 "parent": gff.seqid,
+                                 "seqid": gff.seqid,
                                  "build": build
                                  },
                                 "biotype": gff.attrs["biotype"]}
@@ -181,7 +181,7 @@ class GeneManager:
                   "featureloc": {"properties":
                                  {"start": {"type": "integer"},
                                   "end": {"type": "integer"},
-                                  "parent": {"type": "string"},
+                                  "seqid": {"type": "string"},
                                   "build": {"type": "string"}
                                   }
                                  }

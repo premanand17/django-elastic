@@ -60,13 +60,13 @@ class EsTest(TestCase):
     Test the elements of a SNP result
     '''
     def _SNPtest(self, snp):
-        self.assertTrue(snp['POS'])
-        self.assertTrue(snp['ID'])
-        self.assertTrue(snp['REF'])
-        self.assertTrue(snp['ALT'])
-        self.assertTrue(snp['SRC'])
+        self.assertTrue(snp['pos'])
+        self.assertTrue(snp['id'])
+        self.assertTrue(snp['ref'])
+        self.assertTrue(snp['alt'])
+        self.assertTrue(snp['src'])
 
-        self.assertTrue(isinstance(snp['POS'], int))
+        self.assertTrue(isinstance(snp['pos'], int))
 
     '''
     Test Region Index

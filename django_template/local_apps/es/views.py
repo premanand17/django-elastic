@@ -26,7 +26,7 @@ def reverse_proxy(request):
 
 
 def search(request, query):
-    fields = ["gene_symbol", "hgnc", "synonyms", "ID", "dbxrefs.*", "attr.*"]
+    fields = ["gene_symbol", "hgnc", "synonyms", "id", "dbxrefs.*", "attr.*"]
     data = {"query": {"query_string": {"query": query, "fields": fields}}}
     context = elastic_search(data, 0, 20,
                              settings.MARKERDB + ',' + settings.GENEDB+',' +
@@ -36,8 +36,8 @@ def search(request, query):
 
 
 def range_search(request, src, start, stop):
-    must = [{"match": {"SRC": src.replace('chr', '')}},
-            {"range": {"POS": {"gte": start, "lte": stop, "boost": 2.0}}}]
+    must = [{"match": {"src": src.replace('chr', '')}},
+            {"range": {"pos": {"gte": start, "lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}
     data = {"query": query}
     context = elastic_search(data, db=settings.MARKERDB + ',' +
@@ -72,7 +72,11 @@ def elastic_search(data, search_from=0, size=20, db=settings.MARKERDB):
     context["db"] = db
 
     content = []
-    #print(response.json()) @IgnorePep8
+    if response.status_code != 200:
+        context["error"] = ("Error: elasticsearch response " +
+                            json.dumps(response.json()))
+        return context
+
     if(len(response.json()['hits']['hits']) >= 1):
         for hit in response.json()['hits']['hits']:
             _addInfo(content, hit)
@@ -91,10 +95,10 @@ def elastic_search(data, search_from=0, size=20, db=settings.MARKERDB):
 
 
 def _addInfo(content, hit):
-    if 'INFO' not in hit['_source']:
+    if 'info' not in hit['_source']:
         return
     ''' Split and add INFO tags and values '''
-    infos = re.split(';', hit['_source']['INFO'])
+    infos = re.split(';', hit['_source']['info'])
     for info in infos:
         if "=" in info:
             parts = re.split('=', info)
