@@ -31,15 +31,15 @@ class RegionManager:
                     continue
                 gff = GFF(current_line)
                 json_data += '{"index": {"_id": "%s"}}\n' % auto_num
-                json_data += json.dumps({"CHR": gff.seqid,
-                                         "SRC": gff.source,
-                                         "TYPE": gff.type,
-                                         "START": gff.start,
-                                         "END": gff.end,
-                                         "SCORE": gff.score,
-                                         "STRAND": gff.strand,
-                                         "PHASE": gff.phase,
-                                         "ATTR": gff.attrs
+                json_data += json.dumps({"seqid": gff.seqid,
+                                         "source": gff.source,
+                                         "type": gff.type,
+                                         "start": gff.start,
+                                         "end": gff.end,
+                                         "score": gff.score,
+                                         "strand": gff.strand,
+                                         "phase": gff.phase,
+                                         "attr": gff.attrs
                                          }) + '\n'
                 line_num += 1
                 auto_num += 1
@@ -70,17 +70,17 @@ class RegionManager:
     def create_region_index(self, **options):
         index_name = self.create_index_name(**options)
         print('Mapping created for  ' + index_name)
-        props = {"properties": {"CHR": {"type": "string",
+        props = {"properties": {"seqid": {"type": "string",
                                 "index": "no"},
-                                "SRC": {"type": "string",
-                                        "index": "no"},
-                                "TYPE": {"type": "string",
+                                "source": {"type": "string",
+                                           "index": "no"},
+                                "type": {"type": "string",
                                          "index": "not_analyzed"},
-                                "START": {"type": "integer", "index":
+                                "start": {"type": "integer", "index":
                                           "not_analyzed"},
-                                "END": {"type": "integer",
+                                "end": {"type": "integer",
                                         "index": "not_analyzed"},
-                                "ATTR": {"properties":
+                                "attr": {"properties":
                                          {"tag": {"type": "string",
                                                   "index": "not_analyzed"},
                                           "value":

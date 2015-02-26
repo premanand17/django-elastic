@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.conf import settings
 import requests
+import unittest
 
 
 class EsTest(TestCase):
@@ -66,3 +67,82 @@ class EsTest(TestCase):
         self.assertTrue(snp['SRC'])
 
         self.assertTrue(isinstance(snp['POS'], int))
+
+    '''
+    Test Region Index
+    '''
+    def test_region_index(self):
+        index_name = settings.REGIONDB
+        try:
+            # Test if region index exists
+            resp = requests.head(settings.ELASTICSEARCH_URL + '/' + index_name)
+            self.assertEqual(resp.status_code, 200, "Region Index " +
+                             index_name + "exists")
+            # Test if type aa exists
+            index_type = 'aa'
+            resp = requests.head(settings.ELASTICSEARCH_URL +
+                                 '/' + index_name +
+                                 '/' + index_type)
+            self.assertEqual(resp.status_code, 200, "Region Index: " +
+                             index_name + " and Region Index Type: " +
+                             index_type + " exists")
+            # Test if type celiac exists
+            index_type = 'cel'
+            resp = requests.head(settings.ELASTICSEARCH_URL +
+                                 '/' + index_name +
+                                 '/' + index_type)
+            self.assertEqual(resp.status_code, 200, "Region Index: " +
+                             index_name + " and Region Index Type: " +
+                             index_type + " exists")
+            # Test if type t1d exists
+            index_type = 't1d'
+            resp = requests.head(settings.ELASTICSEARCH_URL + '/' +
+                                 index_name + '/' + index_type)
+            self.assertEqual(resp.status_code, 200, "Region Index " +
+                             index_name + "exists")
+        except requests.exceptions.Timeout:
+            self.assertTrue(False, 'timeout exception')
+        except requests.exceptions.TooManyRedirects:
+            self.assertTrue(False, 'too many redirects exception')
+        except requests.exceptions.ConnectionError:
+            self.assertTrue(False, 'request connection exception')
+        except requests.exceptions.RequestException:
+            self.assertTrue(False, 'request exception')
+
+    '''
+    Dummy Test to skip
+    '''
+    @unittest.skip("demonstrating skipping")
+    def test_dummy_test_skipping(self):
+        pass
+
+    '''
+    Test a single Region search
+    '''
+    def test_region_search(self):
+        resp = self.client.get('/search/22q12.2/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('data' in resp.context)
+        region = resp.context['data'][0]
+        self._RegionTest(region)
+
+    '''
+    Test a wild card search
+    '''
+    def test_region_wildcard(self):
+        resp = self.client.get('/search/22q12*/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('data' in resp.context)
+
+        for region in resp.context['data']:
+            self._RegionTest(region)
+
+    '''
+    Test the elements of a Region result
+    '''
+    def _RegionTest(self, region):
+        self.assertTrue(region['seqid'])
+        self.assertTrue(region['type'])
+        self.assertTrue(region['source'])
+        self.assertTrue(region['start'])
+        self.assertTrue(region['end'])
