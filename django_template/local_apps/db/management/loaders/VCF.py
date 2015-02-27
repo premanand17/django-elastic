@@ -7,6 +7,7 @@ import re
 class VCFManager:
 
     def create_vcf_features(self, **options):
+        ''' Load markers into a chado database '''
         if options['org']:
             org = options['org']
         else:
