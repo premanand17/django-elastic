@@ -70,8 +70,9 @@ class MarkerManager:
             indexName = "dbsnp"
 
         props = {"properties":
-                 {"id": {"type": "string", "boost": 4},
-                  "src": {"type": "string"},
+                 {"id": {"type": "string", "index": "not_analyzed",
+                         "boost": 4},
+                  "src": {"type": "string", "index": "not_analyzed"},
                   "ref": {"type": "string", "index": "no"},
                   "alt": {"type": "string", "index": "no"},
                   "pos": {"type": "integer", "index": "not_analyzed"},
