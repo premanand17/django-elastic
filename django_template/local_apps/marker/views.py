@@ -4,7 +4,7 @@ from db.models import Featureloc
 
 
 def marker_page(request, marker):
-
+    ''' Render a marker page '''
     data = {"query": {"match": {"id": marker}}}
     context = elastic_search(data)
 
