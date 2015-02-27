@@ -26,7 +26,8 @@ def reverse_proxy(request):
 
 
 def search(request, query):
-    fields = ["gene_symbol", "hgnc", "synonyms", "id", "dbxrefs.*", "attr.*"]
+    fields = ["gene_symbol", "hgnc", "synonyms", "id",
+              "dbxrefs.*", "attr.*", "featureloc.seqid"]
     data = {"query": {"query_string": {"query": query, "fields": fields}}}
     context = elastic_search(data, 0, 20,
                              settings.MARKERDB + ',' + settings.GENEDB+',' +
