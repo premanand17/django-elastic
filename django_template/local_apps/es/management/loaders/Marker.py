@@ -67,19 +67,17 @@ class MarkerManager:
         if options['indexName']:
             indexName = options['indexName'].lower()
         else:
-            indexName = "snp"
+            indexName = "dbsnp"
 
-        props = {"properties": {"id": {"type": "string", "boost": 4},
-                                "src": {"type": "string"},
-                                "ref": {"type": "string",
-                                        "index": "no"},
-                                "alt": {"type": "string",
-                                        "index": "no"},
-                                "pos": {"type": "integer",
-                                        "index": "not_analyzed"},
-                                "info": {"type": "string",
-                                         "index": "no"}
-                                }}
+        props = {"properties":
+                 {"id": {"type": "string", "boost": 4},
+                  "src": {"type": "string"},
+                  "ref": {"type": "string", "index": "no"},
+                  "alt": {"type": "string", "index": "no"},
+                  "pos": {"type": "integer", "index": "not_analyzed"},
+                  "info": {"type": "string", "index": "no"}
+                  }
+                 }
 
         data = {"marker": props}
 
