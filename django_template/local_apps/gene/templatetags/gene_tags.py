@@ -27,20 +27,34 @@ def show_gene_section(gene_feature):
 
 
 @register.inclusion_tag('gene/es_gene_section.html')
-def show_es_gene_section(gene_symbol=None, seqid=None, pos=None):
+def show_es_gene_section(gene_symbol=None, seqid=None,
+                         start_pos=None, end_pos=None):
     ''' Template inclusion tag to render a gene section given a
     chado gene feature. '''
-
+    if(seqid.startswith("chr")):
+        seqid = seqid
+    else:
+        seqid = 'chr'+seqid
     if gene_symbol is not None:
         ''' gene symbol query'''
         data = {"query": {"match": {"gene_symbol": gene_symbol}}}
-    else:
-        ''' range query '''
-        must = [{"match": {"seqid": 'chr'+seqid}},
-                {"range": {"featureloc.start": {"lte": pos, "boost": 2.0}}},
-                {"range": {"featureloc.end": {"gte": pos, "boost": 2.0}}}]
+    elif end_pos is None:
+        ''' start and end are same, range query for snp'''
+        must = [{"match": {"seqid": seqid}},
+                {"range": {"featureloc.start": {"lte": start_pos,
+                                                "boost": 2.0}}},
+                {"range": {"featureloc.end": {"gte": start_pos,
+                                              "boost": 2.0}}}]
         query = {"bool": {"must": must}}
         data = {"query": query}
-
+    else:
+        ''' start and end are same, range query for snp'''
+        must = [{"match": {"seqid": seqid}},
+                {"range": {"featureloc.start": {"gte": start_pos,
+                                                "boost": 2.0}}},
+                {"range": {"featureloc.end": {"lte": end_pos, "boost": 2.0}}}]
+        query = {"bool": {"must": must}}
+        data = {"query": query}
+        print(query)
     es_result = elastic_search(data, db=settings.GENEDB)
     return {'es_genes': es_result["data"]}
