@@ -97,10 +97,8 @@ class RegionManager:
         print (response.text)
         return
 
-    '''
-    Create the index name combining build, disease code
-    '''
     def create_index_name(self, **options):
+        ''' Create the index name combining build, disease code '''
         if options['build']:
             org_build = options['build'].lower()
         else:
