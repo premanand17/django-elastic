@@ -90,12 +90,7 @@ class RegionManager:
                                            "index": "no"},
                                 "phase": {"type": "string",
                                           "index": "no"},
-                                "attr": {"properties":
-                                         {"tag": {"type": "string",
-                                                  "index": "not_analyzed"},
-                                          "value": {"type": "string"}
-                                          }
-                                         }
+                                "attr": {"type": "object"}
                                 }
                  }
 
