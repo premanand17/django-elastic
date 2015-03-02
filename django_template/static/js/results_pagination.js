@@ -102,19 +102,26 @@
         		for(var i=0; i<hits.length; i++) {
         			var hit = hits[i]._source;
         			
-        			if(hit.id)
+        			if(hit.id){
         				$('#results').append(
         						'<ul class="list-group">' +
         						'<li class="list-group-item"><a href="/marker/'+hit.id+'">'+hit.id+'</a></li>'+
         						'<li class="list-group-item">Chromosome: '+hit.src+'; Position: '+hit.pos+'; '+
 					                        hit.ref+'/'+hit.alt+'</li>'+
         				'</ul>');
-        			else
+        				}else if(hit.hgnc){
         				$('#results').append(
         						'<ul class="list-group">' +
         						'<li class="list-group-item"><a href="/gene/'+hit.gene_symbol+'">'+hit.gene_symbol+'</a></li>'+
         						'<li class="list-group-item">HGNC: '+hit.hgnc+'</li>'+
         				'</ul>');
+        				}else{
+        				$('#results').append(
+        						'<ul class="list-group">' +
+        						'<li class="list-group-item"><a href="/region/'+hit.attr.region_id+'">'+hit.attr.Name +'</a></li>'+
+        						'<li class="list-group-item">Location: '+ hit.seqid + ':'+ hit.start + '-' + hit.end+'</li>'+
+        				'</ul>');
+        				}
         		}
         	}
         });

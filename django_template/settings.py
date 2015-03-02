@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'es',
     'gene',
     'marker',
+    'region'
 )
 
 MIDDLEWARE_CLASSES = (

@@ -29,10 +29,12 @@ urlpatterns = patterns('',
                        url(r'^search/', include('es.urls', namespace="es")),
                        url(r'^gene/', include('gene.urls')),
                        url(r'^marker/', include('marker.urls')),
+                       url(r'^region/', include('region.urls')),
                        )
 
 if(settings.DEBUG):
     urlpatterns.append(url(r'^'+settings.MARKERDB+'|' +
                            settings.MARKERDB+',\w+/_search'+'|' +
-                           settings.GENEDB,
+                           settings.GENEDB + '|' +
+                           settings.REGIONDB,
                            reverse_proxy),)

@@ -60,7 +60,7 @@ class GenesTestCase(TestCase):
         ''' Test the show_es_gene_section tag - given a position
         on a sequence '''
         t = Template('{% load gene_tags %}' +
-                     '{% show_es_gene_section seqid=seqid pos=pos %}')
+                     '{% show_es_gene_section seqid=seqid start_pos=pos %}')
         context = {'seqid': '1', 'pos': 113834947}
         c = Context(context)
         rendered = t.render(c)
