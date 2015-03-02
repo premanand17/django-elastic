@@ -7,8 +7,8 @@ from django_template import settings
 
 class MarkerManager:
 
-    ''' Index snp data '''
     def create_load_snp_index(self, **options):
+        ''' Index snp data '''
         if options['indexName']:
             indexName = options['indexName'].lower()
         else:
@@ -60,10 +60,8 @@ class MarkerManager:
                                     indexName+'/marker/_bulk', data=data)
         return response
 
-    '''
-    Create the mapping for snp indexing
-    '''
     def create_snp_index(self, **options):
+        ''' Create the mapping for snp indexing '''
         if options['indexName']:
             indexName = options['indexName'].lower()
         else:

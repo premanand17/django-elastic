@@ -7,8 +7,8 @@ from django.conf import settings
 
 class RegionManager:
 
-    ''' Index region data '''
     def create_load_region_index(self, **options):
+        ''' Index region data '''
         index_name = self.create_index_name(**options)
         print('GFF file to be loaded: ' + options['indexRegion'])
         if options['disease']:
@@ -64,10 +64,8 @@ class RegionManager:
                                     )
         return response
 
-    '''
-    Create the mapping for region indexing
-    '''
     def create_region_index(self, **options):
+        ''' Create the mapping for region indexing '''
         index_name = self.create_index_name(**options)
         print('Mapping created for  ' + index_name)
         props = {"properties": {"seqid": {"type": "string",
