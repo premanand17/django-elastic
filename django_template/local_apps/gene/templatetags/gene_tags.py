@@ -31,10 +31,10 @@ def show_es_gene_section(gene_symbol=None, seqid=None,
                          start_pos=None, end_pos=None):
     ''' Template inclusion tag to render a gene section given a
     chado gene feature. '''
-    if(seqid.startswith("chr")):
+    if seqid is not None and seqid.startswith("chr"):
         seqid = seqid
     else:
-        seqid = 'chr'+seqid
+        seqid = 'chr'+str(seqid)
     if gene_symbol is not None:
         ''' gene symbol query'''
         data = {"query": {"match": {"gene_symbol": gene_symbol}}}
