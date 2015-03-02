@@ -6,9 +6,10 @@ import sys
 
 
 class GFFManager:
+    ''' GFF loader management '''
 
-    ''' Create disease region features '''
     def create_gff_disease_region_features(self, **options):
+        ''' Create disease region features '''
         if options['org']:
             org = options['org']
         else:
@@ -83,6 +84,7 @@ class GFFManager:
 
 
 class GFF:
+    ''' GFF file object - based on GFF3 specifications '''
 
     def __init__(self, line='dummy\tdummy\tregion\t' + str(sys.maxsize) +
                  '\t-1\t.\t.\t.\t\t'):
@@ -117,6 +119,7 @@ class GFF:
 
 
 class GFFError(Exception):
+    ''' GFF parse error  '''
     def __init__(self, value):
         self.value = value
 

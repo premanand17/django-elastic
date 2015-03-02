@@ -10,14 +10,14 @@ import sys
 
 class GeneManager:
 
-    '''
-    Create index based on genenames.org download file for names
-    (http://www.genenames.org/cgi-bin/download).
-    The file is assumed to include the following columns:
-    hgnc id, approved symbol, status, locus type, previous symbols
-    synonyms, entrez gene id, ensembl gene id
-    '''
     def load_genename(self, **options):
+        '''
+        Create index based on genenames.org download file for names
+        (http://www.genenames.org/cgi-bin/download).
+        The file is assumed to include the following columns:
+        hgnc id, approved symbol, status, locus type, previous symbols
+        synonyms, entrez gene id, ensembl gene id
+        '''
         if options['org']:
             org = options['org']
         else:
@@ -159,12 +159,13 @@ class GeneManager:
         return response
 
     def _call_elasticsearch(self, name, fields, indexName):
+        ''' Call elasticsearch '''
         data = {"query": {"query_string": {"query": name,
                                            "fields": fields}}}
         return elastic_search(data, 0, 20, indexName)
 
-    ''' Create the mapping for gene names indexing '''
     def create_genename_index(self, **options):
+        ''' Create the mapping for gene names indexing '''
         if options['indexName']:
             indexName = options['indexName'].lower()
         else:

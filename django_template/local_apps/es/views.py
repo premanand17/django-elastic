@@ -26,7 +26,9 @@ def reverse_proxy(request):
 
 
 def search(request, query):
-    fields = ["gene_symbol", "hgnc", "synonyms", "id", "dbxrefs.*", "attr.*"]
+    ''' Renders a search results page based on the query '''
+    fields = ["gene_symbol", "hgnc", "synonyms", "id",
+              "dbxrefs.*", "attr.*", "featureloc.seqid"]
     data = {"query": {"query_string": {"query": query, "fields": fields}}}
     context = elastic_search(data, 0, 20,
                              settings.MARKERDB + ',' + settings.GENEDB+',' +
@@ -36,6 +38,7 @@ def search(request, query):
 
 
 def range_search(request, src, start, stop):
+    ''' Renders a search result page based on the src, start and stop '''
     must = [{"match": {"src": src.replace('chr', '')}},
             {"range": {"pos": {"gte": start, "lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}
@@ -80,8 +83,8 @@ def elastic_search(data, search_from=0, size=20, db=settings.MARKERDB):
     if(len(response.json()['hits']['hits']) >= 1):
         for hit in response.json()['hits']['hits']:
             _addInfo(content, hit)
-            hit['_source']['_type'] = hit['_type']
-            hit['_source']['_id'] = hit['_id']
+            hit['_source']['idx_type'] = hit['_type']
+            hit['_source']['idx_id'] = hit['_id']
             content.append(hit['_source'])
             #print(hit['_source']) @IgnorePep8
 
@@ -95,6 +98,7 @@ def elastic_search(data, search_from=0, size=20, db=settings.MARKERDB):
 
 
 def _addInfo(content, hit):
+    ''' Parse VCF INFO field and add to the search hit '''
     if 'info' not in hit['_source']:
         return
     ''' Split and add INFO tags and values '''

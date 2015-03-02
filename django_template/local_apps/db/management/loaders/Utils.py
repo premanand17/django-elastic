@@ -12,9 +12,8 @@ logger = logging.getLogger(__name__)
 
 class UtilsManager:
 
-    ''' Create CV and cvterms. '''
     def create_cvterms(self, cvName, cvDefn, termList):
-
+        ''' Create CV and cvterms. '''
         try:
             cv = Cv.objects.get(name=cvName)
             logger.warn("WARNING:: " + cvName + " CV EXISTS")
@@ -36,11 +35,11 @@ class UtilsManager:
                 logger.warn("WARNING:: " + term.name + " FAILED TO LOAD")
         return cv
 
-    '''
-    For existing features in the database, create featurelocs
-    based on transcript ranges.
-    '''
     def create_refseq_features(self, **options):
+        '''
+        For existing features in the database, create featurelocs
+        based on transcript ranges.
+        '''
 
         if options['org']:
             org = options['org']

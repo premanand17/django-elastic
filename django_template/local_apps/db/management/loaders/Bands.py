@@ -11,10 +11,8 @@ logger = logging.getLogger(__name__)
 
 class BandsManager:
 
-    '''
-    Create cytological band features
-    '''
     def create_bands(self, **options):
+        ''' Create cytological band features '''
         if options['org']:
             org = options['org']
         else:

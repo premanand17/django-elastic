@@ -6,14 +6,14 @@ import re
 
 class GenenameManager:
 
-    '''
-    Create features based on genenames.org download file for names
-    (http://www.genenames.org/cgi-bin/download).
-    The file is assumed to include the following columns:
-    hgnc id, approved symbol, status, locus type, previous symbols
-    synonyms, entrez gene id, ensembl gene id
-    '''
     def create_genename_features(self, **options):
+        '''
+        Create features based on genenames.org download file for names
+        (http://www.genenames.org/cgi-bin/download).
+        The file is assumed to include the following columns:
+        hgnc id, approved symbol, status, locus type, previous symbols
+        synonyms, entrez gene id, ensembl gene id
+        '''
         if options['org']:
             org = options['org']
         else:
@@ -91,8 +91,8 @@ class GenenameManager:
                                              pub=pub, is_current=True)
             feature_synonym.save()
 
-    ''' Create a feature_dbxref for a feature '''
     def _create_feature_dbxref(self, dbName, feature, acc):
+        ''' Create a feature_dbxref for a feature '''
         dbs = Db.objects.filter(name=dbName)
         if(len(dbs) == 0):
             db = Db(name=dbName)
@@ -111,8 +111,8 @@ class GenenameManager:
             feature_dbxref = FeatureDbxref(dbxref=dbxref, feature=feature)
             feature_dbxref.save()
 
-    ''' Get a new feature object '''
     def _get_feature(self, name, uniquename, cvName, cvtermName, organism):
+        ''' Get a new feature object '''
         cv = Cv.objects.get(name=cvName)
         termtype = Cvterm.objects.get(cv=cv, name=cvtermName)
         return Feature(organism=organism, name=name, uniquename=uniquename,

@@ -6,8 +6,9 @@ from django.template.context import Context
 
 
 class GenesTestCase(TestCase):
-    ''' Set up the data to test with. '''
+
     def setUp(self):
+        ''' Set up the data to test with. '''
         ''' add a feature to the database '''
         cv = Cv.objects.create(name='sequence')
         db = Db.objects.create(name='null')
@@ -26,16 +27,16 @@ class GenesTestCase(TestCase):
         dbxref = Dbxref.objects.create(db=db, accession='ENSG00000134242')
         FeatureDbxref.objects.create(dbxref=dbxref, feature=self.feature)
 
-    ''' Test the gene page. '''
     def test_genes(self):
+        ''' Test the gene page. '''
         resp = self.client.get(reverse('gene_page',
                                        kwargs={'gene': 'PTPN22'}))
         self.assertEqual(resp.status_code, 200)
         # check we've used the right template
         self.assertTemplateUsed(resp, 'gene/gene.html')
 
-    ''' Test the show_gene_section tag. '''
     def test_inclusion_tag1(self):
+        ''' Test the show_gene_section tag. '''
         t = Template('{% load gene_tags %}{% show_gene_section feature %}')
         context = {'feature': self.feature}
         c = Context(context)
@@ -44,8 +45,8 @@ class GenesTestCase(TestCase):
         self.assertIn("9652", rendered)
         self.assertIn("ENSG00000134242", rendered)
 
-    ''' Test the show_es_gene_section tag - given a gene symbol '''
     def test_inclusion_tag2(self):
+        ''' Test the show_es_gene_section tag - given a gene symbol '''
         t = Template('{% load gene_tags %}' +
                      '{% show_es_gene_section gene_symbol=gene %}')
         context = {'gene': 'PTPN22'}
@@ -55,8 +56,9 @@ class GenesTestCase(TestCase):
         self.assertIn("9652", rendered)
         self.assertIn("ENSG00000134242", rendered)
 
-    ''' Test the show_es_gene_section tag - given a position on a sequence '''
     def test_inclusion_tag3(self):
+        ''' Test the show_es_gene_section tag - given a position
+        on a sequence '''
         t = Template('{% load gene_tags %}' +
                      '{% show_es_gene_section seqid=seqid pos=pos %}')
         context = {'seqid': '1', 'pos': 113834947}
