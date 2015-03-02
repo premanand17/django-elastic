@@ -4,6 +4,7 @@ import logging
 from es.management.loaders.Marker import MarkerManager
 from es.management.loaders.Region import RegionManager
 from es.management.loaders.Gene import GeneManager
+from es.management.loaders.Disease import DiseaseManager
 
 
 # Get an instance of a logger
@@ -71,6 +72,15 @@ class Command(BaseCommand):
         make_option('--disease',
                     dest='disease',
                     help='disease code (eg: cel) '),
+        ) + (
+        make_option('--mapDisease',
+                    dest='mapDisease',
+                    action="store_true",
+                    help='Create disease index mapping'),
+        ) + (
+        make_option('--indexDisease',
+                    dest='indexDisease',
+                    help='Load disease details'),
         )
 
     def handle(self, *args, **options):
@@ -97,5 +107,12 @@ class Command(BaseCommand):
         elif options['indexGeneGFF']:
             gene = GeneManager()
             gene.update_gene(**options)
+
+        elif options['mapDisease']:
+            disease = DiseaseManager()
+            disease.create_disease_index(**options)
+        elif options['indexDisease']:
+            disease = DiseaseManager()
+            disease.create_disease(**options)
         else:
             print(help)
