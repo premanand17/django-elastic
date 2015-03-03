@@ -11,7 +11,7 @@
 		<tr><td>Position</td><td>{{ data.0.start }}-{{ data.0.end }}</td></tr>
 		<tr><td>Name</td><td>{{ data.0.attr.Name }}</td></tr>
 		<tr><td>Region ID</td><td>{{ data.0.attr.region_id }}</td></tr>
-		<tr><td>Disease</td><td>{{ data.0.idx_type | upper }}</td></tr>
+		<tr><td>Disease</td><td>{{ data.0.attr.disease_code | upper }}</td></tr>
 {% comment %}	
 		<tr><td>Info</td><td>
 		{% for att_key,att_value in data.0.attr.items %}
