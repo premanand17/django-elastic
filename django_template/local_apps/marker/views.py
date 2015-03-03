@@ -21,6 +21,9 @@ def marker_page(request, marker):
     for loc in featurelocs:
         genes.append(loc.feature)
     context['genes'] = genes
+    # page title
+    if len(context["data"]) == 1 and "id" in context["data"][0]:
+        context['title'] = "Marker - " + context["data"][0]["id"]
 
     return render(request, 'marker/marker.html', context,
                   content_type='text/html')
