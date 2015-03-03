@@ -8,10 +8,8 @@ class DiseaseManager:
 
     def create_disease(self, **options):
         ''' Disease loading '''
-        if options['indexName']:
-            indexName = options['indexName'].lower()
-        else:
-            indexName = "disease"
+        index_name = self._get_index_name(**options)
+        self.create_disease_mapping(**options)
 
         # read disease list as column tab delimited file
         f = open(options['indexDisease'], 'r')
@@ -26,7 +24,7 @@ class DiseaseManager:
                                "tier": int(parts[4])
                                })
             resp = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                indexName+'/disease/'+parts[2],
+                                index_name+'/disease/'+parts[2],
                                 data=data)
 
             if resp.status_code == 201:
@@ -34,12 +32,9 @@ class DiseaseManager:
             else:
                 print ("Problem loading "+parts[0])
 
-    def create_disease_index(self, **options):
+    def create_disease_mapping(self, **options):
         ''' Create the mapping for disease indexing '''
-        if options['indexName']:
-            indexName = options['indexName'].lower()
-        else:
-            indexName = "disease"
+        index_name = self._get_index_name(**options)
 
         props = {"properties":
                  {"name": {"type": "string", "boost": 4,
@@ -57,9 +52,14 @@ class DiseaseManager:
 
         data = {"disease": props}
         ''' create index and add mapping '''
-        requests.put(settings.ELASTICSEARCH_URL+'/' + indexName)
+        requests.put(settings.ELASTICSEARCH_URL+'/' + index_name)
         response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                indexName+'/_mapping/disease',
+                                index_name+'/_mapping/disease',
                                 data=json.dumps(data))
         print (response.text)
         return
+
+    def _get_index_name(self, **options):
+        if options['indexName']:
+            return options['indexName'].lower()
+        return "disease"
