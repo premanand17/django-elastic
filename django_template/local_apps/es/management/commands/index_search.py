@@ -16,8 +16,8 @@ class Command(BaseCommand):
     help = "Use to create elasticsearch index mappings and load data.\n\n" \
            "Usage: ./manage.py index_search [options]\n" \
            "Options for regions:\n" \
-           " --mapRegion --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
-           " --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
+           " --mapRegion --build GRCh38\n" \
+           " --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all) --regionType assoc\n" \
            "Options for markers:\n" \
            " --indexName [index name] --mapSNP\n" \
            " --indexName [index name] --indexSNP All.vcf\n" \
@@ -68,6 +68,10 @@ class Command(BaseCommand):
         make_option('--indexRegion',
                     dest='indexRegion',
                     help='GFF file to index (e.g. celiac_regions.gff'),
+        ) + (
+        make_option('--regionType',
+                    dest='regionType',
+                    help='region type (eg: assoc, ortho, linkage, qtl'),
         ) + (
         make_option('--build',
                     dest='build',
