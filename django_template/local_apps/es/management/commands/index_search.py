@@ -13,20 +13,21 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     ''' Elasticsearch index mapping and loading tool. '''
-    help = "Use to create elasticsearch index mappings and load data.\n\nFor regions:\n" \
-           "./manage.py index_search --mapRegion --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
-           "./manage.py index_search --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
-           "\nFor markers:\n" \
-           "./manage.py index_search --indexName [index name] --mapSNP\n" \
-           "./manage.py index_search --indexName [index name] --indexSNP All.vcf\n" \
-           "\nFor genes:\n" \
-           "./manage.py index_search --indexName [index name] --mapGene\n" \
-           "./manage.py index_search --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
-           "./manage.py index_search --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
-           "\nFor diseases:\n" \
-           "./manage.py index_search --indexName [index name] --mapDisease\n" \
-           "./manage.py index_search --indexName [index name]" \
-           " --indexDisease disease.list"
+    help = "Use to create elasticsearch index mappings and load data.\n\n" \
+           "Usage: ./manage.py index_search [options]\n" \
+           "Options for regions:\n" \
+           " --mapRegion --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
+           " --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
+           "Options for markers:\n" \
+           " --indexName [index name] --mapSNP\n" \
+           " --indexName [index name] --indexSNP All.vcf\n" \
+           "Options for genes:\n" \
+           " --indexName [index name] --mapGene\n" \
+           " --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
+           " --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
+           "Options for diseases:\n" \
+           " --indexName [index name] --mapDisease\n" \
+           " --indexName [index name] --indexDisease disease.list"
 
     option_list = BaseCommand.option_list + (
         make_option('--mapSNP',
