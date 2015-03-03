@@ -3,22 +3,31 @@ from db.management.loaders.GFF import GFF
 import re
 import requests
 from django.conf import settings
+from pip.exceptions import CommandError
+from _ast import Str
 
 
 class RegionManager:
 
     def create_load_region_index(self, **options):
         ''' Index region data '''
-        index_name = self.create_index_name(**options)
         print('GFF file to be loaded: ' + options['indexRegion'])
         if options['disease']:
             disease = options['disease'].lower()
         else:
-            disease = "all"
+            raise CommandError('Please provide the disease code')
+        if options['regionType']:
+            region_type = options['regionType'].lower()
+        else:
+            region_type = 'assoc'
+
+        index_name = self.create_index_name(**options)
+        index_type = 'region'
+
         f = open(options['indexRegion'], 'r')
         json_data = ''
         line_num = 0
-        auto_num = 0
+        auto_num = 1
         lastLine = ''
 
         try:
@@ -30,7 +39,12 @@ class RegionManager:
                 if(len(parts) != 9):
                     continue
                 gff = GFF(current_line)
-                json_data += '{"index": {"_id": "%s"}}\n' % auto_num
+                attrs = gff.attrs
+                attrs['disease_code'] = disease
+                attrs['region_type'] = region_type
+                print(attrs)
+                idx_id = disease + '_' + str(auto_num)
+                json_data += '{"index": {"_id": "%s"}}\n' % idx_id
                 json_data += json.dumps({"seqid": gff.seqid,
                                          "source": gff.source,
                                          "type": gff.type,
@@ -39,7 +53,7 @@ class RegionManager:
                                          "score": gff.score,
                                          "strand": gff.strand,
                                          "phase": gff.phase,
-                                         "attr": gff.attrs
+                                         "attr": attrs
                                          }) + '\n'
                 line_num += 1
                 auto_num += 1
@@ -51,7 +65,7 @@ class RegionManager:
                                ' Loading from line:' + line)
                     print('.', end="", flush=True)
                     response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                            index_name+'/' + disease +
+                                            index_name+'/' + index_type +
                                             '/_bulk', data=json_data
                                             )
                     json_data = ''
@@ -59,7 +73,7 @@ class RegionManager:
 
         finally:
             response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                    index_name+'/' + disease +
+                                    index_name+'/' + index_type +
                                     '/_bulk', data=json_data
                                     )
         return response
@@ -67,11 +81,8 @@ class RegionManager:
     def create_region_index(self, **options):
         ''' Create the mapping for region indexing '''
         index_name = self.create_index_name(**options)
-        if options['disease']:
-            disease = options['disease'].lower()
-        else:
-            disease = "all"
-        print('START Mapping for index ' + index_name + ' and type ' + disease)
+        index_type = 'region'
+        print('Mapping for index ' + index_name + ' and type ' + index_type)
         props = {"properties": {"seqid": {"type": "string",
                                 "index": "no"},
                                 "source": {"type": "string",
@@ -94,12 +105,16 @@ class RegionManager:
 
         # check if index exists
         response = requests.get(settings.ELASTICSEARCH_URL + '/' + index_name)
-        print('Response status code ' + str(response.status_code))
         if(response.status_code != 200):
-            requests.put(settings.ELASTICSEARCH_URL + '/' + index_name)
-        data = {disease: props}
+            print('Response status code ' + str(response.status_code) +
+                  'Creating new index ')
+        else:
+            print('Response status code ' + str(response.status_code) +
+                  ' Index already exists...Overriding the mapping')
+        requests.put(settings.ELASTICSEARCH_URL + '/' + index_name)
+        data = {index_type: props}
         response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                index_name+'/_mapping/' + disease,
+                                index_name+'/_mapping/' + index_type,
                                 data=json.dumps(data))
         print (response.text)
         return

@@ -78,28 +78,14 @@ class EsTest(TestCase):
             resp = requests.head(settings.ELASTICSEARCH_URL + '/' + index_name)
             self.assertEqual(resp.status_code, 200, "Region Index " +
                              index_name + "exists")
-            # Test if type aa exists
-            index_type = 'aa'
+            # Test if type region exists
+            index_type = 'region'
             resp = requests.head(settings.ELASTICSEARCH_URL +
                                  '/' + index_name +
                                  '/' + index_type)
             self.assertEqual(resp.status_code, 200, "Region Index: " +
                              index_name + " and Region Index Type: " +
                              index_type + " exists")
-            # Test if type celiac exists
-            index_type = 'cel'
-            resp = requests.head(settings.ELASTICSEARCH_URL +
-                                 '/' + index_name +
-                                 '/' + index_type)
-            self.assertEqual(resp.status_code, 200, "Region Index: " +
-                             index_name + " and Region Index Type: " +
-                             index_type + " exists")
-            # Test if type t1d exists
-            index_type = 't1d'
-            resp = requests.head(settings.ELASTICSEARCH_URL + '/' +
-                                 index_name + '/' + index_type)
-            self.assertEqual(resp.status_code, 200, "Region Index " +
-                             index_name + "exists")
         except requests.exceptions.Timeout:
             self.assertTrue(False, 'timeout exception')
         except requests.exceptions.TooManyRedirects:
