@@ -26,7 +26,6 @@ class Command(BaseCommand):
            " --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
            " --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
            "Options for diseases:\n" \
-           " --indexName [index name] --mapDisease\n" \
            " --indexName [index name] --indexDisease disease.list"
 
     option_list = BaseCommand.option_list + (
@@ -81,11 +80,6 @@ class Command(BaseCommand):
                     dest='disease',
                     help='disease code (eg: cel) '),
         ) + (
-        make_option('--mapDisease',
-                    dest='mapDisease',
-                    action="store_true",
-                    help='Create a disease index mapping'),
-        ) + (
         make_option('--indexDisease',
                     dest='indexDisease',
                     help='Load disease details'),
@@ -117,9 +111,6 @@ class Command(BaseCommand):
             gene = GeneManager()
             gene.update_gene(**options)
 
-        elif options['mapDisease']:
-            disease = DiseaseManager()
-            disease.create_disease_index(**options)
         elif options['indexDisease']:
             disease = DiseaseManager()
             disease.create_disease(**options)
