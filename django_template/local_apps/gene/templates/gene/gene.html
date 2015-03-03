@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block title %} 
+	Gene {% if gene %} - {{ gene }}{% endif %}
+{% endblock %}
 {% load gene_tags %}
 
 {% block content %}
