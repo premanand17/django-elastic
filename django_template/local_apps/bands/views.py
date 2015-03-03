@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def cvlist(request):
     cv_list = Cv.objects.all()
-    context = {'cv_list': cv_list}
+    context = {'cv_list': cv_list, 'title': 'CV terms'}
     return render(request, 'bands/cvlist.html', context)
 
 
@@ -32,9 +32,8 @@ def cytobands_ws(request, org):
     cv = Cv.objects.get(name="DIL")
     cvtermDIL = Cvterm.objects.filter(cv=cv)
 
-    context = {'srcfeatures': srcfeatures,
-               'org': org,
-               'cvtermDIL': cvtermDIL}
+    context = {'srcfeatures': srcfeatures, 'org': org,
+               'cvtermDIL': cvtermDIL, 'title': 'Cytobands'}
     return render(request, 'bands/bands-ws.html', context,
                   content_type='text/html')
 
@@ -59,7 +58,8 @@ def cytobands(request, org):
     cvtermDIL = Cvterm.objects.filter(cv=cv)
 
     context = {'bands': bands, 'srcfeatures': srcfeatures,
-               'org': org, 'cvtermDIL': cvtermDIL}
+               'org': org, 'cvtermDIL': cvtermDIL,
+               'title': 'Cytobands'}
     return render(request, 'bands/bands.html', context)
 
 
