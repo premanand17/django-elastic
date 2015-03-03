@@ -4,6 +4,7 @@ import logging
 from es.management.loaders.Marker import MarkerManager
 from es.management.loaders.Region import RegionManager
 from es.management.loaders.Gene import GeneManager
+from es.management.loaders.Disease import DiseaseManager
 
 
 # Get an instance of a logger
@@ -11,28 +12,31 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Use to create elasticsearch index mappings and add data.\n\nFor regions:\n" \
+    ''' Elasticsearch index mapping and loading tool. '''
+    help = "Use to create elasticsearch index mappings and load data.\n\nFor regions:\n" \
            "./manage.py index_search --mapRegion --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
            "./manage.py index_search --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all)\n" \
            "\nFor markers:\n" \
-           "./manage.py index_search --mapSNP --indexName [index name]\n" \
+           "./manage.py index_search --indexName [index name] --mapSNP\n" \
            "./manage.py index_search --indexName [index name] --indexSNP All.vcf\n" \
            "\nFor genes:\n" \
-           "./manage.py index_search --mapGene --indexName [index name]\n" \
-           "./manage.py index_search --indexName [index name] --indexGene " \
-           "genenames.org.txt --org=human\n" \
-           "./manage.py index_search --indexName [index name] --indexGeneGFF " \
-           "gene.gff --build GRCh38"
+           "./manage.py index_search --indexName [index name] --mapGene\n" \
+           "./manage.py index_search --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
+           "./manage.py index_search --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
+           "\nFor diseases:\n" \
+           "./manage.py index_search --indexName [index name] --mapDisease\n" \
+           "./manage.py index_search --indexName [index name]" \
+           " --indexDisease disease.list"
 
     option_list = BaseCommand.option_list + (
         make_option('--mapSNP',
                     dest='mapSNP',
                     action="store_true",
-                    help='Create SNP index mapping'),
+                    help='Create a marker index mapping'),
         ) + (
         make_option('--indexSNP',
                     dest='indexSNP',
-                    help='VCF file to index'),
+                    help='VCF file (from dbSNP) to index'),
         ) + (
         make_option('--mapGene',
                     dest='mapGene',
@@ -45,35 +49,45 @@ class Command(BaseCommand):
         ) + (
         make_option('--indexGeneGFF',
                     dest='indexGeneGFF',
-                    help='Genename.org file to index'),
+                    help='GFF gene file used to update a gene index'),
         ) + (
         make_option('--org',
                     dest='org',
-                    help='Organism Name'),
+                    help='Organism name'),
         ) + (
         make_option('--indexName',
                     dest='indexName',
-                    help='Index Name'),
+                    help='Index name'),
         ) + (
         make_option('--mapRegion',
                     dest='mapRegion',
                     action="store_true",
-                    help='Create Region index mapping'),
+                    help='Create a region index mapping'),
         ) + (
         make_option('--indexRegion',
                     dest='indexRegion',
-                    help='GFF file to index (eg: celiac_regions.gff'),
+                    help='GFF file to index (e.g. celiac_regions.gff'),
         ) + (
         make_option('--build',
                     dest='build',
-                    help='BuildName (eg: GRCh38)'),
+                    help='Build name (e.g. GRCh38)'),
         ) + (
         make_option('--disease',
                     dest='disease',
                     help='disease code (eg: cel) '),
+        ) + (
+        make_option('--mapDisease',
+                    dest='mapDisease',
+                    action="store_true",
+                    help='Create a disease index mapping'),
+        ) + (
+        make_option('--indexDisease',
+                    dest='indexDisease',
+                    help='Load disease details'),
         )
 
     def handle(self, *args, **options):
+        ''' Handle the user options to map or load data. '''
         if options['mapSNP']:
             marker = MarkerManager()
             marker.create_snp_index(**options)
@@ -97,5 +111,12 @@ class Command(BaseCommand):
         elif options['indexGeneGFF']:
             gene = GeneManager()
             gene.update_gene(**options)
+
+        elif options['mapDisease']:
+            disease = DiseaseManager()
+            disease.create_disease_index(**options)
+        elif options['indexDisease']:
+            disease = DiseaseManager()
+            disease.create_disease(**options)
         else:
             print(help)
