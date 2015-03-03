@@ -16,6 +16,7 @@ def gene_page(request, gene):
     locs = []
     for loc in flocs:
         locs.append(loc)
-    context = {'feature': feature, 'locs': locs, 'gene': feature.uniquename}
+    context = {'feature': feature, 'locs': locs, 'gene': feature.uniquename,
+               'title': "Gene - "+feature.uniquename}
     return render(request, 'gene/gene.html', context,
                   content_type='text/html')
