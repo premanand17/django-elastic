@@ -84,7 +84,7 @@ In a browser try http://localhost:9000/bands/cached/human_GRCh38/
 ```bash
 ./manage.py makemigrations
 ./manage.py migrate
-./manage.py test db.tests bands.tests es.tests -v3
+./manage.py test db.tests bands.tests es.tests marker.tests -v3
 ```
 
 ### Using Caching
