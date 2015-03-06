@@ -9,8 +9,8 @@ def marker_page(request, marker):
     context = elastic_search(data)
 
     # get gene(s) overlapping position
-    position = context['data'][0]['pos']
-    chrom = 'chr'+context['data'][0]['src']
+    position = context['data'][0]['start']
+    chrom = 'chr'+context['data'][0]['seqid']
     featurelocs = (Featureloc.objects
                    .filter(fmin__lt=position)  # @UndefinedVariable
                    .filter(fmax__gt=position)  # @UndefinedVariable

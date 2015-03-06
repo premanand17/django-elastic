@@ -19,22 +19,15 @@ class Command(BaseCommand):
            " --mapRegion --build GRCh38\n" \
            " --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all) --regionType assoc\n" \
            "Options for markers:\n" \
-           " --indexName [index name] --mapSNP\n" \
            " --indexName [index name] --indexSNP All.vcf\n" \
            "Options for genes:\n" \
            " --indexName [index name] --mapGene\n" \
            " --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
            " --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
            "Options for diseases:\n" \
-           " --indexName [index name] --mapDisease\n" \
            " --indexName [index name] --indexDisease disease.list"
 
     option_list = BaseCommand.option_list + (
-        make_option('--mapSNP',
-                    dest='mapSNP',
-                    action="store_true",
-                    help='Create a marker index mapping'),
-        ) + (
         make_option('--indexSNP',
                     dest='indexSNP',
                     help='VCF file (from dbSNP) to index'),
@@ -81,11 +74,6 @@ class Command(BaseCommand):
                     dest='disease',
                     help='disease code (eg: cel) '),
         ) + (
-        make_option('--mapDisease',
-                    dest='mapDisease',
-                    action="store_true",
-                    help='Create a disease index mapping'),
-        ) + (
         make_option('--indexDisease',
                     dest='indexDisease',
                     help='Load disease details'),
@@ -93,10 +81,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ''' Handle the user options to map or load data. '''
-        if options['mapSNP']:
-            marker = MarkerManager()
-            marker.create_snp_index(**options)
-        elif options['indexSNP']:
+        if options['indexSNP']:
             marker = MarkerManager()
             marker.create_load_snp_index(**options)
 
@@ -117,9 +102,6 @@ class Command(BaseCommand):
             gene = GeneManager()
             gene.update_gene(**options)
 
-        elif options['mapDisease']:
-            disease = DiseaseManager()
-            disease.create_disease_index(**options)
         elif options['indexDisease']:
             disease = DiseaseManager()
             disease.create_disease(**options)

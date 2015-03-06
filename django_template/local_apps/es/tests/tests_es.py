@@ -1,14 +1,12 @@
 from django.test import TestCase
 from django.conf import settings
 import requests
-import unittest
 
 
 class EsTest(TestCase):
-    '''
-    Test elasticsearch server is running and status
-    '''
+
     def test_es(self):
+        ''' Test elasticsearch server is running and status '''
         try:
             resp = requests.get(settings.ELASTICSEARCH_URL +
                                 '/_cluster/health/'+settings.MARKERDB)
@@ -24,20 +22,16 @@ class EsTest(TestCase):
         except requests.exceptions.RequestException:
             self.assertTrue(False, 'request exception')
 
-    '''
-    Test a single SNP search
-    '''
     def test_snp_search(self):
-        resp = self.client.get('/search/rs333/')
+        ''' Test a single SNP search '''
+        resp = self.client.get('/search/rs2476601/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
         snp = resp.context['data'][0]
         self._SNPtest(snp)
 
-    '''
-    Test a wild card search
-    '''
     def test_snp_wildcard(self):
+        ''' Test a wild card search '''
         resp = self.client.get('/search/rs33311*/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
@@ -45,10 +39,8 @@ class EsTest(TestCase):
         for snp in resp.context['data']:
             self._SNPtest(snp)
 
-    '''
-    Test a range query
-    '''
     def test_range(self):
+        ''' Test a range query '''
         resp = self.client.get('/search/chr4:10000-10050/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
@@ -56,22 +48,18 @@ class EsTest(TestCase):
         for snp in resp.context['data']:
             self._SNPtest(snp)
 
-    '''
-    Test the elements of a SNP result
-    '''
     def _SNPtest(self, snp):
-        self.assertTrue(snp['pos'])
+        ''' Test the elements of a SNP result '''
+        self.assertTrue(snp['start'])
         self.assertTrue(snp['id'])
         self.assertTrue(snp['ref'])
         self.assertTrue(snp['alt'])
-        self.assertTrue(snp['src'])
+        self.assertTrue(snp['seqid'])
 
-        self.assertTrue(isinstance(snp['pos'], int))
+        self.assertTrue(isinstance(snp['start'], int))
 
-    '''
-    Test Region Index
-    '''
     def test_region_index(self):
+        ''' Test Region Index '''
         index_name = settings.REGIONDB
         try:
             # Test if region index exists
@@ -95,27 +83,16 @@ class EsTest(TestCase):
         except requests.exceptions.RequestException:
             self.assertTrue(False, 'request exception')
 
-    '''
-    Dummy Test to skip
-    '''
-    @unittest.skip("demonstrating skipping")
-    def test_dummy_test_skipping(self):
-        pass
-
-    '''
-    Test a single Region search
-    '''
     def test_region_search(self):
+        ''' Test a single Region search '''
         resp = self.client.get('/search/22q12.2/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
         region = resp.context['data'][0]
         self._RegionTest(region)
 
-    '''
-    Test a wild card search
-    '''
     def test_region_wildcard(self):
+        ''' Test a wild card search '''
         resp = self.client.get('/search/22q12*/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
@@ -123,10 +100,8 @@ class EsTest(TestCase):
         for region in resp.context['data']:
             self._RegionTest(region)
 
-    '''
-    Test the elements of a Region result
-    '''
     def _RegionTest(self, region):
+        ''' Test the elements of a Region result '''
         self.assertTrue(region['seqid'])
         self.assertTrue(region['type'])
         self.assertTrue(region['source'])
