@@ -4,7 +4,6 @@ import re
 import requests
 from django.conf import settings
 from pip.exceptions import CommandError
-from _ast import Str
 
 
 class RegionManager:
