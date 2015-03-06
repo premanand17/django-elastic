@@ -39,8 +39,9 @@ def search(request, query):
 
 def range_search(request, src, start, stop):
     ''' Renders a search result page based on the src, start and stop '''
-    must = [{"match": {"src": src.replace('chr', '')}},
-            {"range": {"start": {"gte": start, "lte": stop, "boost": 2.0}}}]
+    must = [{"match": {"seqid": src}},
+            {"range": {"start": {"gte": start, "boost": 2.0}}},
+            {"range": {"end": {"lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}
     data = {"query": query}
     context = elastic_search(data, db=settings.MARKERDB + ',' +
