@@ -24,7 +24,7 @@ class EsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP search '''
-        resp = self.client.get('/search/rs333/')
+        resp = self.client.get('/search/rs2476601/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
         snp = resp.context['data'][0]
@@ -50,13 +50,13 @@ class EsTest(TestCase):
 
     def _SNPtest(self, snp):
         ''' Test the elements of a SNP result '''
-        self.assertTrue(snp['pos'])
+        self.assertTrue(snp['start'])
         self.assertTrue(snp['id'])
         self.assertTrue(snp['ref'])
         self.assertTrue(snp['alt'])
-        self.assertTrue(snp['src'])
+        self.assertTrue(snp['seqid'])
 
-        self.assertTrue(isinstance(snp['pos'], int))
+        self.assertTrue(isinstance(snp['start'], int))
 
     def test_region_index(self):
         ''' Test Region Index '''

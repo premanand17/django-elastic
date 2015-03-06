@@ -106,7 +106,7 @@
         				$('#results').append(
         						'<ul class="list-group">' +
         						'<li class="list-group-item"><a href="/marker/'+hit.id+'">'+hit.id+'</a></li>'+
-        						'<li class="list-group-item">Chromosome: '+hit.src+'; Position: '+hit.pos+'; '+
+        						'<li class="list-group-item">Chromosome: '+hit.seqid+'; Position: '+hit.start+'; '+
 					                        hit.ref+'/'+hit.alt+'</li>'+
         				'</ul>');
         				}else if(hit.hgnc){
