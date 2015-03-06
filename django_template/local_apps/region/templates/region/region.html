@@ -7,11 +7,14 @@
   	<h3>Region: {{ data.0.id }}</h3>
   	<div class="table-responsive">
 	<table class="table table-striped table-condensed">
-		<tr><td>Chromosome </td><td>{{ data.0.seqid }}</td></tr>
-		<tr><td>Position</td><td>{{ data.0.start }}-{{ data.0.end }}</td></tr>
+		
+		<tr><td>Location  </td><td>
+		<a href="/search/{{ data.0.seqid  }}:{{ data.0.start }}-{{ data.0.end }}">{{ data.0.seqid   }}:{{ data.0.start }}-{{ data.0.end }}</a>
+		</td></tr>
+		
 		<tr><td>Name</td><td>{{ data.0.attr.Name }}</td></tr>
-		<tr><td>Region ID</td><td>{{ data.0.attr.region_id }}</td></tr>
 		<tr><td>Disease</td><td>{{ data.0.attr.disease_code | upper }}</td></tr>
+		<tr><td>Region Type</td><td>{{ data.0.attr.region_type | upper }}</td></tr>
 {% comment %}	
 		<tr><td>Info</td><td>
 		{% for att_key,att_value in data.0.attr.items %}
