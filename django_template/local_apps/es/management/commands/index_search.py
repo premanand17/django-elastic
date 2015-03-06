@@ -19,7 +19,6 @@ class Command(BaseCommand):
            " --mapRegion --build GRCh38\n" \
            " --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all) --regionType assoc\n" \
            "Options for markers:\n" \
-           " --indexName [index name] --mapSNP\n" \
            " --indexName [index name] --indexSNP All.vcf\n" \
            "Options for genes:\n" \
            " --indexName [index name] --mapGene\n" \
@@ -29,11 +28,6 @@ class Command(BaseCommand):
            " --indexName [index name] --indexDisease disease.list"
 
     option_list = BaseCommand.option_list + (
-        make_option('--mapSNP',
-                    dest='mapSNP',
-                    action="store_true",
-                    help='Create a marker index mapping'),
-        ) + (
         make_option('--indexSNP',
                     dest='indexSNP',
                     help='VCF file (from dbSNP) to index'),
@@ -87,10 +81,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ''' Handle the user options to map or load data. '''
-        if options['mapSNP']:
-            marker = MarkerManager()
-            marker.create_snp_index(**options)
-        elif options['indexSNP']:
+        if options['indexSNP']:
             marker = MarkerManager()
             marker.create_load_snp_index(**options)
 

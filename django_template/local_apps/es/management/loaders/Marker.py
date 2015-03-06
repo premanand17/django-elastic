@@ -9,10 +9,8 @@ class MarkerManager:
 
     def create_load_snp_index(self, **options):
         ''' Index snp data '''
-        if options['indexName']:
-            indexName = options['indexName'].lower()
-        else:
-            indexName = "snp"
+        index_name = self._get_index_name(**options)
+        self._create_snp_index(**options)
 
         if options['indexSNP'].endswith('.gz'):
             f = gzip.open(options['indexSNP'], 'rb')
@@ -32,12 +30,15 @@ class MarkerManager:
                     continue
 
                 src = parts[0]
+                if not src.startswith("chr"):
+                    src = "chr"+src
                 data += '{"index": {"_id": "%s"}}\n' % nn
                 data += json.dumps({"id": parts[2],
-                                    "src": src,
+                                    "seqid": src,
                                     "ref": parts[3],
                                     "alt": parts[4],
-                                    "pos": int(parts[1])+1,
+                                    "start": int(parts[1]),
+                                    "end": int(parts[1]),
                                     "info": parts[7]
                                     })+'\n'
 
@@ -50,30 +51,28 @@ class MarkerManager:
                         print ('\nLoading '+src)
                     print('.', end="", flush=True)
                     response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                            indexName+'/marker/_bulk',
+                                            index_name+'/marker/_bulk',
                                             data=data)
                     data = ''
                     lastSrc = src
 
         finally:
             response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                    indexName+'/marker/_bulk', data=data)
+                                    index_name+'/marker/_bulk', data=data)
         return response
 
-    def create_snp_index(self, **options):
+    def _create_snp_index(self, **options):
         ''' Create the mapping for snp indexing '''
-        if options['indexName']:
-            indexName = options['indexName'].lower()
-        else:
-            indexName = "dbsnp"
+        index_name = self._get_index_name(**options)
 
         props = {"properties":
                  {"id": {"type": "string", "index": "not_analyzed",
                          "boost": 4},
-                  "src": {"type": "string", "index": "not_analyzed"},
+                  "seqid": {"type": "string", "index": "not_analyzed"},
                   "ref": {"type": "string", "index": "no"},
                   "alt": {"type": "string", "index": "no"},
-                  "pos": {"type": "integer", "index": "not_analyzed"},
+                  "start": {"type": "integer", "index": "not_analyzed"},
+                  "end": {"type": "integer", "index": "not_analyzed"},
                   "info": {"type": "string", "index": "no"}
                   }
                  }
@@ -81,9 +80,14 @@ class MarkerManager:
         data = {"marker": props}
 
         ''' create index and add mapping '''
-        requests.put(settings.ELASTICSEARCH_URL+'/' + indexName)
+        requests.put(settings.ELASTICSEARCH_URL+'/' + index_name)
         response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                indexName+'/_mapping/marker',
+                                index_name+'/_mapping/marker',
                                 data=json.dumps(data))
         print (response.text)
         return
+
+    def _get_index_name(self, **options):
+        if options['indexName']:
+            return options['indexName'].lower()
+        return "dbsnp"
