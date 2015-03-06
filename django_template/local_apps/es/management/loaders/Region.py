@@ -83,14 +83,12 @@ class RegionManager:
         index_name = self.create_index_name(**options)
         index_type = 'region'
         print('Mapping for index ' + index_name + ' and type ' + index_type)
-        props = {"properties": {"seqid": {"type": "string",
-                                "index": "no"},
-                                "source": {"type": "string",
-                                           "index": "no"},
+        props = {"properties": {"seqid": {"type": "string"},
+                                "source": {"type": "string"},
                                 "type": {"type": "string",
                                          "index": "not_analyzed"},
-                                "start": {"type": "integer", "index":
-                                          "not_analyzed"},
+                                "start": {"type": "integer",
+                                          "index": "not_analyzed"},
                                 "end": {"type": "integer",
                                         "index": "not_analyzed"},
                                 "score": {"type": "string",
