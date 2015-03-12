@@ -5,27 +5,40 @@
 		var npages = total / size;
 		$('#'+paginationId).empty();
 		$('#'+paginationId).append('<ul class="pagination pagination-sm" id="search-pagination" style="margin: 0;"></ul>');
-		$('#search-pagination').append('<li><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
-		$('#search-pagination').append('<li class="active"><a href="#">1</a></li>');
-		for (i = 2; i < npages+1; i++) {
-			$('#search-pagination').append('<li><a href="#">'+i+'</a></li>');
-		}
-		$('#search-pagination').append('<li><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');
-		
+
+		updatePager(npages, 1);
 		$('#search-pagination').on( "click", "li", function() {
-			updateResults(this, overviewId, db, size, total, query);
+			updateResults(this, paginationId, overviewId, db, size, total, query, npages);
 		});
-		updateResults($('.active'), overviewId, db, size, total, query);
-		if(npages === 1) {
-			$('#search-pagination').children("li").first().addClass("disabled");
-			$('#search-pagination').children("li").last().addClass("disabled");
-		}
-		addDropDownSize(paginationId, overviewId, query, db, size, total);
 		
+		updateResults($('.active'), paginationId, overviewId, db, size, total, query, npages);
+		addDropDownSize(paginationId, overviewId, query, db, size, total);
+
 		var dbs = db.split(',');
 		for(var i=0; i<dbs.length; i++) {
 			addCounter(query, dbs[i]);
 		}
+	}
+	
+	updatePager = function(npages, start) {
+		$('#search-pagination').empty();
+		$('#search-pagination').append('<li><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
+		$('#search-pagination').append('<li class="active"><a href="#">'+start+'</a></li>');
+		for (i = start+1; i < npages+1 && i < 10+start; i++) {
+			$('#search-pagination').append('<li><a href="#">'+i+'</a></li>');
+		}
+		
+		if(npages > 10) {
+			$('#search-pagination').append('<li><a style="font-size:0; padding: 0px 10px"></a></li>');
+			$('#search-pagination').append('<li><a href="#">'+Math.ceil(npages)+'</a></li>');
+		}
+		
+		$('#search-pagination').append('<li><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');
+		if(npages === 1) {
+			$('#search-pagination').children("li").first().addClass("disabled");
+			$('#search-pagination').children("li").last().addClass("disabled");
+		}
+		return $('.active');
 	}
 	
 	addCounter = function(query, db) {
@@ -65,20 +78,33 @@
 	}
 	
 	// update results when a new page number is clicked
-	updateResults = function(thisPage, overviewId, db, size, total, query) {
+	updateResults = function(thisPage, paginationId, overviewId, db, size, total, query, npages) {
 		var url = 'http://'+window.location.host +'/'+db+'/_search?';
 		var page = $( thisPage ).text().match(/[0-9]+/);
 		if( page === null ) {
 			var label = $( thisPage ).children('a').first().attr('aria-label');
 			if(label === 'Next') {
-				$('.active').next().trigger('click');
+				page = parseInt($('.active').text().match(/[0-9]+/)) + 1;
+				var mod = page % 10;
+				if(mod === 1) {
+					thisPage = updatePager(npages, page);
+				}
 			} else {
-				$('.active').prev().trigger('click');
+				page = parseInt($('.active').text().match(/[0-9]+/)) - 1;
+				var mod = page % 10;
+				console.log(mod);
+				if(mod === 0) {
+					thisPage = updatePager(npages, page-9);
+				}
 			}
-			return;
-		}
+			thisPage = $("#search-pagination li:contains('"+page+"')" );
+			thisPage = thisPage.filter(function() { return $.text([this]) === ''+page+''; })
+		} else
+			page = page[0]
+		
 
-        var es_from = (((page[0]-1)*size));
+		
+        var es_from = (((page-1)*size));
         var es_data = JSON.stringify({
 				"from" : es_from, "size" : size,
 				"query": query
