@@ -1,15 +1,32 @@
 from django.test import TestCase
 from django.conf import settings
+from django.core.management import call_command
 import requests
+from es.tests.settings_idx import IDX
+from django.test.utils import override_settings
+import time
 
 
+def setUpModule():
+    for idx_kwargs in IDX.values():
+        call_command('index_search', **idx_kwargs)
+    time.sleep(2)
+
+
+def tearDownModule():
+    for idx_kwargs in IDX.values():
+        requests.delete(settings.ELASTICSEARCH_URL +
+                        '/' + idx_kwargs['indexName'])
+
+
+@override_settings(MARKERDB=IDX['MARKER']['indexName'])
 class EsTest(TestCase):
 
     def test_es(self):
         ''' Test elasticsearch server is running and status '''
         try:
             resp = requests.get(settings.ELASTICSEARCH_URL +
-                                '/_cluster/health/'+settings.MARKERDB)
+                                '/_cluster/health/test__marker')
             self.assertEqual(resp.status_code, 200, "Health page status code")
             self.assertFalse(resp.json()['status'] == 'red',
                              'Health report - red')
@@ -32,7 +49,7 @@ class EsTest(TestCase):
 
     def test_snp_wildcard(self):
         ''' Test a wild card search '''
-        resp = self.client.get('/search/rs33311*/')
+        resp = self.client.get('/search/rs3*/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
 
@@ -41,7 +58,7 @@ class EsTest(TestCase):
 
     def test_range(self):
         ''' Test a range query '''
-        resp = self.client.get('/search/chr4:10000-10050/')
+        resp = self.client.get('/search/chr1:10600-10650/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
 
