@@ -1,21 +1,31 @@
 from django.test import TestCase
 from django.core.management import call_command
 from django_template import settings
+from es.tests.settings_idx import IDX
 import requests
 import time
 import random
 import string
 
 
-class EsLoadersTest(TestCase):
+class ElasticLoadersTest(TestCase):
 
     def test_disease_loader(self):
         ''' Test disease loader '''
-        index_name = 'test__disease__' + self._id_generator()
-        call_command('index_search', indexName=index_name,
-                     indexDisease='tmp/disease.list')
+        options = IDX['DISEASE']
+        index_name = IDX['DISEASE']['indexName']
+        call_command('index_search', **options)
         time.sleep(2)
         self._check_index(index_name, 'disease', 19)
+        self._remove(index_name)
+
+    def test_marker_loader(self):
+        ''' Test disease loader '''
+        options = IDX['MARKER']
+        index_name = IDX['MARKER']['indexName']
+        call_command('index_search', **options)
+        time.sleep(2)
+        self._check_index(index_name, 'marker')
         self._remove(index_name)
 
     def _check_index(self, index_name, index_type, count=None):
