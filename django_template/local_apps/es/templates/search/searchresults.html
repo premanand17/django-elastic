@@ -29,7 +29,7 @@ $(document).ready(function() {
     	All
   		</li>
   		{% for key, type in dbs.items %}
-  			<li class="list-group-item" id="{{ key }}">{{ type }}<span class='badge'></span></li>
+  		   	<li class="list-group-item" id="{{ key }}"><a href="SEARCH_QUERY_LINK">{{ type }}</a><span class='badge'></span></li>
   		{% endfor %}
 	</ul>
 	</div>

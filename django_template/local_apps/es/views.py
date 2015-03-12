@@ -25,27 +25,31 @@ def reverse_proxy(request):
                         content_type=proxy_resp.headers.get('content-type'))
 
 
-def search(request, query):
+def search(request, query,
+           search_db=settings.MARKERDB + ',' +
+           settings.GENEDB + ',' +
+           settings.REGIONDB):
     ''' Renders a search results page based on the query '''
     fields = ["gene_symbol", "hgnc", "synonyms", "id",
               "dbxrefs.*", "attr.*", "featureloc.seqid"]
     data = {"query": {"query_string": {"query": query, "fields": fields}}}
-    context = elastic_search(data, 0, 20,
-                             settings.MARKERDB + ',' + settings.GENEDB+',' +
-                             settings.REGIONDB)
+    context = elastic_search(data, 0, 20, db=search_db)
     return render(request, 'search/searchresults.html', context,
                   content_type='text/html')
 
 
-def range_search(request, src, start, stop):
+def range_search(request, src, start, stop,
+                 search_db=settings.MARKERDB + ',' +
+                 settings.GENEDB + ',' +
+                 settings.REGIONDB):
     ''' Renders a search result page based on the src, start and stop '''
+
     must = [{"match": {"seqid": src}},
             {"range": {"start": {"gte": start, "boost": 2.0}}},
             {"range": {"end": {"lte": stop, "boost": 2.0}}}]
     query = {"bool": {"must": must}}
     data = {"query": query}
-    context = elastic_search(data, db=settings.MARKERDB + ',' +
-                             settings.GENEDB + ',' + settings.REGIONDB)
+    context = elastic_search(data, db=search_db)
     context["chromosome"] = src
     context["start"] = start
     context["stop"] = stop
@@ -112,3 +116,17 @@ def _addInfo(content, hit):
         else:
             if info not in hit['_source']:
                 hit['_source'][info] = ""
+
+
+def filtered_range_search(request, src, start, stop, db):
+    '''
+    Pass the range parameters to the range_search routine.
+    '''
+    return range_search(request, src, start, stop, db)
+
+
+def filtered_search(request, query, db):
+    '''
+    Pass the search parameters to the regular search routine
+    '''
+    return search(request, query, db)
