@@ -81,10 +81,9 @@ class MarkerManager:
 
         ''' create index and add mapping '''
         requests.put(settings.ELASTICSEARCH_URL+'/' + index_name)
-        response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                index_name+'/_mapping/marker',
-                                data=json.dumps(data))
-        print (response.text)
+        requests.put(settings.ELASTICSEARCH_URL+'/' +
+                     index_name+'/_mapping/marker',
+                     data=json.dumps(data))
         return
 
     def _get_index_name(self, **options):
