@@ -53,8 +53,15 @@
 	       	type: "POST",
 	       	data: es_data,
 	       	success: function(json){
-	       		$('#'+db+' span').replaceWith("<span class='badge'>"+
-	       				json.hits.total+"</span>");
+	       	$('#'+db+' span').replaceWith("<span class='badge'>"+
+	       				json.count+"</span>");
+	       		
+	       		var path_name = window.location.pathname; 
+	       		var my_regexp = /search\/(.*?)\//gi
+	       		var match = my_regexp.exec(path_name);
+	       		href_url = 'http://'+window.location.host+'/search/'+ match[1] + '/db' + '/' + db;
+				$('#'+db+' a[href]').attr('href',href_url );
+	       		
 	       	}
 	    });
 	}
