@@ -29,9 +29,8 @@
 	}
 	
 	addCounter = function(query, db) {
-		var url = 'http://'+window.location.host +'/'+db+'/_search?';
+		var url = 'http://'+window.location.host +'/'+db+'/_count?';
 		var es_data = JSON.stringify({
-			"from" : 0, "size" : 1,
 			"query": query
 		});
 
@@ -101,7 +100,7 @@
 
         		for(var i=0; i<hits.length; i++) {
         			var hit = hits[i]._source;
-        			
+        		        			
         			if(hit.id){
         				$('#results').append(
         						'<ul class="list-group">' +
@@ -115,11 +114,12 @@
         						'<li class="list-group-item"><a href="/gene/'+hit.gene_symbol+'">'+hit.gene_symbol+'</a></li>'+
         						'<li class="list-group-item">HGNC: '+hit.hgnc+'</li>'+
         				'</ul>');
-        				}else{
+        				}else if(hit.type == 'region'){
         				$('#results').append(
         						'<ul class="list-group">' +
         						'<li class="list-group-item"><a href="/region/'+hit.attr.region_id+'">'+hit.attr.Name +'</a></li>'+
-        						'<li class="list-group-item">Location: '+ hit.seqid + ':'+ hit.start + '-' + hit.end+'</li>'+
+        						'<li class="list-group-item">Location: <a href="/search/' + hit.seqid + ':' + hit.start + '-' + hit.end + '">' +  hit.seqid + ':' + hit.start + '-' + hit.end + '</a>' + 
+        						
         				'</ul>');
         				}
         		}
