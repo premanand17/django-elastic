@@ -35,7 +35,7 @@ class EsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP search '''
-        time.sleep(1)
+        time.sleep(2)
         resp = self.client.get('/search/rs2476601/')
         self.assertEqual(resp.status_code, 200)
 #         print(resp.context)
