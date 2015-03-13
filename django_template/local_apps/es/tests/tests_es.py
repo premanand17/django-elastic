@@ -1,26 +1,20 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.conf import settings
 from django.core.management import call_command
 import requests
 from es.tests.settings_idx import IDX
-from django.test.utils import override_settings
 import time
-
-
-def setUpModule():
-    for idx_kwargs in IDX.values():
-        call_command('index_search', **idx_kwargs)
-    time.sleep(2)
-
-
-def tearDownModule():
-    for idx_kwargs in IDX.values():
-        requests.delete(settings.ELASTICSEARCH_URL +
-                        '/' + idx_kwargs['indexName'])
 
 
 @override_settings(MARKERDB=IDX['MARKER']['indexName'])
 class EsTest(TestCase):
+
+    def setUp(self):
+        call_command('index_search', **IDX['MARKER'])
+
+    def tearDown(self):
+        requests.delete(settings.ELASTICSEARCH_URL +
+                        '/' + IDX['MARKER']['indexName'])
 
     def test_es(self):
         ''' Test elasticsearch server is running and status '''
@@ -41,8 +35,10 @@ class EsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP search '''
+        time.sleep(1)
         resp = self.client.get('/search/rs2476601/')
         self.assertEqual(resp.status_code, 200)
+#         print(resp.context)
         self.assertTrue('data' in resp.context)
         snp = resp.context['data'][0]
         self._SNPtest(snp)
