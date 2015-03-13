@@ -9,7 +9,7 @@ import time
 def setUpModule():
     for idx_kwargs in IDX.values():
         call_command('index_search', **idx_kwargs)
-    time.sleep(1)
+    time.sleep(2)
 
 
 def tearDownModule():
