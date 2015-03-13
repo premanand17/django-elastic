@@ -2,7 +2,7 @@ import gzip
 import re
 import json
 import requests
-from django_template import settings
+from django.conf import settings
 
 
 class MarkerManager:
@@ -57,8 +57,10 @@ class MarkerManager:
                     lastSrc = src
 
         finally:
+            print(settings.ELASTICSEARCH_URL+'/' + index_name)
             response = requests.put(settings.ELASTICSEARCH_URL+'/' +
                                     index_name+'/marker/_bulk', data=data)
+            print(response)
         return response
 
     def _create_snp_index(self, **options):

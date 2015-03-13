@@ -1,7 +1,7 @@
 import gzip
 import re
 import requests
-from django_template import settings
+from django.conf import settings
 import json
 from db.management.loaders.GFF import GFF
 from es.views import elastic_search
