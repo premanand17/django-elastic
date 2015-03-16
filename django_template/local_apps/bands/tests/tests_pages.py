@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.core.management import call_command
 import string
 import random
+from db.models import Cv, Db
 
 
 class BandsViewsTestCase(TestCase):
@@ -16,6 +17,9 @@ class BandsViewsTestCase(TestCase):
     def tearDownClass(cls):
         super(BandsViewsTestCase, cls).tearDownClass()
         call_command('flush', verbosity=0, interactive=False)
+        # flush command does not clear data properly
+        Cv.objects.all().delete()
+        Db.objects.all().delete()
 
     def test_band(self):
         ''' Test the home page '''
