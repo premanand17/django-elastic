@@ -6,6 +6,7 @@ __pycache__/
 .project
 .pydevproject
 .settings
+.coverage
 settings_secret.py
 *_initial.py
 tmp
