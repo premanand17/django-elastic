@@ -11,7 +11,7 @@ class BandsViewsTestCase(TestCase):
     def setUpClass(cls):
         ''' Load fixture for all test methods in this class '''
         super(BandsViewsTestCase, cls).setUpClass()
-        call_command('loaddata', 'db2.json', verbosity=0)
+        call_command('loaddata', 'cv.json', 'db.json', 'feature.json', verbosity=0)
 
     @classmethod
     def tearDownClass(cls):
