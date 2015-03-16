@@ -56,10 +56,6 @@
   "name": "null",  "cv": 1,  "is_relationshiptype": 0,  "dbxref": 1
  }
 },{
- "model": "db.cvterm", "pk": 2, "fields": {
-  "name": "computer file",  "cv": 1,  "is_relationshiptype": 0,  "dbxref": 2
- }
-},{
  "model": "db.cvterm", "pk": 29, "fields": {
   "name": "version",  "cv": 6,  "is_relationshiptype": 0,  "dbxref": 29
  }
@@ -68,132 +64,16 @@
   "name": "comment",  "cv": 9,  "is_relationshiptype": 0,  "dbxref": 30
  }
 },{
- "model": "db.cvterm", "pk": 31, "fields": {
-  "name": "is_anonymous",  "cv": 9,  "is_relationshiptype": 0,  "dbxref": 31
- }
-},{
- "model": "db.cvterm", "pk": 32, "fields": {
-  "name": "is_a",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 32
- }
-},{
- "model": "db.cvterm", "pk": 33, "fields": {
-  "name": "is_reflexive",  "cv": 9,  "is_relationshiptype": 0,  "dbxref": 33
- }
-},{
- "model": "db.cvterm", "pk": 34, "fields": {
-  "name": "is_anti_symmetric",  "cv": 9,  "is_relationshiptype": 0,  "dbxref": 34
- }
-},{
- "model": "db.cvterm", "pk": 35, "fields": {
-  "name": "is_transitive",  "cv": 9,  "is_relationshiptype": 0,  "dbxref": 35
- }
-},{
- "model": "db.cvterm", "pk": 36, "fields": {
-  "name": "exact",  "cv": 8,  "is_relationshiptype": 0,  "dbxref": 36
- }
-},{
  "model": "db.cvterm", "pk": 37, "fields": {
   "name": "part_of",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 39
- }
-},{
- "model": "db.cvterm", "pk": 38, "fields": {
-  "name": "has_part",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 41
- }
-},{
- "model": "db.cvterm", "pk": 39, "fields": {
-  "name": "integral_part_of",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 43
- }
-},{
- "model": "db.cvterm", "pk": 40, "fields": {
-  "name": "has_integral_part",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 45
- }
-},{
- "model": "db.cvterm", "pk": 41, "fields": {
-  "name": "proper_part_of",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 47
- }
-},{
- "model": "db.cvterm", "pk": 42, "fields": {
-  "name": "has_proper_part",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 49
- }
-},{
- "model": "db.cvterm", "pk": 43, "fields": {
-  "name": "located_in",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 51
- }
-},{
- "model": "db.cvterm", "pk": 44, "fields": {
-  "name": "location_of",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 53
- }
-},{
- "model": "db.cvterm", "pk": 45, "fields": {
-  "name": "contained_in",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 55
- }
-},{
- "model": "db.cvterm", "pk": 46, "fields": {
-  "name": "contains",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 57
- }
-},{
- "model": "db.cvterm", "pk": 47, "fields": {
-  "name": "adjacent_to",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 59
- }
-},{
- "model": "db.cvterm", "pk": 48, "fields": {
-  "name": "transformation_of",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 61
- }
-},{
- "model": "db.cvterm", "pk": 49, "fields": {
-  "name": "transformed_into",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 63
  }
 },{
  "model": "db.cvterm", "pk": 50, "fields": {
   "name": "derives_from",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 65
  }
 },{
- "model": "db.cvterm", "pk": 51, "fields": {
-  "name": "derived_into",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 67
- }
-},{
- "model": "db.cvterm", "pk": 52, "fields": {
-  "name": "preceded_by",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 69
- }
-},{
- "model": "db.cvterm", "pk": 53, "fields": {
-  "name": "precedes",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 71
- }
-},{
- "model": "db.cvterm", "pk": 54, "fields": {
-  "name": "has_participant",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 73
- }
-},{
- "model": "db.cvterm", "pk": 55, "fields": {
-  "name": "participates_in",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 75
- }
-},{
- "model": "db.cvterm", "pk": 56, "fields": {
-  "name": "has_agent",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 77
- }
-},{
- "model": "db.cvterm", "pk": 57, "fields": {
-  "name": "agent_in",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 79
- }
-},{
- "model": "db.cvterm", "pk": 58, "fields": {
-  "name": "instance_of",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 81
- }
-},{
- "model": "db.cvterm", "pk": 59, "fields": {
-  "name": "has_improper_part",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 83
- }
-},{
- "model": "db.cvterm", "pk": 60, "fields": {
-  "name": "improper_part_of",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 85
- }
-},{
  "model": "db.cvterm", "pk": 61, "fields": {
   "name": "relationship",  "cv": 7,  "is_relationshiptype": 1,  "dbxref": 87
- }
-},{
- "model": "db.cvterm", "pk": 85, "fields": {
-  "name": "is_symmetric",  "cv": 9,  "is_relationshiptype": 0,  "dbxref": 111
  }
 },{
  "model": "db.cvterm", "pk": 95, "fields": {
@@ -204,52 +84,12 @@
   "name": "region",  "cv": 11,  "is_relationshiptype": 0,  "dbxref": 140
  }
 },{
- "model": "db.cvterm", "pk": 120, "fields": {
-  "name": "related",  "cv": 8,  "is_relationshiptype": 0,  "dbxref": 151
- }
-},{
- "model": "db.cvterm", "pk": 130, "fields": {
-  "name": "narrow",  "cv": 8,  "is_relationshiptype": 0,  "dbxref": 167
- }
-},{
- "model": "db.cvterm", "pk": 149, "fields": {
-  "name": "broad",  "cv": 8,  "is_relationshiptype": 0,  "dbxref": 196
- }
-},{
  "model": "db.cvterm", "pk": 455, "fields": {
   "name": "chromosome",  "cv": 11,  "is_relationshiptype": 0,  "dbxref": 600
  }
 },{
- "model": "db.cvterm", "pk": 2267, "fields": {
-  "name": "negatively_regulates",  "cv": 15,  "is_relationshiptype": 1,  "dbxref": 3088
- }
-},{
- "model": "db.cvterm", "pk": 2268, "fields": {
-  "name": "never_in_taxon",  "cv": 15,  "is_relationshiptype": 1,  "dbxref": 3090
- }
-},{
- "model": "db.cvterm", "pk": 2269, "fields": {
-  "name": "positively_regulates",  "cv": 15,  "is_relationshiptype": 1,  "dbxref": 3093
- }
-},{
- "model": "db.cvterm", "pk": 2270, "fields": {
-  "name": "regulates",  "cv": 15,  "is_relationshiptype": 1,  "dbxref": 3095
- }
-},{
- "model": "db.cvterm", "pk": 44512, "fields": {
-  "name": "is_candidate",  "cv": 75,  "is_relationshiptype": 0,  "dbxref": 100291
- }
-},{
- "model": "db.cvterm", "pk": 44513, "fields": {
-  "name": "region_id",  "cv": 75,  "is_relationshiptype": 0,  "dbxref": 100292
- }
-},{
  "model": "db.cvterm", "pk": 44514, "fields": {
   "name": "entrez_id",  "cv": 75,  "is_relationshiptype": 0,  "dbxref": 100293
- }
-},{
- "model": "db.cvterm", "pk": 44515, "fields": {
-  "name": "in_region",  "cv": 75,  "is_relationshiptype": 0,  "dbxref": 100294
  }
 },{
  "model": "db.cvterm", "pk": 44594, "fields": {
@@ -321,1627 +161,1627 @@
  }
 },{
  "model": "db.db", "pk": 1, "fields": {
-  "name": "null",  "description": "a fake database for local items",  "urlprefix": "",  "url": ""
+  "name": "null",  "description": "a fake database for local items"
  }
 },{
  "model": "db.db", "pk": 2, "fields": {
-  "name": "GFF_source",  "description": "A collection of sources (ie, column 2) from GFF files",  "urlprefix": "",  "url": ""
+  "name": "GFF_source",  "description": "A collection of sources (ie, column 2) from GFF files"
  }
 },{
  "model": "db.db", "pk": 40, "fields": {
-  "name": "OBO_REL",  "description": "",  "urlprefix": "",  "url": ""
+  "name": "OBO_REL"
  }
 },{
  "model": "db.db", "pk": 41, "fields": {
-  "name": "_global",  "description": "",  "urlprefix": "",  "url": ""
+  "name": "_global"
  }
 },{
  "model": "db.db", "pk": 42, "fields": {
-  "name": "internal",  "description": "",  "urlprefix": "",  "url": ""
+  "name": "internal"
  }
 },{
  "model": "db.db", "pk": 44, "fields": {
-  "name": "SO",  "description": "",  "urlprefix": "",  "url": ""
+  "name": "SO"
  }
 },{
  "model": "db.db", "pk": 82, "fields": {
-  "name": "RO",  "description": "",  "urlprefix": "",  "url": ""
+  "name": "RO"
  }
 },{
  "model": "db.db", "pk": 83, "fields": {
-  "name": "BFO",  "description": "",  "urlprefix": "",  "url": ""
+  "name": "BFO"
  }
 },{
  "model": "db.db", "pk": 257, "fields": {
-  "name": "test",  "description": "",  "urlprefix": "",  "url": ""
+  "name": "test"
  }
 },{
  "model": "db.dbxref", "pk": 1, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "local:null"
+  "db": 1,  "version": "",  "accession": "local:null"
  }
 },{
  "model": "db.dbxref", "pk": 2, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "local:computer file"
+  "db": 1,  "version": "",  "accession": "local:computer file"
  }
 },{
  "model": "db.dbxref", "pk": 3, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "local:glass"
+  "db": 1,  "version": "",  "accession": "local:glass"
  }
 },{
  "model": "db.dbxref", "pk": 4, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "local:photochemical_oligo"
+  "db": 1,  "version": "",  "accession": "local:photochemical_oligo"
  }
 },{
  "model": "db.dbxref", "pk": 5, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "developmental stages:fetus"
+  "db": 1,  "version": "",  "accession": "developmental stages:fetus"
  }
 },{
  "model": "db.dbxref", "pk": 6, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "developmental stages:neonate"
+  "db": 1,  "version": "",  "accession": "developmental stages:neonate"
  }
 },{
  "model": "db.dbxref", "pk": 7, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "developmental stages:child"
+  "db": 1,  "version": "",  "accession": "developmental stages:child"
  }
 },{
  "model": "db.dbxref", "pk": 8, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "developmental stages:adult_young"
+  "db": 1,  "version": "",  "accession": "developmental stages:adult_young"
  }
 },{
  "model": "db.dbxref", "pk": 9, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "developmental stages:adult"
+  "db": 1,  "version": "",  "accession": "developmental stages:adult"
  }
 },{
  "model": "db.dbxref", "pk": 10, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "developmental stages:adult_old"
+  "db": 1,  "version": "",  "accession": "developmental stages:adult_old"
  }
 },{
  "model": "db.dbxref", "pk": 11, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "local:survival_time"
+  "db": 1,  "version": "",  "accession": "local:survival_time"
  }
 },{
  "model": "db.dbxref", "pk": 12, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:n"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:n"
  }
 },{
  "model": "db.dbxref", "pk": 13, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:minimum"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:minimum"
  }
 },{
  "model": "db.dbxref", "pk": 14, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:maximum"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:maximum"
  }
 },{
  "model": "db.dbxref", "pk": 15, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:modality"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:modality"
  }
 },{
  "model": "db.dbxref", "pk": 16, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:modality p"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:modality p"
  }
 },{
  "model": "db.dbxref", "pk": 17, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:mean"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:mean"
  }
 },{
  "model": "db.dbxref", "pk": 18, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:median"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:median"
  }
 },{
  "model": "db.dbxref", "pk": 19, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:mode"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:mode"
  }
 },{
  "model": "db.dbxref", "pk": 20, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:quartile 1"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:quartile 1"
  }
 },{
  "model": "db.dbxref", "pk": 21, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:quartile 3"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:quartile 3"
  }
 },{
  "model": "db.dbxref", "pk": 22, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:skewness"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:skewness"
  }
 },{
  "model": "db.dbxref", "pk": 23, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:kurtosis"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:kurtosis"
  }
 },{
  "model": "db.dbxref", "pk": 24, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:chi square p"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:chi square p"
  }
 },{
  "model": "db.dbxref", "pk": 25, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:standard deviation"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:standard deviation"
  }
 },{
  "model": "db.dbxref", "pk": 26, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:expectation maximization gaussian mean"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:expectation maximization gaussian mean"
  }
 },{
  "model": "db.dbxref", "pk": 27, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:expectation maximization p"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:expectation maximization p"
  }
 },{
  "model": "db.dbxref", "pk": 28, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Statistical Terms:histogram"
+  "db": 1,  "version": "",  "accession": "Statistical Terms:histogram"
  }
 },{
  "model": "db.dbxref", "pk": 29, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "chado_properties:version"
+  "db": 1,  "version": "",  "accession": "chado_properties:version"
  }
 },{
  "model": "db.dbxref", "pk": 30, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "comment"
+  "db": 42,  "version": "",  "accession": "comment"
  }
 },{
  "model": "db.dbxref", "pk": 31, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "is_anonymous"
+  "db": 42,  "version": "",  "accession": "is_anonymous"
  }
 },{
  "model": "db.dbxref", "pk": 32, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "is_a"
+  "db": 40,  "version": "",  "accession": "is_a"
  }
 },{
  "model": "db.dbxref", "pk": 33, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "is_reflexive"
+  "db": 42,  "version": "",  "accession": "is_reflexive"
  }
 },{
  "model": "db.dbxref", "pk": 34, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "is_anti_symmetric"
+  "db": 42,  "version": "",  "accession": "is_anti_symmetric"
  }
 },{
  "model": "db.dbxref", "pk": 35, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "is_transitive"
+  "db": 42,  "version": "",  "accession": "is_transitive"
  }
 },{
  "model": "db.dbxref", "pk": 36, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "exact"
+  "db": 42,  "version": "",  "accession": "exact"
  }
 },{
  "model": "db.dbxref", "pk": 39, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "part_of"
+  "db": 40,  "version": "",  "accession": "part_of"
  }
 },{
  "model": "db.dbxref", "pk": 41, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "has_part"
+  "db": 40,  "version": "",  "accession": "has_part"
  }
 },{
  "model": "db.dbxref", "pk": 43, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "integral_part_of"
+  "db": 40,  "version": "",  "accession": "integral_part_of"
  }
 },{
  "model": "db.dbxref", "pk": 45, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "has_integral_part"
+  "db": 40,  "version": "",  "accession": "has_integral_part"
  }
 },{
  "model": "db.dbxref", "pk": 47, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "proper_part_of"
+  "db": 40,  "version": "",  "accession": "proper_part_of"
  }
 },{
  "model": "db.dbxref", "pk": 49, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "has_proper_part"
+  "db": 40,  "version": "",  "accession": "has_proper_part"
  }
 },{
  "model": "db.dbxref", "pk": 51, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "located_in"
+  "db": 40,  "version": "",  "accession": "located_in"
  }
 },{
  "model": "db.dbxref", "pk": 53, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "location_of"
+  "db": 40,  "version": "",  "accession": "location_of"
  }
 },{
  "model": "db.dbxref", "pk": 55, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "contained_in"
+  "db": 40,  "version": "",  "accession": "contained_in"
  }
 },{
  "model": "db.dbxref", "pk": 57, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "contains"
+  "db": 40,  "version": "",  "accession": "contains"
  }
 },{
  "model": "db.dbxref", "pk": 59, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "adjacent_to"
+  "db": 40,  "version": "",  "accession": "adjacent_to"
  }
 },{
  "model": "db.dbxref", "pk": 61, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "transformation_of"
+  "db": 40,  "version": "",  "accession": "transformation_of"
  }
 },{
  "model": "db.dbxref", "pk": 63, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "transformed_into"
+  "db": 40,  "version": "",  "accession": "transformed_into"
  }
 },{
  "model": "db.dbxref", "pk": 65, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "derives_from"
+  "db": 40,  "version": "",  "accession": "derives_from"
  }
 },{
  "model": "db.dbxref", "pk": 67, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "derived_into"
+  "db": 40,  "version": "",  "accession": "derived_into"
  }
 },{
  "model": "db.dbxref", "pk": 69, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "preceded_by"
+  "db": 40,  "version": "",  "accession": "preceded_by"
  }
 },{
  "model": "db.dbxref", "pk": 71, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "precedes"
+  "db": 40,  "version": "",  "accession": "precedes"
  }
 },{
  "model": "db.dbxref", "pk": 73, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "has_participant"
+  "db": 40,  "version": "",  "accession": "has_participant"
  }
 },{
  "model": "db.dbxref", "pk": 75, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "participates_in"
+  "db": 40,  "version": "",  "accession": "participates_in"
  }
 },{
  "model": "db.dbxref", "pk": 77, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "has_agent"
+  "db": 40,  "version": "",  "accession": "has_agent"
  }
 },{
  "model": "db.dbxref", "pk": 79, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "agent_in"
+  "db": 40,  "version": "",  "accession": "agent_in"
  }
 },{
  "model": "db.dbxref", "pk": 81, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "instance_of"
+  "db": 40,  "version": "",  "accession": "instance_of"
  }
 },{
  "model": "db.dbxref", "pk": 83, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "has_improper_part"
+  "db": 40,  "version": "",  "accession": "has_improper_part"
  }
 },{
  "model": "db.dbxref", "pk": 85, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "improper_part_of"
+  "db": 40,  "version": "",  "accession": "improper_part_of"
  }
 },{
  "model": "db.dbxref", "pk": 87, "fields": {
-  "description": "",  "db": 40,  "version": "",  "accession": "relationship"
+  "db": 40,  "version": "",  "accession": "relationship"
  }
 },{
  "model": "db.dbxref", "pk": 88, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "adjacent_to"
+  "db": 41,  "version": "",  "accession": "adjacent_to"
  }
 },{
  "model": "db.dbxref", "pk": 89, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "associated_with"
+  "db": 41,  "version": "",  "accession": "associated_with"
  }
 },{
  "model": "db.dbxref", "pk": 90, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "complete_evidence_for_feature"
+  "db": 41,  "version": "",  "accession": "complete_evidence_for_feature"
  }
 },{
  "model": "db.dbxref", "pk": 91, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "connects_on"
+  "db": 41,  "version": "",  "accession": "connects_on"
  }
 },{
  "model": "db.dbxref", "pk": 92, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "contained_by"
+  "db": 41,  "version": "",  "accession": "contained_by"
  }
 },{
  "model": "db.dbxref", "pk": 93, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "contains"
+  "db": 41,  "version": "",  "accession": "contains"
  }
 },{
  "model": "db.dbxref", "pk": 94, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "derives_from"
+  "db": 41,  "version": "",  "accession": "derives_from"
  }
 },{
  "model": "db.dbxref", "pk": 95, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "disconnected_from"
+  "db": 41,  "version": "",  "accession": "disconnected_from"
  }
 },{
  "model": "db.dbxref", "pk": 96, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "edited_from"
+  "db": 41,  "version": "",  "accession": "edited_from"
  }
 },{
  "model": "db.dbxref", "pk": 97, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "edited_to"
+  "db": 41,  "version": "",  "accession": "edited_to"
  }
 },{
  "model": "db.dbxref", "pk": 98, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "evidence_for_feature"
+  "db": 41,  "version": "",  "accession": "evidence_for_feature"
  }
 },{
  "model": "db.dbxref", "pk": 99, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "exemplar_of"
+  "db": 41,  "version": "",  "accession": "exemplar_of"
  }
 },{
  "model": "db.dbxref", "pk": 100, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "finished_by"
+  "db": 41,  "version": "",  "accession": "finished_by"
  }
 },{
  "model": "db.dbxref", "pk": 101, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "finishes"
+  "db": 41,  "version": "",  "accession": "finishes"
  }
 },{
  "model": "db.dbxref", "pk": 102, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "gained"
+  "db": 41,  "version": "",  "accession": "gained"
  }
 },{
  "model": "db.dbxref", "pk": 103, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "genome_of"
+  "db": 41,  "version": "",  "accession": "genome_of"
  }
 },{
  "model": "db.dbxref", "pk": 104, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "guided_by"
+  "db": 41,  "version": "",  "accession": "guided_by"
  }
 },{
  "model": "db.dbxref", "pk": 105, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "guides"
+  "db": 41,  "version": "",  "accession": "guides"
  }
 },{
  "model": "db.dbxref", "pk": 106, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "has_integral_part"
+  "db": 41,  "version": "",  "accession": "has_integral_part"
  }
 },{
  "model": "db.dbxref", "pk": 107, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "has_origin"
+  "db": 41,  "version": "",  "accession": "has_origin"
  }
 },{
  "model": "db.dbxref", "pk": 108, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "has_part"
+  "db": 41,  "version": "",  "accession": "has_part"
  }
 },{
  "model": "db.dbxref", "pk": 109, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "has_quality"
+  "db": 41,  "version": "",  "accession": "has_quality"
  }
 },{
  "model": "db.dbxref", "pk": 110, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "homologous_to"
+  "db": 41,  "version": "",  "accession": "homologous_to"
  }
 },{
  "model": "db.dbxref", "pk": 111, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "is_symmetric"
+  "db": 42,  "version": "",  "accession": "is_symmetric"
  }
 },{
  "model": "db.dbxref", "pk": 112, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "integral_part_of"
+  "db": 41,  "version": "",  "accession": "integral_part_of"
  }
 },{
  "model": "db.dbxref", "pk": 113, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "is_consecutive_sequence_of"
+  "db": 41,  "version": "",  "accession": "is_consecutive_sequence_of"
  }
 },{
  "model": "db.dbxref", "pk": 114, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "lost"
+  "db": 41,  "version": "",  "accession": "lost"
  }
 },{
  "model": "db.dbxref", "pk": 115, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "maximally_overlaps"
+  "db": 41,  "version": "",  "accession": "maximally_overlaps"
  }
 },{
  "model": "db.dbxref", "pk": 116, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "member_of"
+  "db": 41,  "version": "",  "accession": "member_of"
  }
 },{
  "model": "db.dbxref", "pk": 117, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "non_functional_homolog_of"
+  "db": 41,  "version": "",  "accession": "non_functional_homolog_of"
  }
 },{
  "model": "db.dbxref", "pk": 118, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "orthologous_to"
+  "db": 41,  "version": "",  "accession": "orthologous_to"
  }
 },{
  "model": "db.dbxref", "pk": 119, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "overlaps"
+  "db": 41,  "version": "",  "accession": "overlaps"
  }
 },{
  "model": "db.dbxref", "pk": 120, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "paralogous_to"
+  "db": 41,  "version": "",  "accession": "paralogous_to"
  }
 },{
  "model": "db.dbxref", "pk": 121, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "part_of"
+  "db": 41,  "version": "",  "accession": "part_of"
  }
 },{
  "model": "db.dbxref", "pk": 122, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "partial_evidence_for_feature"
+  "db": 41,  "version": "",  "accession": "partial_evidence_for_feature"
  }
 },{
  "model": "db.dbxref", "pk": 123, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "position_of"
+  "db": 41,  "version": "",  "accession": "position_of"
  }
 },{
  "model": "db.dbxref", "pk": 124, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "processed_from"
+  "db": 41,  "version": "",  "accession": "processed_from"
  }
 },{
  "model": "db.dbxref", "pk": 125, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "processed_into"
+  "db": 41,  "version": "",  "accession": "processed_into"
  }
 },{
  "model": "db.dbxref", "pk": 126, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "recombined_from"
+  "db": 41,  "version": "",  "accession": "recombined_from"
  }
 },{
  "model": "db.dbxref", "pk": 127, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "recombined_to"
+  "db": 41,  "version": "",  "accession": "recombined_to"
  }
 },{
  "model": "db.dbxref", "pk": 128, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "sequence_of"
+  "db": 41,  "version": "",  "accession": "sequence_of"
  }
 },{
  "model": "db.dbxref", "pk": 129, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "similar_to"
+  "db": 41,  "version": "",  "accession": "similar_to"
  }
 },{
  "model": "db.dbxref", "pk": 130, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "started_by"
+  "db": 41,  "version": "",  "accession": "started_by"
  }
 },{
  "model": "db.dbxref", "pk": 131, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "starts"
+  "db": 41,  "version": "",  "accession": "starts"
  }
 },{
  "model": "db.dbxref", "pk": 132, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "trans_spliced_from"
+  "db": 41,  "version": "",  "accession": "trans_spliced_from"
  }
 },{
  "model": "db.dbxref", "pk": 133, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "trans_spliced_to"
+  "db": 41,  "version": "",  "accession": "trans_spliced_to"
  }
 },{
  "model": "db.dbxref", "pk": 134, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "transcribed_from"
+  "db": 41,  "version": "",  "accession": "transcribed_from"
  }
 },{
  "model": "db.dbxref", "pk": 135, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "transcribed_to"
+  "db": 41,  "version": "",  "accession": "transcribed_to"
  }
 },{
  "model": "db.dbxref", "pk": 136, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "translates_to"
+  "db": 41,  "version": "",  "accession": "translates_to"
  }
 },{
  "model": "db.dbxref", "pk": 137, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "translation_of"
+  "db": 41,  "version": "",  "accession": "translation_of"
  }
 },{
  "model": "db.dbxref", "pk": 138, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "variant_of"
+  "db": 41,  "version": "",  "accession": "variant_of"
  }
 },{
  "model": "db.dbxref", "pk": 140, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "0000001"
+  "db": 44,  "version": "",  "accession": "0000001"
  }
 },{
  "model": "db.dbxref", "pk": 141, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "ke"
+  "db": 44,  "version": "",  "accession": "ke"
  }
 },{
  "model": "db.dbxref", "pk": 151, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "related"
+  "db": 42,  "version": "",  "accession": "related"
  }
 },{
  "model": "db.dbxref", "pk": 154, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "ls"
+  "db": 44,  "version": "",  "accession": "ls"
  }
 },{
  "model": "db.dbxref", "pk": 167, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "narrow"
+  "db": 42,  "version": "",  "accession": "narrow"
  }
 },{
  "model": "db.dbxref", "pk": 196, "fields": {
-  "description": "",  "db": 42,  "version": "",  "accession": "broad"
+  "db": 42,  "version": "",  "accession": "broad"
  }
 },{
  "model": "db.dbxref", "pk": 201, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "ma"
+  "db": 44,  "version": "",  "accession": "ma"
  }
 },{
  "model": "db.dbxref", "pk": 211, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "xp"
+  "db": 44,  "version": "",  "accession": "xp"
  }
 },{
  "model": "db.dbxref", "pk": 233, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "cb"
+  "db": 44,  "version": "",  "accession": "cb"
  }
 },{
  "model": "db.dbxref", "pk": 327, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "as"
+  "db": 44,  "version": "",  "accession": "as"
  }
 },{
  "model": "db.dbxref", "pk": 342, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "rd"
+  "db": 44,  "version": "",  "accession": "rd"
  }
 },{
  "model": "db.dbxref", "pk": 357, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000033"
+  "db": 44,  "version": "",  "accession": "1000033"
  }
 },{
  "model": "db.dbxref", "pk": 364, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "cjm"
+  "db": 44,  "version": "",  "accession": "cjm"
  }
 },{
  "model": "db.dbxref", "pk": 373, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "regcreative"
+  "db": 44,  "version": "",  "accession": "regcreative"
  }
 },{
  "model": "db.dbxref", "pk": 600, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "0000340"
+  "db": 44,  "version": "",  "accession": "0000340"
  }
 },{
  "model": "db.dbxref", "pk": 893, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "jh"
+  "db": 44,  "version": "",  "accession": "jh"
  }
 },{
  "model": "db.dbxref", "pk": 1049, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000034"
+  "db": 44,  "version": "",  "accession": "1000034"
  }
 },{
  "model": "db.dbxref", "pk": 1092, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "immuno_workshop"
+  "db": 44,  "version": "",  "accession": "immuno_workshop"
  }
 },{
  "model": "db.dbxref", "pk": 1099, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "nlw"
+  "db": 44,  "version": "",  "accession": "nlw"
  }
 },{
  "model": "db.dbxref", "pk": 1125, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "SG"
+  "db": 44,  "version": "",  "accession": "SG"
  }
 },{
  "model": "db.dbxref", "pk": 1255, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "GAR"
+  "db": 44,  "version": "",  "accession": "GAR"
  }
 },{
  "model": "db.dbxref", "pk": 1359, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "jk"
+  "db": 44,  "version": "",  "accession": "jk"
  }
 },{
  "model": "db.dbxref", "pk": 1522, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000004"
+  "db": 44,  "version": "",  "accession": "1000004"
  }
 },{
  "model": "db.dbxref", "pk": 1523, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000007"
+  "db": 44,  "version": "",  "accession": "1000007"
  }
 },{
  "model": "db.dbxref", "pk": 1820, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "bm"
+  "db": 44,  "version": "",  "accession": "bm"
  }
 },{
  "model": "db.dbxref", "pk": 2163, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "chado"
+  "db": 44,  "version": "",  "accession": "chado"
  }
 },{
  "model": "db.dbxref", "pk": 2420, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "jestill"
+  "db": 44,  "version": "",  "accession": "jestill"
  }
 },{
  "model": "db.dbxref", "pk": 2427, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "db"
+  "db": 44,  "version": "",  "accession": "db"
  }
 },{
  "model": "db.dbxref", "pk": 2442, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "AF"
+  "db": 44,  "version": "",  "accession": "AF"
  }
 },{
  "model": "db.dbxref", "pk": 2525, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "KE"
+  "db": 44,  "version": "",  "accession": "KE"
  }
 },{
  "model": "db.dbxref", "pk": 2535, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "mc"
+  "db": 44,  "version": "",  "accession": "mc"
  }
 },{
  "model": "db.dbxref", "pk": 2537, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "hd"
+  "db": 44,  "version": "",  "accession": "hd"
  }
 },{
  "model": "db.dbxref", "pk": 2541, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "BM"
+  "db": 44,  "version": "",  "accession": "BM"
  }
 },{
  "model": "db.dbxref", "pk": 2599, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "vw"
+  "db": 44,  "version": "",  "accession": "vw"
  }
 },{
  "model": "db.dbxref", "pk": 2792, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "andrewgibson"
+  "db": 44,  "version": "",  "accession": "andrewgibson"
  }
 },{
  "model": "db.dbxref", "pk": 2797, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "rtapella"
+  "db": 44,  "version": "",  "accession": "rtapella"
  }
 },{
  "model": "db.dbxref", "pk": 2855, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000002"
+  "db": 44,  "version": "",  "accession": "1000002"
  }
 },{
  "model": "db.dbxref", "pk": 2857, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000005"
+  "db": 44,  "version": "",  "accession": "1000005"
  }
 },{
  "model": "db.dbxref", "pk": 2858, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000008"
+  "db": 44,  "version": "",  "accession": "1000008"
  }
 },{
  "model": "db.dbxref", "pk": 2860, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000009"
+  "db": 44,  "version": "",  "accession": "1000009"
  }
 },{
  "model": "db.dbxref", "pk": 2861, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000010"
+  "db": 44,  "version": "",  "accession": "1000010"
  }
 },{
  "model": "db.dbxref", "pk": 2862, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000011"
+  "db": 44,  "version": "",  "accession": "1000011"
  }
 },{
  "model": "db.dbxref", "pk": 2863, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000012"
+  "db": 44,  "version": "",  "accession": "1000012"
  }
 },{
  "model": "db.dbxref", "pk": 2864, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000013"
+  "db": 44,  "version": "",  "accession": "1000013"
  }
 },{
  "model": "db.dbxref", "pk": 2865, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000014"
+  "db": 44,  "version": "",  "accession": "1000014"
  }
 },{
  "model": "db.dbxref", "pk": 2866, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000015"
+  "db": 44,  "version": "",  "accession": "1000015"
  }
 },{
  "model": "db.dbxref", "pk": 2867, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000016"
+  "db": 44,  "version": "",  "accession": "1000016"
  }
 },{
  "model": "db.dbxref", "pk": 2868, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000017"
+  "db": 44,  "version": "",  "accession": "1000017"
  }
 },{
  "model": "db.dbxref", "pk": 2870, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000018"
+  "db": 44,  "version": "",  "accession": "1000018"
  }
 },{
  "model": "db.dbxref", "pk": 2871, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000019"
+  "db": 44,  "version": "",  "accession": "1000019"
  }
 },{
  "model": "db.dbxref", "pk": 2872, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000020"
+  "db": 44,  "version": "",  "accession": "1000020"
  }
 },{
  "model": "db.dbxref", "pk": 2873, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000021"
+  "db": 44,  "version": "",  "accession": "1000021"
  }
 },{
  "model": "db.dbxref", "pk": 2874, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000022"
+  "db": 44,  "version": "",  "accession": "1000022"
  }
 },{
  "model": "db.dbxref", "pk": 2875, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000023"
+  "db": 44,  "version": "",  "accession": "1000023"
  }
 },{
  "model": "db.dbxref", "pk": 2876, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000024"
+  "db": 44,  "version": "",  "accession": "1000024"
  }
 },{
  "model": "db.dbxref", "pk": 2877, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000025"
+  "db": 44,  "version": "",  "accession": "1000025"
  }
 },{
  "model": "db.dbxref", "pk": 2878, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000026"
+  "db": 44,  "version": "",  "accession": "1000026"
  }
 },{
  "model": "db.dbxref", "pk": 2879, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000027"
+  "db": 44,  "version": "",  "accession": "1000027"
  }
 },{
  "model": "db.dbxref", "pk": 2880, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000028"
+  "db": 44,  "version": "",  "accession": "1000028"
  }
 },{
  "model": "db.dbxref", "pk": 2881, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000029"
+  "db": 44,  "version": "",  "accession": "1000029"
  }
 },{
  "model": "db.dbxref", "pk": 2883, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000030"
+  "db": 44,  "version": "",  "accession": "1000030"
  }
 },{
  "model": "db.dbxref", "pk": 2885, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000031"
+  "db": 44,  "version": "",  "accession": "1000031"
  }
 },{
  "model": "db.dbxref", "pk": 2886, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000032"
+  "db": 44,  "version": "",  "accession": "1000032"
  }
 },{
  "model": "db.dbxref", "pk": 2890, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000035"
+  "db": 44,  "version": "",  "accession": "1000035"
  }
 },{
  "model": "db.dbxref", "pk": 2892, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000036"
+  "db": 44,  "version": "",  "accession": "1000036"
  }
 },{
  "model": "db.dbxref", "pk": 2894, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000037"
+  "db": 44,  "version": "",  "accession": "1000037"
  }
 },{
  "model": "db.dbxref", "pk": 2896, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000038"
+  "db": 44,  "version": "",  "accession": "1000038"
  }
 },{
  "model": "db.dbxref", "pk": 2897, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000039"
+  "db": 44,  "version": "",  "accession": "1000039"
  }
 },{
  "model": "db.dbxref", "pk": 2898, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000040"
+  "db": 44,  "version": "",  "accession": "1000040"
  }
 },{
  "model": "db.dbxref", "pk": 2899, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000041"
+  "db": 44,  "version": "",  "accession": "1000041"
  }
 },{
  "model": "db.dbxref", "pk": 2900, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000042"
+  "db": 44,  "version": "",  "accession": "1000042"
  }
 },{
  "model": "db.dbxref", "pk": 2901, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000043"
+  "db": 44,  "version": "",  "accession": "1000043"
  }
 },{
  "model": "db.dbxref", "pk": 2904, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000044"
+  "db": 44,  "version": "",  "accession": "1000044"
  }
 },{
  "model": "db.dbxref", "pk": 2906, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000045"
+  "db": 44,  "version": "",  "accession": "1000045"
  }
 },{
  "model": "db.dbxref", "pk": 2908, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000046"
+  "db": 44,  "version": "",  "accession": "1000046"
  }
 },{
  "model": "db.dbxref", "pk": 2909, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000047"
+  "db": 44,  "version": "",  "accession": "1000047"
  }
 },{
  "model": "db.dbxref", "pk": 2910, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000048"
+  "db": 44,  "version": "",  "accession": "1000048"
  }
 },{
  "model": "db.dbxref", "pk": 2911, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000049"
+  "db": 44,  "version": "",  "accession": "1000049"
  }
 },{
  "model": "db.dbxref", "pk": 2912, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000177"
+  "db": 44,  "version": "",  "accession": "1000177"
  }
 },{
  "model": "db.dbxref", "pk": 2913, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000179"
+  "db": 44,  "version": "",  "accession": "1000179"
  }
 },{
  "model": "db.dbxref", "pk": 2914, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000050"
+  "db": 44,  "version": "",  "accession": "1000050"
  }
 },{
  "model": "db.dbxref", "pk": 2915, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000054"
+  "db": 44,  "version": "",  "accession": "1000054"
  }
 },{
  "model": "db.dbxref", "pk": 2916, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000055"
+  "db": 44,  "version": "",  "accession": "1000055"
  }
 },{
  "model": "db.dbxref", "pk": 2917, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000056"
+  "db": 44,  "version": "",  "accession": "1000056"
  }
 },{
  "model": "db.dbxref", "pk": 2918, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000057"
+  "db": 44,  "version": "",  "accession": "1000057"
  }
 },{
  "model": "db.dbxref", "pk": 2919, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000058"
+  "db": 44,  "version": "",  "accession": "1000058"
  }
 },{
  "model": "db.dbxref", "pk": 2920, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000059"
+  "db": 44,  "version": "",  "accession": "1000059"
  }
 },{
  "model": "db.dbxref", "pk": 2921, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000060"
+  "db": 44,  "version": "",  "accession": "1000060"
  }
 },{
  "model": "db.dbxref", "pk": 2922, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000061"
+  "db": 44,  "version": "",  "accession": "1000061"
  }
 },{
  "model": "db.dbxref", "pk": 2923, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000062"
+  "db": 44,  "version": "",  "accession": "1000062"
  }
 },{
  "model": "db.dbxref", "pk": 2924, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000063"
+  "db": 44,  "version": "",  "accession": "1000063"
  }
 },{
  "model": "db.dbxref", "pk": 2925, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000064"
+  "db": 44,  "version": "",  "accession": "1000064"
  }
 },{
  "model": "db.dbxref", "pk": 2926, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000065"
+  "db": 44,  "version": "",  "accession": "1000065"
  }
 },{
  "model": "db.dbxref", "pk": 2928, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000066"
+  "db": 44,  "version": "",  "accession": "1000066"
  }
 },{
  "model": "db.dbxref", "pk": 2929, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000067"
+  "db": 44,  "version": "",  "accession": "1000067"
  }
 },{
  "model": "db.dbxref", "pk": 2930, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000068"
+  "db": 44,  "version": "",  "accession": "1000068"
  }
 },{
  "model": "db.dbxref", "pk": 2931, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000069"
+  "db": 44,  "version": "",  "accession": "1000069"
  }
 },{
  "model": "db.dbxref", "pk": 2932, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000070"
+  "db": 44,  "version": "",  "accession": "1000070"
  }
 },{
  "model": "db.dbxref", "pk": 2933, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000071"
+  "db": 44,  "version": "",  "accession": "1000071"
  }
 },{
  "model": "db.dbxref", "pk": 2934, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000072"
+  "db": 44,  "version": "",  "accession": "1000072"
  }
 },{
  "model": "db.dbxref", "pk": 2935, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000073"
+  "db": 44,  "version": "",  "accession": "1000073"
  }
 },{
  "model": "db.dbxref", "pk": 2936, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000074"
+  "db": 44,  "version": "",  "accession": "1000074"
  }
 },{
  "model": "db.dbxref", "pk": 2937, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000075"
+  "db": 44,  "version": "",  "accession": "1000075"
  }
 },{
  "model": "db.dbxref", "pk": 2938, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000076"
+  "db": 44,  "version": "",  "accession": "1000076"
  }
 },{
  "model": "db.dbxref", "pk": 2939, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000078"
+  "db": 44,  "version": "",  "accession": "1000078"
  }
 },{
  "model": "db.dbxref", "pk": 2940, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000079"
+  "db": 44,  "version": "",  "accession": "1000079"
  }
 },{
  "model": "db.dbxref", "pk": 2941, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000080"
+  "db": 44,  "version": "",  "accession": "1000080"
  }
 },{
  "model": "db.dbxref", "pk": 2942, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000081"
+  "db": 44,  "version": "",  "accession": "1000081"
  }
 },{
  "model": "db.dbxref", "pk": 2943, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000082"
+  "db": 44,  "version": "",  "accession": "1000082"
  }
 },{
  "model": "db.dbxref", "pk": 2944, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000083"
+  "db": 44,  "version": "",  "accession": "1000083"
  }
 },{
  "model": "db.dbxref", "pk": 2945, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000084"
+  "db": 44,  "version": "",  "accession": "1000084"
  }
 },{
  "model": "db.dbxref", "pk": 2946, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000085"
+  "db": 44,  "version": "",  "accession": "1000085"
  }
 },{
  "model": "db.dbxref", "pk": 2947, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000086"
+  "db": 44,  "version": "",  "accession": "1000086"
  }
 },{
  "model": "db.dbxref", "pk": 2948, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000087"
+  "db": 44,  "version": "",  "accession": "1000087"
  }
 },{
  "model": "db.dbxref", "pk": 2949, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000088"
+  "db": 44,  "version": "",  "accession": "1000088"
  }
 },{
  "model": "db.dbxref", "pk": 2950, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000090"
+  "db": 44,  "version": "",  "accession": "1000090"
  }
 },{
  "model": "db.dbxref", "pk": 2951, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000091"
+  "db": 44,  "version": "",  "accession": "1000091"
  }
 },{
  "model": "db.dbxref", "pk": 2952, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000089"
+  "db": 44,  "version": "",  "accession": "1000089"
  }
 },{
  "model": "db.dbxref", "pk": 2953, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000092"
+  "db": 44,  "version": "",  "accession": "1000092"
  }
 },{
  "model": "db.dbxref", "pk": 2954, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000093"
+  "db": 44,  "version": "",  "accession": "1000093"
  }
 },{
  "model": "db.dbxref", "pk": 2955, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000094"
+  "db": 44,  "version": "",  "accession": "1000094"
  }
 },{
  "model": "db.dbxref", "pk": 2956, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000095"
+  "db": 44,  "version": "",  "accession": "1000095"
  }
 },{
  "model": "db.dbxref", "pk": 2957, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000096"
+  "db": 44,  "version": "",  "accession": "1000096"
  }
 },{
  "model": "db.dbxref", "pk": 2958, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000097"
+  "db": 44,  "version": "",  "accession": "1000097"
  }
 },{
  "model": "db.dbxref", "pk": 2959, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000098"
+  "db": 44,  "version": "",  "accession": "1000098"
  }
 },{
  "model": "db.dbxref", "pk": 2960, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000099"
+  "db": 44,  "version": "",  "accession": "1000099"
  }
 },{
  "model": "db.dbxref", "pk": 2961, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000100"
+  "db": 44,  "version": "",  "accession": "1000100"
  }
 },{
  "model": "db.dbxref", "pk": 2962, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000101"
+  "db": 44,  "version": "",  "accession": "1000101"
  }
 },{
  "model": "db.dbxref", "pk": 2963, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000102"
+  "db": 44,  "version": "",  "accession": "1000102"
  }
 },{
  "model": "db.dbxref", "pk": 2964, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000103"
+  "db": 44,  "version": "",  "accession": "1000103"
  }
 },{
  "model": "db.dbxref", "pk": 2965, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000104"
+  "db": 44,  "version": "",  "accession": "1000104"
  }
 },{
  "model": "db.dbxref", "pk": 2966, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000105"
+  "db": 44,  "version": "",  "accession": "1000105"
  }
 },{
  "model": "db.dbxref", "pk": 2967, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000106"
+  "db": 44,  "version": "",  "accession": "1000106"
  }
 },{
  "model": "db.dbxref", "pk": 2968, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000107"
+  "db": 44,  "version": "",  "accession": "1000107"
  }
 },{
  "model": "db.dbxref", "pk": 2969, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000108"
+  "db": 44,  "version": "",  "accession": "1000108"
  }
 },{
  "model": "db.dbxref", "pk": 2970, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000109"
+  "db": 44,  "version": "",  "accession": "1000109"
  }
 },{
  "model": "db.dbxref", "pk": 2971, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000110"
+  "db": 44,  "version": "",  "accession": "1000110"
  }
 },{
  "model": "db.dbxref", "pk": 2972, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000111"
+  "db": 44,  "version": "",  "accession": "1000111"
  }
 },{
  "model": "db.dbxref", "pk": 2973, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000113"
+  "db": 44,  "version": "",  "accession": "1000113"
  }
 },{
  "model": "db.dbxref", "pk": 2974, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000114"
+  "db": 44,  "version": "",  "accession": "1000114"
  }
 },{
  "model": "db.dbxref", "pk": 2975, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000112"
+  "db": 44,  "version": "",  "accession": "1000112"
  }
 },{
  "model": "db.dbxref", "pk": 2976, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000115"
+  "db": 44,  "version": "",  "accession": "1000115"
  }
 },{
  "model": "db.dbxref", "pk": 2977, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000116"
+  "db": 44,  "version": "",  "accession": "1000116"
  }
 },{
  "model": "db.dbxref", "pk": 2978, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000117"
+  "db": 44,  "version": "",  "accession": "1000117"
  }
 },{
  "model": "db.dbxref", "pk": 2979, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000118"
+  "db": 44,  "version": "",  "accession": "1000118"
  }
 },{
  "model": "db.dbxref", "pk": 2980, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000119"
+  "db": 44,  "version": "",  "accession": "1000119"
  }
 },{
  "model": "db.dbxref", "pk": 2981, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000120"
+  "db": 44,  "version": "",  "accession": "1000120"
  }
 },{
  "model": "db.dbxref", "pk": 2982, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000121"
+  "db": 44,  "version": "",  "accession": "1000121"
  }
 },{
  "model": "db.dbxref", "pk": 2983, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000122"
+  "db": 44,  "version": "",  "accession": "1000122"
  }
 },{
  "model": "db.dbxref", "pk": 2984, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000123"
+  "db": 44,  "version": "",  "accession": "1000123"
  }
 },{
  "model": "db.dbxref", "pk": 2985, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000124"
+  "db": 44,  "version": "",  "accession": "1000124"
  }
 },{
  "model": "db.dbxref", "pk": 2986, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000125"
+  "db": 44,  "version": "",  "accession": "1000125"
  }
 },{
  "model": "db.dbxref", "pk": 2987, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000126"
+  "db": 44,  "version": "",  "accession": "1000126"
  }
 },{
  "model": "db.dbxref", "pk": 2988, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000127"
+  "db": 44,  "version": "",  "accession": "1000127"
  }
 },{
  "model": "db.dbxref", "pk": 2989, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000132"
+  "db": 44,  "version": "",  "accession": "1000132"
  }
 },{
  "model": "db.dbxref", "pk": 2990, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000134"
+  "db": 44,  "version": "",  "accession": "1000134"
  }
 },{
  "model": "db.dbxref", "pk": 2991, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000136"
+  "db": 44,  "version": "",  "accession": "1000136"
  }
 },{
  "model": "db.dbxref", "pk": 2993, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000138"
+  "db": 44,  "version": "",  "accession": "1000138"
  }
 },{
  "model": "db.dbxref", "pk": 2994, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000140"
+  "db": 44,  "version": "",  "accession": "1000140"
  }
 },{
  "model": "db.dbxref", "pk": 2995, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000141"
+  "db": 44,  "version": "",  "accession": "1000141"
  }
 },{
  "model": "db.dbxref", "pk": 2996, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000142"
+  "db": 44,  "version": "",  "accession": "1000142"
  }
 },{
  "model": "db.dbxref", "pk": 2998, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000143"
+  "db": 44,  "version": "",  "accession": "1000143"
  }
 },{
  "model": "db.dbxref", "pk": 2999, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000144"
+  "db": 44,  "version": "",  "accession": "1000144"
  }
 },{
  "model": "db.dbxref", "pk": 3000, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000145"
+  "db": 44,  "version": "",  "accession": "1000145"
  }
 },{
  "model": "db.dbxref", "pk": 3001, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000146"
+  "db": 44,  "version": "",  "accession": "1000146"
  }
 },{
  "model": "db.dbxref", "pk": 3002, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000147"
+  "db": 44,  "version": "",  "accession": "1000147"
  }
 },{
  "model": "db.dbxref", "pk": 3003, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000148"
+  "db": 44,  "version": "",  "accession": "1000148"
  }
 },{
  "model": "db.dbxref", "pk": 3004, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000149"
+  "db": 44,  "version": "",  "accession": "1000149"
  }
 },{
  "model": "db.dbxref", "pk": 3005, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000150"
+  "db": 44,  "version": "",  "accession": "1000150"
  }
 },{
  "model": "db.dbxref", "pk": 3006, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000151"
+  "db": 44,  "version": "",  "accession": "1000151"
  }
 },{
  "model": "db.dbxref", "pk": 3007, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000152"
+  "db": 44,  "version": "",  "accession": "1000152"
  }
 },{
  "model": "db.dbxref", "pk": 3008, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000153"
+  "db": 44,  "version": "",  "accession": "1000153"
  }
 },{
  "model": "db.dbxref", "pk": 3009, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000154"
+  "db": 44,  "version": "",  "accession": "1000154"
  }
 },{
  "model": "db.dbxref", "pk": 3010, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000155"
+  "db": 44,  "version": "",  "accession": "1000155"
  }
 },{
  "model": "db.dbxref", "pk": 3011, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000156"
+  "db": 44,  "version": "",  "accession": "1000156"
  }
 },{
  "model": "db.dbxref", "pk": 3012, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000157"
+  "db": 44,  "version": "",  "accession": "1000157"
  }
 },{
  "model": "db.dbxref", "pk": 3013, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000158"
+  "db": 44,  "version": "",  "accession": "1000158"
  }
 },{
  "model": "db.dbxref", "pk": 3014, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000159"
+  "db": 44,  "version": "",  "accession": "1000159"
  }
 },{
  "model": "db.dbxref", "pk": 3015, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000160"
+  "db": 44,  "version": "",  "accession": "1000160"
  }
 },{
  "model": "db.dbxref", "pk": 3016, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000161"
+  "db": 44,  "version": "",  "accession": "1000161"
  }
 },{
  "model": "db.dbxref", "pk": 3017, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000162"
+  "db": 44,  "version": "",  "accession": "1000162"
  }
 },{
  "model": "db.dbxref", "pk": 3018, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000170"
+  "db": 44,  "version": "",  "accession": "1000170"
  }
 },{
  "model": "db.dbxref", "pk": 3019, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000171"
+  "db": 44,  "version": "",  "accession": "1000171"
  }
 },{
  "model": "db.dbxref", "pk": 3020, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000173"
+  "db": 44,  "version": "",  "accession": "1000173"
  }
 },{
  "model": "db.dbxref", "pk": 3021, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000175"
+  "db": 44,  "version": "",  "accession": "1000175"
  }
 },{
  "model": "db.dbxref", "pk": 3022, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000180"
+  "db": 44,  "version": "",  "accession": "1000180"
  }
 },{
  "model": "db.dbxref", "pk": 3023, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000181"
+  "db": 44,  "version": "",  "accession": "1000181"
  }
 },{
  "model": "db.dbxref", "pk": 3024, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000182"
+  "db": 44,  "version": "",  "accession": "1000182"
  }
 },{
  "model": "db.dbxref", "pk": 3025, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000183"
+  "db": 44,  "version": "",  "accession": "1000183"
  }
 },{
  "model": "db.dbxref", "pk": 3026, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000184"
+  "db": 44,  "version": "",  "accession": "1000184"
  }
 },{
  "model": "db.dbxref", "pk": 3027, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000185"
+  "db": 44,  "version": "",  "accession": "1000185"
  }
 },{
  "model": "db.dbxref", "pk": 3028, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1000186"
+  "db": 44,  "version": "",  "accession": "1000186"
  }
 },{
  "model": "db.dbxref", "pk": 3029, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001186"
+  "db": 44,  "version": "",  "accession": "1001186"
  }
 },{
  "model": "db.dbxref", "pk": 3030, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001187"
+  "db": 44,  "version": "",  "accession": "1001187"
  }
 },{
  "model": "db.dbxref", "pk": 3031, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001188"
+  "db": 44,  "version": "",  "accession": "1001188"
  }
 },{
  "model": "db.dbxref", "pk": 3032, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001189"
+  "db": 44,  "version": "",  "accession": "1001189"
  }
 },{
  "model": "db.dbxref", "pk": 3033, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001190"
+  "db": 44,  "version": "",  "accession": "1001190"
  }
 },{
  "model": "db.dbxref", "pk": 3034, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001191"
+  "db": 44,  "version": "",  "accession": "1001191"
  }
 },{
  "model": "db.dbxref", "pk": 3035, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001192"
+  "db": 44,  "version": "",  "accession": "1001192"
  }
 },{
  "model": "db.dbxref", "pk": 3036, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001193"
+  "db": 44,  "version": "",  "accession": "1001193"
  }
 },{
  "model": "db.dbxref", "pk": 3037, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001194"
+  "db": 44,  "version": "",  "accession": "1001194"
  }
 },{
  "model": "db.dbxref", "pk": 3038, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001195"
+  "db": 44,  "version": "",  "accession": "1001195"
  }
 },{
  "model": "db.dbxref", "pk": 3039, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001196"
+  "db": 44,  "version": "",  "accession": "1001196"
  }
 },{
  "model": "db.dbxref", "pk": 3040, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001197"
+  "db": 44,  "version": "",  "accession": "1001197"
  }
 },{
  "model": "db.dbxref", "pk": 3041, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001217"
+  "db": 44,  "version": "",  "accession": "1001217"
  }
 },{
  "model": "db.dbxref", "pk": 3042, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001244"
+  "db": 44,  "version": "",  "accession": "1001244"
  }
 },{
  "model": "db.dbxref", "pk": 3043, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001246"
+  "db": 44,  "version": "",  "accession": "1001246"
  }
 },{
  "model": "db.dbxref", "pk": 3044, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001247"
+  "db": 44,  "version": "",  "accession": "1001247"
  }
 },{
  "model": "db.dbxref", "pk": 3045, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001249"
+  "db": 44,  "version": "",  "accession": "1001249"
  }
 },{
  "model": "db.dbxref", "pk": 3046, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001251"
+  "db": 44,  "version": "",  "accession": "1001251"
  }
 },{
  "model": "db.dbxref", "pk": 3047, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001254"
+  "db": 44,  "version": "",  "accession": "1001254"
  }
 },{
  "model": "db.dbxref", "pk": 3048, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001255"
+  "db": 44,  "version": "",  "accession": "1001255"
  }
 },{
  "model": "db.dbxref", "pk": 3049, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001259"
+  "db": 44,  "version": "",  "accession": "1001259"
  }
 },{
  "model": "db.dbxref", "pk": 3050, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001260"
+  "db": 44,  "version": "",  "accession": "1001260"
  }
 },{
  "model": "db.dbxref", "pk": 3052, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001261"
+  "db": 44,  "version": "",  "accession": "1001261"
  }
 },{
  "model": "db.dbxref", "pk": 3054, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001262"
+  "db": 44,  "version": "",  "accession": "1001262"
  }
 },{
  "model": "db.dbxref", "pk": 3055, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001263"
+  "db": 44,  "version": "",  "accession": "1001263"
  }
 },{
  "model": "db.dbxref", "pk": 3056, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001264"
+  "db": 44,  "version": "",  "accession": "1001264"
  }
 },{
  "model": "db.dbxref", "pk": 3057, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001265"
+  "db": 44,  "version": "",  "accession": "1001265"
  }
 },{
  "model": "db.dbxref", "pk": 3058, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001266"
+  "db": 44,  "version": "",  "accession": "1001266"
  }
 },{
  "model": "db.dbxref", "pk": 3059, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001267"
+  "db": 44,  "version": "",  "accession": "1001267"
  }
 },{
  "model": "db.dbxref", "pk": 3060, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001268"
+  "db": 44,  "version": "",  "accession": "1001268"
  }
 },{
  "model": "db.dbxref", "pk": 3062, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001269"
+  "db": 44,  "version": "",  "accession": "1001269"
  }
 },{
  "model": "db.dbxref", "pk": 3063, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001270"
+  "db": 44,  "version": "",  "accession": "1001270"
  }
 },{
  "model": "db.dbxref", "pk": 3064, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001271"
+  "db": 44,  "version": "",  "accession": "1001271"
  }
 },{
  "model": "db.dbxref", "pk": 3066, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001272"
+  "db": 44,  "version": "",  "accession": "1001272"
  }
 },{
  "model": "db.dbxref", "pk": 3067, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001273"
+  "db": 44,  "version": "",  "accession": "1001273"
  }
 },{
  "model": "db.dbxref", "pk": 3068, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001274"
+  "db": 44,  "version": "",  "accession": "1001274"
  }
 },{
  "model": "db.dbxref", "pk": 3071, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001275"
+  "db": 44,  "version": "",  "accession": "1001275"
  }
 },{
  "model": "db.dbxref", "pk": 3072, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001277"
+  "db": 44,  "version": "",  "accession": "1001277"
  }
 },{
  "model": "db.dbxref", "pk": 3073, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001279"
+  "db": 44,  "version": "",  "accession": "1001279"
  }
 },{
  "model": "db.dbxref", "pk": 3074, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001280"
+  "db": 44,  "version": "",  "accession": "1001280"
  }
 },{
  "model": "db.dbxref", "pk": 3075, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001281"
+  "db": 44,  "version": "",  "accession": "1001281"
  }
 },{
  "model": "db.dbxref", "pk": 3076, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001282"
+  "db": 44,  "version": "",  "accession": "1001282"
  }
 },{
  "model": "db.dbxref", "pk": 3077, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001283"
+  "db": 44,  "version": "",  "accession": "1001283"
  }
 },{
  "model": "db.dbxref", "pk": 3078, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001284"
+  "db": 44,  "version": "",  "accession": "1001284"
  }
 },{
  "model": "db.dbxref", "pk": 3080, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001285"
+  "db": 44,  "version": "",  "accession": "1001285"
  }
 },{
  "model": "db.dbxref", "pk": 3081, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001286"
+  "db": 44,  "version": "",  "accession": "1001286"
  }
 },{
  "model": "db.dbxref", "pk": 3082, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001287"
+  "db": 44,  "version": "",  "accession": "1001287"
  }
 },{
  "model": "db.dbxref", "pk": 3084, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "1001288"
+  "db": 44,  "version": "",  "accession": "1001288"
  }
 },{
  "model": "db.dbxref", "pk": 3085, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "2000061"
+  "db": 44,  "version": "",  "accession": "2000061"
  }
 },{
  "model": "db.dbxref", "pk": 3086, "fields": {
-  "description": "",  "db": 44,  "version": "",  "accession": "3000000"
+  "db": 44,  "version": "",  "accession": "3000000"
  }
 },{
  "model": "db.dbxref", "pk": 3088, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "negatively_regulates"
+  "db": 41,  "version": "",  "accession": "negatively_regulates"
  }
 },{
  "model": "db.dbxref", "pk": 3090, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "never_in_taxon"
+  "db": 41,  "version": "",  "accession": "never_in_taxon"
  }
 },{
  "model": "db.dbxref", "pk": 3093, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "positively_regulates"
+  "db": 41,  "version": "",  "accession": "positively_regulates"
  }
 },{
  "model": "db.dbxref", "pk": 3095, "fields": {
-  "description": "",  "db": 41,  "version": "",  "accession": "regulates"
+  "db": 41,  "version": "",  "accession": "regulates"
  }
 },{
  "model": "db.dbxref", "pk": 100291, "fields": {
-  "description": "",  "db": 1,  "version": "1",  "accession": "autocreated:is_candidate"
+  "db": 1,  "version": "1",  "accession": "autocreated:is_candidate"
  }
 },{
  "model": "db.dbxref", "pk": 100292, "fields": {
-  "description": "",  "db": 1,  "version": "1",  "accession": "autocreated:region_id"
+  "db": 1,  "version": "1",  "accession": "autocreated:region_id"
  }
 },{
  "model": "db.dbxref", "pk": 100293, "fields": {
-  "description": "",  "db": 1,  "version": "1",  "accession": "autocreated:entrez_id"
+  "db": 1,  "version": "1",  "accession": "autocreated:entrez_id"
  }
 },{
  "model": "db.dbxref", "pk": 100294, "fields": {
-  "description": "",  "db": 1,  "version": "1",  "accession": "autocreated:in_region"
+  "db": 1,  "version": "1",  "accession": "autocreated:in_region"
  }
 },{
  "model": "db.dbxref", "pk": 100295, "fields": {
-  "description": "",  "db": 2,  "version": "1",  "accession": "t1d_region"
+  "db": 2,  "version": "1",  "accession": "t1d_region"
  }
 },{
  "model": "db.dbxref", "pk": 100305, "fields": {
-  "description": "",  "db": 257,  "version": "",  "accession": "XXXXXX"
+  "db": 257,  "version": "",  "accession": "XXXXXX"
  }
 },{
  "model": "db.dbxref", "pk": 100374, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gpos100"
+  "db": 1,  "version": "",  "accession": "gpos100"
  }
 },{
  "model": "db.dbxref", "pk": 100375, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gpos"
+  "db": 1,  "version": "",  "accession": "gpos"
  }
 },{
  "model": "db.dbxref", "pk": 100376, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gpos75"
+  "db": 1,  "version": "",  "accession": "gpos75"
  }
 },{
  "model": "db.dbxref", "pk": 100377, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gpos66"
+  "db": 1,  "version": "",  "accession": "gpos66"
  }
 },{
  "model": "db.dbxref", "pk": 100378, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gpos50"
+  "db": 1,  "version": "",  "accession": "gpos50"
  }
 },{
  "model": "db.dbxref", "pk": 100379, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gpos33"
+  "db": 1,  "version": "",  "accession": "gpos33"
  }
 },{
  "model": "db.dbxref", "pk": 100380, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gpos25"
+  "db": 1,  "version": "",  "accession": "gpos25"
  }
 },{
  "model": "db.dbxref", "pk": 100381, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gvar"
+  "db": 1,  "version": "",  "accession": "gvar"
  }
 },{
  "model": "db.dbxref", "pk": 100382, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "gneg"
+  "db": 1,  "version": "",  "accession": "gneg"
  }
 },{
  "model": "db.dbxref", "pk": 100383, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "acen"
+  "db": 1,  "version": "",  "accession": "acen"
  }
 },{
  "model": "db.dbxref", "pk": 100384, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "stalk"
+  "db": 1,  "version": "",  "accession": "stalk"
  }
 },{
  "model": "db.dbxref", "pk": 100385, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Type 1 Diabetes"
+  "db": 1,  "version": "",  "accession": "Type 1 Diabetes"
  }
 },{
  "model": "db.dbxref", "pk": 100386, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Multiple Sclerosis"
+  "db": 1,  "version": "",  "accession": "Multiple Sclerosis"
  }
 },{
  "model": "db.dbxref", "pk": 100387, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Ankylosing Spondylitis"
+  "db": 1,  "version": "",  "accession": "Ankylosing Spondylitis"
  }
 },{
  "model": "db.dbxref", "pk": 100413, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "disease short name"
+  "db": 1,  "version": "",  "accession": "disease short name"
  }
 },{
  "model": "db.dbxref", "pk": 100414, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "colour"
+  "db": 1,  "version": "",  "accession": "colour"
  }
 },{
  "model": "db.dbxref", "pk": 100434, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "rank"
+  "db": 1,  "version": "",  "accession": "rank"
  }
 },{
  "model": "db.dbxref", "pk": 100438, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Autoimmune Thyroid Disease"
+  "db": 1,  "version": "",  "accession": "Autoimmune Thyroid Disease"
  }
 },{
  "model": "db.dbxref", "pk": 100439, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Celiac Disease"
+  "db": 1,  "version": "",  "accession": "Celiac Disease"
  }
 },{
  "model": "db.dbxref", "pk": 100440, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Crohn's Disease"
+  "db": 1,  "version": "",  "accession": "Crohn's Disease"
  }
 },{
  "model": "db.dbxref", "pk": 100441, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Juvenile Idiopathic Arthritis"
+  "db": 1,  "version": "",  "accession": "Juvenile Idiopathic Arthritis"
  }
 },{
  "model": "db.dbxref", "pk": 100442, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Primary Biliary Cirrhosis"
+  "db": 1,  "version": "",  "accession": "Primary Biliary Cirrhosis"
  }
 },{
  "model": "db.dbxref", "pk": 100443, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Psoriasis"
+  "db": 1,  "version": "",  "accession": "Psoriasis"
  }
 },{
  "model": "db.dbxref", "pk": 100444, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Rheumatoid Arthritis"
+  "db": 1,  "version": "",  "accession": "Rheumatoid Arthritis"
  }
 },{
  "model": "db.dbxref", "pk": 100445, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Systemic Lupus Erythematosus"
+  "db": 1,  "version": "",  "accession": "Systemic Lupus Erythematosus"
  }
 },{
  "model": "db.dbxref", "pk": 100446, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Ulcerative Colitis"
+  "db": 1,  "version": "",  "accession": "Ulcerative Colitis"
  }
 },{
  "model": "db.dbxref", "pk": 100447, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Alopecia Areata"
+  "db": 1,  "version": "",  "accession": "Alopecia Areata"
  }
 },{
  "model": "db.dbxref", "pk": 100448, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Inflammatory Bowel Disease"
+  "db": 1,  "version": "",  "accession": "Inflammatory Bowel Disease"
  }
 },{
  "model": "db.dbxref", "pk": 100449, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Narcolepsy"
+  "db": 1,  "version": "",  "accession": "Narcolepsy"
  }
 },{
  "model": "db.dbxref", "pk": 100450, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Primary Sclerosing Cholangitis"
+  "db": 1,  "version": "",  "accession": "Primary Sclerosing Cholangitis"
  }
 },{
  "model": "db.dbxref", "pk": 100451, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Sjogren Syndrome"
+  "db": 1,  "version": "",  "accession": "Sjogren Syndrome"
  }
 },{
  "model": "db.dbxref", "pk": 100452, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Systemic Scleroderma"
+  "db": 1,  "version": "",  "accession": "Systemic Scleroderma"
  }
 },{
  "model": "db.dbxref", "pk": 100453, "fields": {
-  "description": "",  "db": 1,  "version": "",  "accession": "Vitiligo"
+  "db": 1,  "version": "",  "accession": "Vitiligo"
  }
 },{
  "model": "db.feature", "pk": 54, "fields": {
