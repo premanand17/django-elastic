@@ -10,7 +10,7 @@ class ManagedModelTestRunner(DiscoverRunner):
     settings.TEST_DB_UNMANAGED_TABLES_SCHEMA_FILE)
     see:
     http://www.caktusgroup.com/blog/2010/09/24/simplifying-the-testing-of-unmanaged-database-models-in-django/
-    https://www.marshut.net/krupvs/how-to-test-an-application-that-s-using-a-legacy-database.html
+    https://groups.google.com/forum/#!topic/django-users/v1mamEyPR2M
     """
     def setup_databases(self, **kwargs):
         ret = super(ManagedModelTestRunner, self).setup_databases(**kwargs)
