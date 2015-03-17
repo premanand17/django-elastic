@@ -4,27 +4,33 @@ from django_template import settings
 from es.tests.settings_idx import IDX
 import requests
 import time
-import random
-import string
+
+
+def setUpModule():
+    ''' Run the index loading script to create test indeces '''
+    for idx_kwargs in IDX.values():
+        call_command('index_search', **idx_kwargs)
+    time.sleep(2)
+
+
+def tearDownModule():
+    ''' Remove loaded test indeces '''
+    for key in IDX:
+        requests.delete(settings.ELASTICSEARCH_URL +
+                        '/' + IDX[key]['indexName'])
 
 
 class ElasticLoadersTest(TestCase):
 
     def test_disease_loader(self):
         ''' Test disease loader '''
-        options = IDX['DISEASE']
         index_name = IDX['DISEASE']['indexName']
-        call_command('index_search', **options)
-        time.sleep(2)
         self._check_index(index_name, 'disease', 19)
         self._remove(index_name)
 
     def test_marker_loader(self):
         ''' Test disease loader '''
-        options = IDX['MARKER']
         index_name = IDX['MARKER']['indexName']
-        call_command('index_search', **options)
-        time.sleep(2)
         self._check_index(index_name, 'marker')
         self._remove(index_name)
 
@@ -33,7 +39,7 @@ class ElasticLoadersTest(TestCase):
         response = self._check(settings.ELASTICSEARCH_URL + '/' + index_name +
                                '/' + index_type + '/_count')
         if count is not None:
-            self.assertEqual(response.json()['count'], 19,
+            self.assertEqual(response.json()['count'], count,
                              "Index count "+str(response.json()['count']))
 
     def _check(self, url):
@@ -56,7 +62,3 @@ class ElasticLoadersTest(TestCase):
                                    '/' + index_name)
         self.assertEqual(response.status_code, 200, "Index " +
                          index_name + " exists")
-
-    def _id_generator(self, size=6,
-                      chars=string.ascii_lowercase + string.digits):
-        return ''.join(random.choice(chars) for _ in range(size))

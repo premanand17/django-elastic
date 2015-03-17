@@ -1,22 +1,21 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.conf import settings
 from django.core.management import call_command
-import requests
 from es.tests.settings_idx import IDX
-from django.test.utils import override_settings
+import requests
 import time
 
 
+@override_settings(MARKERDB=IDX['MARKER']['indexName'])
 def setUpModule():
-    for idx_kwargs in IDX.values():
-        call_command('index_search', **idx_kwargs)
-    time.sleep(2)
+    ''' Load test indices (marker) '''
+    call_command('index_search', **IDX['MARKER'])
 
 
+@override_settings(MARKERDB=IDX['MARKER']['indexName'])
 def tearDownModule():
-    for idx_kwargs in IDX.values():
-        requests.delete(settings.ELASTICSEARCH_URL +
-                        '/' + idx_kwargs['indexName'])
+    ''' Remove test indices '''
+    requests.delete(settings.ELASTICSEARCH_URL + '/' + IDX['MARKER']['indexName'])
 
 
 @override_settings(MARKERDB=IDX['MARKER']['indexName'])
@@ -25,11 +24,9 @@ class EsTest(TestCase):
     def test_es(self):
         ''' Test elasticsearch server is running and status '''
         try:
-            resp = requests.get(settings.ELASTICSEARCH_URL +
-                                '/_cluster/health/test__marker')
+            resp = requests.get(settings.ELASTICSEARCH_URL + '/_cluster/health/test__marker')
             self.assertEqual(resp.status_code, 200, "Health page status code")
-            self.assertFalse(resp.json()['status'] == 'red',
-                             'Health report - red')
+            self.assertFalse(resp.json()['status'] == 'red', 'Health report - red')
         except requests.exceptions.Timeout:
             self.assertTrue(False, 'timeout exception')
         except requests.exceptions.TooManyRedirects:
@@ -41,8 +38,10 @@ class EsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP search '''
+        time.sleep(1)
         resp = self.client.get('/search/rs2476601/')
         self.assertEqual(resp.status_code, 200)
+#         print(resp.context)
         self.assertTrue('data' in resp.context)
         snp = resp.context['data'][0]
         self._SNPtest(snp)
@@ -81,8 +80,7 @@ class EsTest(TestCase):
         try:
             # Test if region index exists
             resp = requests.head(settings.ELASTICSEARCH_URL + '/' + index_name)
-            self.assertEqual(resp.status_code, 200, "Region Index " +
-                             index_name + "exists")
+            self.assertEqual(resp.status_code, 200, "Region Index " + index_name + "exists")
             # Test if type region exists
             index_type = 'region'
             resp = requests.head(settings.ELASTICSEARCH_URL +

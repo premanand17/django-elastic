@@ -67,6 +67,28 @@ CREATE TABLE featureprop (
     value text,
     rank integer DEFAULT 0 NOT NULL
 );
+CREATE TABLE pub (
+    pub_id integer NOT NULL,
+    title text,
+    volumetitle text,
+    volume character varying(255),
+    series_name character varying(255),
+    issue character varying(255),
+    pyear character varying(255),
+    pages character varying(255),
+    miniref character varying(255),
+    uniquename text NOT NULL,
+    type_id integer NOT NULL,
+    is_obsolete boolean DEFAULT false,
+    publisher character varying(255),
+    pubplace character varying(255)
+);
+CREATE TABLE synonym (
+    synonym_id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    type_id integer NOT NULL,
+    synonym_sgml character varying(255) NOT NULL
+);
 CREATE TABLE feature_dbxref (
     feature_dbxref_id integer NOT NULL,
     feature_id integer NOT NULL,
@@ -85,6 +107,26 @@ CREATE TABLE cv (
     cv_id integer NOT NULL,
     name character varying(255) NOT NULL,
     definition text
+);
+CREATE TABLE cvterm_relationship (
+    cvterm_relationship_id integer NOT NULL,
+    type_id integer NOT NULL,
+    subject_id integer NOT NULL,
+    object_id integer NOT NULL
+);
+CREATE TABLE cvtermpath (
+    cvtermpath_id integer NOT NULL,
+    type_id integer,
+    subject_id integer NOT NULL,
+    object_id integer NOT NULL,
+    cv_id integer NOT NULL,
+    pathdistance integer
+);
+CREATE TABLE cvtermsynonym (
+    cvtermsynonym_id integer NOT NULL,
+    cvterm_id integer NOT NULL,
+    synonym character varying(1024) NOT NULL,
+    type_id integer
 );
 CREATE SEQUENCE cv_cv_id_seq
     START WITH 1

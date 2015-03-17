@@ -7,9 +7,11 @@ from django.template.context import Context
 
 class GenesTestCase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         ''' Set up the data to test with. '''
         ''' add a feature to the database '''
+        super(GenesTestCase, cls).setUpClass()
         cv = Cv.objects.create(name='sequence')
         db = Db.objects.create(name='null')
         dbxref = Dbxref.objects.create(db_id=db.db_id, accession='gene')
@@ -18,14 +20,14 @@ class GenesTestCase(TestCase):
                           is_obsolete=0, is_relationshiptype=0)
         termtype.save()
         organism = Organism.objects.create(common_name='human_GRCh38')
-        self.feature = Feature(organism=organism, name='9652',
-                               uniquename='PTPN22',
-                               type=termtype, is_analysis=0, is_obsolete=0)
-        self.feature.save()
+        cls.feature = Feature(organism=organism, name='9652',
+                              uniquename='PTPN22',
+                              type=termtype, is_analysis=0, is_obsolete=0)
+        cls.feature.save()
         ''' add a feature_dbxref '''
         db = Db.objects.create(name='Ensembl')
         dbxref = Dbxref.objects.create(db=db, accession='ENSG00000134242')
-        FeatureDbxref.objects.create(dbxref=dbxref, feature=self.feature)
+        FeatureDbxref.objects.create(dbxref=dbxref, feature=cls.feature)
 
     def test_genes(self):
         ''' Test the gene page. '''

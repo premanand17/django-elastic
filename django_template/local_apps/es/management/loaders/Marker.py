@@ -2,7 +2,7 @@ import gzip
 import re
 import json
 import requests
-from django_template import settings
+from django.conf import settings
 
 
 class MarkerManager:

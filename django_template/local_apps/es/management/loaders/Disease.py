@@ -1,5 +1,5 @@
 import re
-from django_template import settings
+from django.conf import settings
 import requests
 import json
 
