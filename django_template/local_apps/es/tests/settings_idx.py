@@ -1,4 +1,9 @@
+from django.conf import settings
+import os
 
-IDX = {'DISEASE': {'indexName': 'test__disease', 'indexDisease': 'tmp/disease.list'},
-       'MARKER': {'indexName': 'test__marker', 'indexSNP': 'tmp/dbsnp142_test.vcf.gz'}
+TEST_DATA_PATH = os.path.join(settings.BASE_DIR, 'django_template/local_apps/es/tests/data/')
+
+IDX = {'GENE': {'indexName': 'test__gene', 'indexGene': TEST_DATA_PATH+'genenames.org.test.txt.gz'},
+       'DISEASE': {'indexName': 'test__disease', 'indexDisease': TEST_DATA_PATH+'disease.list'},
+       'MARKER': {'indexName': 'test__marker', 'indexSNP': TEST_DATA_PATH+'dbsnp142_test.vcf.gz'},
        }
