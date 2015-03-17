@@ -39,7 +39,7 @@ class ElasticLoadersTest(TestCase):
         response = self._check(settings.ELASTICSEARCH_URL + '/' + index_name +
                                '/' + index_type + '/_count')
         if count is not None:
-            self.assertEqual(response.json()['count'], 19,
+            self.assertEqual(response.json()['count'], count,
                              "Index count "+str(response.json()['count']))
 
     def _check(self, url):
