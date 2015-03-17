@@ -18,15 +18,13 @@ class GeneManager:
         hgnc id, approved symbol, status, locus type, previous symbols
         synonyms, entrez gene id, ensembl gene id
         '''
+        index_name = self._get_index_name(**options)
+        self._create_genename_index(**options)
+
         if options['org']:
             org = options['org']
         else:
             org = 'human'
-
-        if options['indexName']:
-            indexName = options['indexName'].lower()
-        else:
-            indexName = "gene"
 
         if options['indexGene'].endswith('.gz'):
             f = gzip.open(options['indexGene'], 'rb')
@@ -44,7 +42,8 @@ class GeneManager:
 
         try:
             for line in f:
-                parts = re.split('\t', line.decode("utf-8").rstrip())
+                line = line.rstrip().decode("utf-8")
+                parts = re.split('\t', line)
                 ''' Use table header to identify column names '''
                 if(len(col) == 0):
                     for part in parts:
@@ -95,19 +94,16 @@ class GeneManager:
                         n = 0
                         response = requests.put(settings
                                                 .ELASTICSEARCH_URL+'/' +
-                                                indexName+'/gene/_bulk',
+                                                index_name+'/gene/_bulk',
                                                 data=data)
                         data = ''
         finally:
             response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                    indexName+'/gene/_bulk', data=data)
+                                    index_name+'/gene/_bulk', data=data)
             return response
 
     def update_gene(self, **options):
-        if options['indexName']:
-            indexName = options['indexName'].lower()
-        else:
-            indexName = "gene"
+        index_name = self._get_index_name(**options)
 
         if options['build']:
             build = options['build']
@@ -126,10 +122,10 @@ class GeneManager:
             gff = GFF(line)
 
             context = self._call_elasticsearch(gff.attrs["Name"],
-                                               ["gene_symbol"], indexName)
+                                               ["gene_symbol"], index_name)
             if context["total"] != 1:
                 context = self._call_elasticsearch(gff.attrs["Name"],
-                                                   ["synonyms"], indexName)
+                                                   ["synonyms"], index_name)
             if context["total"] != 1:
                 print ("IGNORE "+gff.attrs["Name"]+" "+gff.attrs["biotype"])
                 continue
@@ -154,7 +150,7 @@ class GeneManager:
                                 "biotype": gff.attrs["biotype"]}
                                })
             response = requests.post(settings.ELASTICSEARCH_URL+'/' +
-                                     indexName+'/gene/'+esid+'/_update',
+                                     index_name+'/gene/'+esid+'/_update',
                                      data=data)
         return response
 
@@ -164,12 +160,9 @@ class GeneManager:
                                            "fields": fields}}}
         return elastic_search(data, 0, 20, indexName)
 
-    def create_genename_index(self, **options):
+    def _create_genename_index(self, **options):
         ''' Create the mapping for gene names indexing '''
-        if options['indexName']:
-            indexName = options['indexName'].lower()
-        else:
-            indexName = "genename"
+        index_name = self._get_index_name(**options)
 
         props = {"properties":
                  {"gene_symbol": {"type": "string", "boost": 4,
@@ -191,9 +184,14 @@ class GeneManager:
 
         data = {"gene": props}
         ''' create index and add mapping '''
-        requests.put(settings.ELASTICSEARCH_URL+'/' + indexName)
+        requests.put(settings.ELASTICSEARCH_URL+'/' + index_name)
         response = requests.put(settings.ELASTICSEARCH_URL+'/' +
-                                indexName+'/_mapping/gene',
+                                index_name+'/_mapping/gene',
                                 data=json.dumps(data))
         print (response.text)
         return
+
+    def _get_index_name(self, **options):
+        if options['indexName']:
+            return options['indexName'].lower()
+        return "genename"
