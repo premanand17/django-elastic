@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    ''' Elasticsearch index mapping and loading tool. '''
-    help = "Use to create elasticsearch index mappings and load data.\n\n" \
+    ''' Elastic index mapping and loading tool. '''
+    help = "Use to create Elastic index mappings and load data.\n\n" \
            "Usage: ./manage.py index_search [options]\n" \
            "Options for regions:\n" \
            " --mapRegion --build GRCh38\n" \
@@ -21,7 +21,6 @@ class Command(BaseCommand):
            "Options for markers:\n" \
            " --indexName [index name] --indexSNP All.vcf\n" \
            "Options for genes:\n" \
-           " --indexName [index name] --mapGene\n" \
            " --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
            " --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
            "Options for diseases:\n" \
@@ -31,11 +30,6 @@ class Command(BaseCommand):
         make_option('--indexSNP',
                     dest='indexSNP',
                     help='VCF file (from dbSNP) to index'),
-        ) + (
-        make_option('--mapGene',
-                    dest='mapGene',
-                    action="store_true",
-                    help='Create gene mapping'),
         ) + (
         make_option('--indexGene',
                     dest='indexGene',
@@ -92,9 +86,6 @@ class Command(BaseCommand):
             region = RegionManager()
             region.create_load_region_index(**options)
 
-        elif options['mapGene']:
-            gene = GeneManager()
-            gene.create_genename_index(**options)
         elif options['indexGene']:
             gene = GeneManager()
             gene.load_genename(**options)
