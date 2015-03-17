@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 # fixtures used in defining db data for tests
 FIXTURE_DIRS = os.path.join(BASE_DIR, 'django_template/local_apps/db/fixtures')
 
-# 
+#
 # test runner for unmanaged db models and postgres schema to load
 # when tests are run
 TEST_RUNNER = 'db.scripts.testrunner.ManagedModelTestRunner'
@@ -37,11 +37,11 @@ TEST_DB_UNMANAGED_TABLES_SCHEMA_FILE = os.path.join(BASE_DIR, 'django_template/l
 
 # Application definition
 INSTALLED_APPS = (
-#    'django.contrib.admin',
-#    'django.contrib.auth',
-#    'django.contrib.contenttypes',
-#    'django.contrib.sessions',
-#    'django.contrib.messages',
+#     'django.contrib.admin',
+#     'django.contrib.auth',
+    'django.contrib.contenttypes',
+#     'django.contrib.sessions',
+#     'django.contrib.messages',
     'django.contrib.staticfiles',
     'db',
     'bands',
@@ -55,9 +55,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-#    'django.contrib.auth.middleware.AuthenticationMiddleware',
-#    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-#    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
