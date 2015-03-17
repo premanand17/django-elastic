@@ -16,8 +16,9 @@ class BandsViewsTestCase(TestCase):
     @classmethod
     def tearDownClass(cls):
         super(BandsViewsTestCase, cls).tearDownClass()
-        call_command('flush', verbosity=0, interactive=False)
-        # flush command does not clear data properly
+        # call_command('flush', verbosity=0, interactive=False)
+        # flush command does not clear data presumably because the
+        # models are managed
         Cv.objects.all().delete()
         Db.objects.all().delete()
 
