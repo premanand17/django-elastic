@@ -26,13 +26,11 @@ class ElasticLoadersTest(TestCase):
         ''' Test disease loader '''
         index_name = IDX['DISEASE']['indexName']
         self._check_index(index_name, 'disease', 19)
-        self._remove(index_name)
 
     def test_marker_loader(self):
         ''' Test disease loader '''
         index_name = IDX['MARKER']['indexName']
         self._check_index(index_name, 'marker')
-        self._remove(index_name)
 
     def _check_index(self, index_name, index_type, count=None):
         self._check(settings.ELASTICSEARCH_URL + '/' + index_name)
@@ -56,9 +54,3 @@ class ElasticLoadersTest(TestCase):
             self.assertTrue(False, 'request connection exception')
         except requests.exceptions.RequestException:
             self.assertTrue(False, 'request exception')
-
-    def _remove(self, index_name):
-        response = requests.delete(settings.ELASTICSEARCH_URL +
-                                   '/' + index_name)
-        self.assertEqual(response.status_code, 200, "Index " +
-                         index_name + " exists")
