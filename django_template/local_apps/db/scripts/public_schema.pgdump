@@ -83,6 +83,28 @@ CREATE TABLE pub (
     publisher character varying(255),
     pubplace character varying(255)
 );
+CREATE TABLE pubprop (
+    pubprop_id integer NOT NULL,
+    pub_id integer NOT NULL,
+    type_id integer NOT NULL,
+    value text NOT NULL,
+    rank integer
+);
+CREATE TABLE pubauthor (
+    pubauthor_id integer NOT NULL,
+    pub_id integer NOT NULL,
+    rank integer NOT NULL,
+    editor boolean DEFAULT false,
+    surname character varying(100) NOT NULL,
+    givennames character varying(100),
+    suffix character varying(100)
+);
+CREATE TABLE pub_dbxref (
+    pub_dbxref_id integer NOT NULL,
+    pub_id integer NOT NULL,
+    dbxref_id integer NOT NULL,
+    is_current boolean DEFAULT true NOT NULL
+); 
 CREATE TABLE synonym (
     synonym_id integer NOT NULL,
     name character varying(255) NOT NULL,
