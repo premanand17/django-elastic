@@ -283,6 +283,43 @@ class Pub(models.Model):
         db_table = 'pub'
 
 
+class PubDbxref(models.Model):
+    pub_dbxref_id = models.AutoField(primary_key=True)
+    pub = models.ForeignKey(Pub)
+    dbxref = models.ForeignKey(Dbxref)
+    is_current = models.BooleanField(default=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pub_dbxref'
+
+
+class Pubauthor(models.Model):
+    pubauthor_id = models.AutoField(primary_key=True)
+    pub = models.ForeignKey(Pub)
+    rank = models.IntegerField()
+    editor = models.NullBooleanField()
+    surname = models.CharField(max_length=100)
+    givennames = models.CharField(max_length=100, blank=True)
+    suffix = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pubauthor'
+
+
+class Pubprop(models.Model):
+    pubprop_id = models.AutoField(primary_key=True)
+    pub = models.ForeignKey(Pub)
+    type = models.ForeignKey(Cvterm)
+    value = models.TextField()
+    rank = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pubprop'
+
+
 class Synonym(models.Model):
     synonym_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
