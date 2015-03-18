@@ -12,6 +12,7 @@ class GenesTestCase(TestCase):
         ''' Set up the data to test with. '''
         ''' add a feature to the database '''
         super(GenesTestCase, cls).setUpClass()
+
         cv = Cv.objects.create(name='sequence')
         db = Db.objects.create(name='null')
         dbxref = Dbxref.objects.create(db_id=db.db_id, accession='gene')
@@ -28,6 +29,16 @@ class GenesTestCase(TestCase):
         db = Db.objects.create(name='Ensembl')
         dbxref = Dbxref.objects.create(db=db, accession='ENSG00000134242')
         FeatureDbxref.objects.create(dbxref=dbxref, feature=cls.feature)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(GenesTestCase, cls).tearDownClass()
+        # call_command('flush', verbosity=0, interactive=False)
+        # flush command does not clear data presumably because the
+        # models are managed
+        Cv.objects.all().delete()
+        Db.objects.all().delete()
+        Organism.objects.all().delete()
 
     def test_genes(self):
         ''' Test the gene page. '''
