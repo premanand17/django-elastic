@@ -104,11 +104,11 @@ class GFF:
         self._parseAttributes()
 
     def _parseAttributes(self):
-        parts = re.split(';', self.attrStr)
+        parts = re.split(';', self.attrStr.strip())
         for p in parts:
             if(p == ''):
                 continue
-            at = re.split('=', p)
+            at = re.split('=', p.strip())
             if len(at) == 2:
                 self.attrs[at[0]] = at[1]
             else:
