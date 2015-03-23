@@ -7,4 +7,6 @@ IDX = {'GENE': {'indexName': 'test__gene', 'indexGene': TEST_DATA_PATH+'genename
        'DISEASE': {'indexName': 'test__disease', 'indexDisease': TEST_DATA_PATH+'disease.list'},
        'MARKER': {'indexName': 'test__marker', 'indexSNP': TEST_DATA_PATH+'dbsnp142_test.vcf.gz'},
        'GFF_GENERIC': {'indexName': 'test__gff', 'indexType': 'gff', 'indexGFF': TEST_DATA_PATH+'test.gff.gz'},
+       'GTF_GENERIC': {'indexName': 'test__gtf', 'indexType': 'gtf', 'indexGFF': TEST_DATA_PATH+'test.gtf.gz',
+                       'isGTF': True},
        }
