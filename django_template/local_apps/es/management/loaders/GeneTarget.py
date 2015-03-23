@@ -35,24 +35,24 @@ class GeneTargetManager:
                                     "biotype": parts[2],
                                     "strand": parts[3],
                                     "baitChr": parts[4],
-                                    "baitStart": parts[5],
-                                    "baitEnd": parts[6],
+                                    "baitStart": int(parts[5]),
+                                    "baitEnd": int(parts[6]),
                                     "baitID": parts[7],
                                     "baitName": parts[8],
                                     "oeChr": parts[9],
-                                    "oeStart": parts[10],
-                                    "oeEnd": parts[11],
+                                    "oeStart": int(parts[10]),
+                                    "oeEnd": int(parts[11]),
                                     "oeID": parts[12],
                                     "oeName": parts[13],
                                     "dist": abs(int(float(parts[14]))),
-                                    "Monocyte": parts[15],
-                                    "Macrophage": parts[16],
-                                    "Erythroblast": parts[17],
-                                    "Megakaryocyte": parts[18],
-                                    "CD4_Naive": parts[19],
-                                    "Non_Activated": parts[20],
-                                    "CD4_Total": parts[21],
-                                    "CD4_Activated": parts[22]
+                                    "Monocyte": float(parts[15]),
+                                    "Macrophage": float(parts[16]),
+                                    "Erythroblast": float(parts[17]),
+                                    "Megakaryocyte": float(parts[18]),
+                                    "CD4_Naive": float(parts[19]),
+                                    "Non_Activated": float(parts[20]),
+                                    "CD4_Total": float(parts[21]),
+                                    "CD4_Activated": float(parts[22])
                                     })+'\n'
 
                 n += 1
@@ -90,14 +90,14 @@ class GeneTargetManager:
                   "oeID": {"type": "string", "index": "no"},
                   "oeName": {"type": "string", "index": "no"},
                   "dist": {"type": "integer", "index": "not_analyzed"},
-                  "Monocyte": {"type": "string", "index": "not_analyzed"},
-                  "Macrophage": {"type": "string", "index": "not_analyzed"},
-                  "Erythroblast": {"type": "string", "index": "not_analyzed"},
-                  "Megakaryocyte": {"type": "string", "index": "not_analyzed"},
-                  "CD4_Naive": {"type": "string", "index": "not_analyzed"},
-                  "Non_Activated": {"type": "string", "index": "not_analyzed"},
-                  "CD4_Total": {"type": "string", "index": "not_analyzed"},
-                  "CD4_Activated": {"type": "string", "index": "not_analyzed"}
+                  "Monocyte": {"type": "float"},
+                  "Macrophage": {"type": "float"},
+                  "Erythroblast": {"type": "float"},
+                  "Megakaryocyte": {"type": "float"},
+                  "CD4_Naive": {"type": "float"},
+                  "Non_Activated": {"type": "float"},
+                  "CD4_Total": {"type": "float"},
+                  "CD4_Activated": {"type": "float"}
                   }
                  }
 
