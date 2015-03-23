@@ -5,6 +5,8 @@ from es.management.loaders.Marker import MarkerManager
 from es.management.loaders.Region import RegionManager
 from es.management.loaders.Gene import GeneManager
 from es.management.loaders.Disease import DiseaseManager
+from es.management.loaders.GeneTarget import GeneTargetManager
+from es.management.loaders.GFF import GFFManager
 
 
 # Get an instance of a logger
@@ -24,7 +26,9 @@ class Command(BaseCommand):
            " --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
            " --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
            "Options for diseases:\n" \
-           " --indexName [index name] --indexDisease disease.list"
+           " --indexName [index name] --indexDisease disease.list\n" \
+           "Options for GFF/GTF:\n" \
+           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]"
 
     option_list = BaseCommand.option_list + (
         make_option('--indexSNP',
@@ -71,6 +75,23 @@ class Command(BaseCommand):
         make_option('--indexDisease',
                     dest='indexDisease',
                     help='Load disease details'),
+        ) + (
+        make_option('--indexGTarget',
+                    dest='indexGTarget',
+                    help='Load gene targets'),
+        ) + (
+        make_option('--indexGFF',
+                    dest='indexGFF',
+                    help='Load GFF targets'),
+        ) + (
+        make_option('--isGTF',
+                    dest='isGTF',
+                    help='GTF file type',
+                    action="store_true"),
+        ) + (
+        make_option('--indexType',
+                    dest='indexType',
+                    help='Index type'),
         )
 
     def handle(self, *args, **options):
@@ -96,5 +117,13 @@ class Command(BaseCommand):
         elif options['indexDisease']:
             disease = DiseaseManager()
             disease.create_disease(**options)
+
+        elif options['indexGTarget']:
+            gt = GeneTargetManager()
+            gt.create_load_gene_target_index(**options)
+
+        elif options['indexGFF']:
+            gff = GFFManager()
+            gff.create_load_gff_index(**options)
         else:
             print(help)
