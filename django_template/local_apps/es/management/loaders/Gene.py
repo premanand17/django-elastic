@@ -4,7 +4,7 @@ import requests
 from django.conf import settings
 import json
 from db.management.loaders.GFF import GFF
-from es.views import elastic_search
+from es.elastic_model import Elastic
 import sys
 
 
@@ -158,7 +158,8 @@ class GeneManager:
         ''' Call elasticsearch '''
         data = {"query": {"query_string": {"query": name,
                                            "fields": fields}}}
-        return elastic_search(data, 0, 20, indexName)
+        elastic = Elastic(data, 0, 20, indexName)
+        return elastic.get_result()
 
     def _create_genename_index(self, **options):
         ''' Create the mapping for gene names indexing '''
