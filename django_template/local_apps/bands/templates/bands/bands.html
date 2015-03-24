@@ -2,9 +2,11 @@
 {% block header %}
 
 <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"/>
-<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="/static/js/bands.js" charset="utf-8"></script>
-<script src="/static/js/diseases.js" charset="utf-8"></script>
+
+{% load staticfiles %}
+<script src="{% static "bands/d3.v3.min.js" %}" charset="utf-8"></script>
+<script src="{% static "bands/bands.js" %}" charset="utf-8"></script>
+<script src="{% static "bands/diseases.js" %}"charset="utf-8"></script>
 
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
 <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>

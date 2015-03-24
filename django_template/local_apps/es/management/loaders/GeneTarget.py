@@ -50,7 +50,7 @@ class GeneTargetManager:
                                     "Erythroblast": float(parts[17]),
                                     "Megakaryocyte": float(parts[18]),
                                     "CD4_Naive": float(parts[19]),
-                                    "Non_Activated": float(parts[20]),
+                                    "CD4_Non_Activated": float(parts[20]),
                                     "CD4_Total": float(parts[21]),
                                     "CD4_Activated": float(parts[22])
                                     })+'\n'
@@ -95,7 +95,7 @@ class GeneTargetManager:
                   "Erythroblast": {"type": "float"},
                   "Megakaryocyte": {"type": "float"},
                   "CD4_Naive": {"type": "float"},
-                  "Non_Activated": {"type": "float"},
+                  "CD4_Non_Activated": {"type": "float"},
                   "CD4_Total": {"type": "float"},
                   "CD4_Activated": {"type": "float"}
                   }
