@@ -1,6 +1,6 @@
 from django import template
 from db.models import FeatureDbxref, FeatureSynonym
-from es.views import elastic_search
+from es.elastic_model import Elastic
 from django_template import settings
 
 register = template.Library()
@@ -56,5 +56,5 @@ def show_es_gene_section(gene_symbol=None, seqid=None,
         query = {"bool": {"must": must}}
         data = {"query": query}
         print(query)
-    es_result = elastic_search(data, db=settings.GENEDB)
-    return {'es_genes': es_result["data"]}
+    elastic = Elastic(data, db=settings.GENEDB)
+    return {'es_genes': elastic.get_result()["data"]}
