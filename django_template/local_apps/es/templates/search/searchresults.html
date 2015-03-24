@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}SEARCH{% endblock %}
-
 {% block header %}
-<script type="text/javascript" src="/static/js/results_pagination.js"></script>
+
+{% load staticfiles %}
+<script src="{% static "es/results_pagination.js" %}" charset="utf-8"></script>
 <script type='text/javascript'>
 $(document).ready(function() {
 	var query = {% autoescape off %}{{ query }}.query{% endautoescape %};
