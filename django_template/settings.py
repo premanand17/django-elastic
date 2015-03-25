@@ -45,7 +45,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'db',
     'bands',
-    'es',
+    'search',
     'gene',
     'marker',
     'region'

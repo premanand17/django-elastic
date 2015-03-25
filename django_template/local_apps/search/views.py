@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse
 from django.core.urlresolvers import NoReverseMatch
 import requests
-from es.elastic_model import Elastic
+from search.elastic_model import Elastic
 
 
 @csrf_exempt

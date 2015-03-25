@@ -4,7 +4,7 @@ import requests
 from django.conf import settings
 import json
 from db.management.loaders.GFF import GFF
-from es.elastic_model import Elastic
+from search.elastic_model import Elastic
 import sys
 
 
