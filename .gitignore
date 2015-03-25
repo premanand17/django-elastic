@@ -1,0 +1,11 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# 
+.project
+.pydevproject
+.settings
+.coverage
+*.swp
+*_initial.py
