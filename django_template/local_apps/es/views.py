@@ -35,20 +35,33 @@ def search(request, query, search_db=settings.MARKERDB + ',' +
                   content_type='text/html')
 
 
-def range_search(request, src, start, stop, search_db=settings.MARKERDB + ',' +
-                 settings.GENEDB + ',' + settings.REGIONDB):
+def range_overlap_search(request, src, start, stop, search_db=settings.MARKERDB + ',' +
+                         settings.GENEDB + ',' + settings.REGIONDB):
     ''' Renders a search result page based on the src, start and stop '''
-
-    must = [{"match": {"seqid": src}},
-            {"range": {"start": {"gte": start, "boost": 2.0}}},
-            {"range": {"end": {"lte": stop, "boost": 2.0}}}]
-    query = {"bool": {"must": must}}
-    data = {"query": query}
+    data = {"query":
+            {"filtered":
+             {"query":
+              {"term": {"seqid": src}},
+              "filter": {"or":
+                         [{"range": {"start": {"gte": start, "lte": stop}}},
+                          {"range": {"end": {"gte": start, "lte": stop}}},
+                          {"bool":
+                           {"must":
+                            [{"range": {"start": {"lte": start}}},
+                             {"range": {"end": {"gte": stop}}}
+                             ]
+                            }
+                           }
+                          ]
+                         }
+              }
+             }}
     elastic = Elastic(data, db=search_db)
     context = elastic.get_result()
     context["chromosome"] = src
     context["start"] = start
     context["stop"] = stop
+
     return render(request, 'search/searchresults.html', context,
                   content_type='text/html')
 
@@ -57,7 +70,7 @@ def filtered_range_search(request, src, start, stop, db):
     '''
     Pass the range parameters to the range_search routine.
     '''
-    return range_search(request, src, start, stop, db)
+    return range_overlap_search(request, src, start, stop, db)
 
 
 def filtered_search(request, query, db):
