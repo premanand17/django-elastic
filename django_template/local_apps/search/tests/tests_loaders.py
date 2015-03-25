@@ -7,14 +7,14 @@ import time
 
 
 def setUpModule():
-    ''' Run the index loading script to create test indeces '''
+    ''' Run the index loading script to create test indices '''
     for idx_kwargs in IDX.values():
         call_command('index_search', **idx_kwargs)
     time.sleep(2)
 
 
 def tearDownModule():
-    ''' Remove loaded test indeces '''
+    ''' Remove loaded test indices '''
     for key in IDX:
         requests.delete(settings.SEARCH_ELASTIC_URL +
                         '/' + IDX[key]['indexName'])
