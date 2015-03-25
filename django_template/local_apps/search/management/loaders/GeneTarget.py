@@ -60,13 +60,13 @@ class GeneTargetManager:
                 if(n > 5000):
                     n = 0
                     print('.', end="", flush=True)
-                    response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+                    response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                             index_name+'/gene_target/_bulk',
                                             data=data)
                     data = ''
 
         finally:
-            response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+            response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                     index_name+'/gene_target/_bulk', data=data)
         return response
 
@@ -104,8 +104,8 @@ class GeneTargetManager:
         data = {"gene_target": props}
 
         ''' create index and add mapping '''
-        requests.put(settings.ELASTICSEARCH_URL+'/' + index_name)
-        requests.put(settings.ELASTICSEARCH_URL+'/' +
+        requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name)
+        requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                      index_name+'/_mapping/gene_target',
                      data=json.dumps(data))
         return

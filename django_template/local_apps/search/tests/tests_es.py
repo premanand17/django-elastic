@@ -15,7 +15,7 @@ def setUpModule():
 @override_settings(MARKERDB=IDX['MARKER']['indexName'])
 def tearDownModule():
     ''' Remove test indices '''
-    requests.delete(settings.ELASTICSEARCH_URL + '/' + IDX['MARKER']['indexName'])
+    requests.delete(settings.SEARCH_ELASTIC_URL + '/' + IDX['MARKER']['indexName'])
 
 
 @override_settings(MARKERDB=IDX['MARKER']['indexName'])
@@ -24,7 +24,7 @@ class EsTest(TestCase):
     def test_es(self):
         ''' Test elasticsearch server is running and status '''
         try:
-            resp = requests.get(settings.ELASTICSEARCH_URL + '/_cluster/health/test__marker')
+            resp = requests.get(settings.SEARCH_ELASTIC_URL + '/_cluster/health/test__marker')
             self.assertEqual(resp.status_code, 200, "Health page status code")
             self.assertFalse(resp.json()['status'] == 'red', 'Health report - red')
         except requests.exceptions.Timeout:
@@ -76,14 +76,14 @@ class EsTest(TestCase):
 
     def test_region_index(self):
         ''' Test Region Index '''
-        index_name = settings.REGIONDB
+        index_name = settings.SEARCH_REGIONDB
         try:
             # Test if region index exists
-            resp = requests.head(settings.ELASTICSEARCH_URL + '/' + index_name)
+            resp = requests.head(settings.SEARCH_ELASTIC_URL + '/' + index_name)
             self.assertEqual(resp.status_code, 200, "Region Index " + index_name + "exists")
             # Test if type region exists
             index_type = 'region'
-            resp = requests.head(settings.ELASTICSEARCH_URL +
+            resp = requests.head(settings.SEARCH_ELASTIC_URL +
                                  '/' + index_name +
                                  '/' + index_type)
             self.assertEqual(resp.status_code, 200, "Region Index: " +

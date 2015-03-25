@@ -16,7 +16,7 @@ def setUpModule():
 def tearDownModule():
     ''' Remove loaded test indeces '''
     for key in IDX:
-        requests.delete(settings.ELASTICSEARCH_URL +
+        requests.delete(settings.SEARCH_ELASTIC_URL +
                         '/' + IDX[key]['indexName'])
 
 
@@ -33,8 +33,8 @@ class ElasticLoadersTest(TestCase):
         self._check_index(index_name, 'marker')
 
     def _check_index(self, index_name, index_type, count=None):
-        self._check(settings.ELASTICSEARCH_URL + '/' + index_name)
-        response = self._check(settings.ELASTICSEARCH_URL + '/' + index_name +
+        self._check(settings.SEARCH_ELASTIC_URL + '/' + index_name)
+        response = self._check(settings.SEARCH_ELASTIC_URL + '/' + index_name +
                                '/' + index_type + '/_count')
         if count is not None:
             self.assertEqual(response.json()['count'], count,

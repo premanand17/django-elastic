@@ -54,13 +54,13 @@ class GFFManager:
                 if(line_num > 5000):
                     line_num = 0
                     print('.', end="", flush=True)
-                    response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+                    response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                             index_name+'/' + index_type +
                                             '/_bulk', data=json_data
                                             )
                     json_data = ''
         finally:
-            response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+            response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                     index_name+'/' + index_type +
                                     '/_bulk', data=json_data
                                     )
@@ -90,16 +90,16 @@ class GFFManager:
                  }
 
         # check if index exists
-        response = requests.get(settings.ELASTICSEARCH_URL + '/' + index_name)
+        response = requests.get(settings.SEARCH_ELASTIC_URL + '/' + index_name)
         if(response.status_code != 200):
             print('Response status code ' + str(response.status_code) +
                   'Creating new index ')
         else:
             print('Response status code ' + str(response.status_code) +
                   ' Index already exists...Overriding the mapping')
-        requests.put(settings.ELASTICSEARCH_URL + '/' + index_name)
+        requests.put(settings.SEARCH_ELASTIC_URL + '/' + index_name)
         data = {index_type: props}
-        response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+        response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                 index_name+'/_mapping/' + index_type,
                                 data=json.dumps(data))
         print (response.text)

@@ -23,7 +23,7 @@ class DiseaseManager:
                                "colour": parts[3],
                                "tier": int(parts[4])
                                })
-            resp = requests.put(settings.ELASTICSEARCH_URL+'/' +
+            resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                 index_name+'/disease/'+parts[2],
                                 data=data)
 
@@ -52,8 +52,8 @@ class DiseaseManager:
 
         data = {"disease": props}
         ''' create index and add mapping '''
-        requests.put(settings.ELASTICSEARCH_URL+'/' + index_name)
-        requests.put(settings.ELASTICSEARCH_URL+'/' +
+        requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name)
+        requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                      index_name+'/_mapping/disease',
                      data=json.dumps(data))
         return

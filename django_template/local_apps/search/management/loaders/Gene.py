@@ -93,12 +93,12 @@ class GeneManager:
                     if(n > 5000):
                         n = 0
                         response = requests.put(settings
-                                                .ELASTICSEARCH_URL+'/' +
+                                                .SEARCH_ELASTIC_URL+'/' +
                                                 index_name+'/gene/_bulk',
                                                 data=data)
                         data = ''
         finally:
-            response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+            response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                     index_name+'/gene/_bulk', data=data)
             return response
 
@@ -149,7 +149,7 @@ class GeneManager:
                                  },
                                 "biotype": gff.attrs["biotype"]}
                                })
-            response = requests.post(settings.ELASTICSEARCH_URL+'/' +
+            response = requests.post(settings.SEARCH_ELASTIC_URL+'/' +
                                      index_name+'/gene/'+esid+'/_update',
                                      data=data)
         return response
@@ -185,8 +185,8 @@ class GeneManager:
 
         data = {"gene": props}
         ''' create index and add mapping '''
-        requests.put(settings.ELASTICSEARCH_URL+'/' + index_name)
-        response = requests.put(settings.ELASTICSEARCH_URL+'/' +
+        requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name)
+        response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                 index_name+'/_mapping/gene',
                                 data=json.dumps(data))
         print (response.text)
