@@ -1,7 +1,8 @@
 from django.conf import settings
 import os
 
-SEARCH_TEST_DATA_PATH = os.path.join(settings.BASE_DIR, 'django_template/local_apps/search/tests/data/')
+SEARCH_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+SEARCH_TEST_DATA_PATH = os.path.join(SEARCH_BASE_DIR, 'tests/data/')
 
 IDX = {'GENE': {'indexName': 'test__gene', 'indexGene': SEARCH_TEST_DATA_PATH+'genenames.org.test.txt.gz'},
        'DISEASE': {'indexName': 'test__disease', 'indexDisease': SEARCH_TEST_DATA_PATH+'disease.list'},
