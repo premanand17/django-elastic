@@ -8,7 +8,7 @@ Quick start
 -----------
 
 1. Installation
-pip install -e git://github.com/D-I-L/search.git#egg=search
+pip install -e git://github.com/D-I-L/django-search.git#egg=search
 
 2. Add "search" to your INSTALLED_APPS setting like this::
 
