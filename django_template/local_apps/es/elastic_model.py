@@ -6,18 +6,49 @@ import re
 
 class Elastic:
 
-    def __init__(self, data, search_from=0, size=20, db=settings.MARKERDB):
-        ''' Query the elastic server for given search data '''
+    def __init__(self, query=None, search_from=0, size=20, db=settings.MARKERDB):
+        ''' Query the elastic server for given search query '''
         self.url = (settings.ELASTICSEARCH_URL + '/' + db + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
-        self.data = data
+        self.query = query
         self.size = size
         self.db = db
-        self.response = requests.post(self.url, data=json.dumps(data))
+
+    @classmethod
+    def range_overlap_query(cls, seqid, start_range, end_range,
+                            search_from=0, size=20, db=settings.MARKERDB):
+        ''' Constructs a range overlap query '''
+        query = {"query":
+                 {"filtered":
+                  {"query":
+                   {"term": {"seqid": seqid}},
+                   "filter": {"or":
+                              [{"range": {"start": {"gte": start_range, "lte": end_range}}},
+                               {"range": {"end": {"gte": start_range, "lte": end_range}}},
+                               {"bool":
+                                {"must":
+                                 [{"range": {"start": {"lte": start_range}}},
+                                  {"range": {"end": {"gte": end_range}}}
+                                  ]
+                                 }
+                                }
+                               ]
+                              }
+                   }
+                  }}
+        return cls(query, search_from, size, db)
+
+    @classmethod
+    def field_search_query(cls, query_term, fields,
+                           search_from=0, size=20, db=settings.MARKERDB):
+        ''' Constructs a field search query '''
+        query = {"query": {"query_string": {"query": query_term, "fields": fields}}}
+        return cls(query, search_from, size, db)
 
     def get_result(self):
         ''' Return the elastic context result '''
-        context = {"query": self.data}
+        response = requests.post(self.url, data=json.dumps(self.query))
+        context = {"query": self.query}
         c_dbs = {}
         dbs = self.db.split(",")
         for this_db in dbs:
@@ -31,13 +62,13 @@ class Elastic:
         context["db"] = self.db
 
         content = []
-        if self.response.status_code != 200:
+        if response.status_code != 200:
             context["error"] = ("Error: elastic response " +
-                                json.dumps(self.response.json()))
+                                json.dumps(response.json()))
             return context
 
-        if(len(self.response.json()['hits']['hits']) >= 1):
-            for hit in self.response.json()['hits']['hits']:
+        if(len(response.json()['hits']['hits']) >= 1):
+            for hit in response.json()['hits']['hits']:
                 self._addInfo(content, hit)
                 hit['_source']['idx_type'] = hit['_type']
                 hit['_source']['idx_id'] = hit['_id']
@@ -45,9 +76,9 @@ class Elastic:
                 #print(hit['_source']) @IgnorePep8
 
         context["data"] = content
-        context["total"] = self.response.json()['hits']['total']
-        if(int(self.response.json()['hits']['total']) < self.size):
-            context["size"] = self.response.json()['hits']['total']
+        context["total"] = response.json()['hits']['total']
+        if(int(response.json()['hits']['total']) < self.size):
+            context["size"] = response.json()['hits']['total']
         else:
             context["size"] = self.size
         return context
