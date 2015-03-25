@@ -17,15 +17,15 @@ def reverse_proxy(request):
     if(not settings.DEBUG):
         raise NoReverseMatch
     path = request.get_full_path()
-    url = "%s%s" % (settings.ELASTICSEARCH_URL, path)
+    url = "%s%s" % (settings.SEARCH_ELASTIC_URL, path)
     requestor = getattr(requests, request.method.lower())
     proxy_resp = requestor(url, data=request.body, files=request.FILES)
     return HttpResponse(proxy_resp.content,
                         content_type=proxy_resp.headers.get('content-type'))
 
 
-def search(request, query, search_db=settings.MARKERDB + ',' +
-           settings.GENEDB + ',' + settings.REGIONDB):
+def search(request, query, search_db=settings.SEARCH_MARKERDB + ',' +
+           settings.SEARCH_GENEDB + ',' + settings.SEARCH_REGIONDB):
     ''' Renders a search results page based on the query '''
     fields = ["gene_symbol", "hgnc", "synonyms", "id",
               "dbxrefs.*", "attr.*", "featureloc.seqid"]
@@ -34,8 +34,8 @@ def search(request, query, search_db=settings.MARKERDB + ',' +
                   content_type='text/html')
 
 
-def range_overlap_search(request, src, start, stop, search_db=settings.MARKERDB + ',' +
-                         settings.GENEDB + ',' + settings.REGIONDB):
+def range_overlap_search(request, src, start, stop, search_db=settings.SEARCH_MARKERDB + ',' +
+                         settings.SEARCH_GENEDB + ',' + settings.SEARCH_REGIONDB):
     ''' Renders a search result page based on the src, start and stop '''
     elastic = Elastic.range_overlap_query(src, start, stop, db=search_db)
     context = elastic.get_result()

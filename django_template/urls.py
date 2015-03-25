@@ -33,8 +33,8 @@ urlpatterns = patterns('',
                        )
 
 if(settings.DEBUG):
-    urlpatterns.append(url(r'^'+settings.MARKERDB+'|' +
-                           settings.MARKERDB+',\w+/_search'+'|' +
-                           settings.GENEDB + '|' +
-                           settings.REGIONDB,
+    urlpatterns.append(url(r'^'+settings.SEARCH_MARKERDB+'|' +
+                           settings.SEARCH_MARKERDB+',\w+/_search'+'|' +
+                           settings.SEARCH_GENEDB + '|' +
+                           settings.SEARCH_REGIONDB,
                            reverse_proxy),)

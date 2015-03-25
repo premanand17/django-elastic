@@ -6,9 +6,9 @@ import re
 
 class Elastic:
 
-    def __init__(self, query=None, search_from=0, size=20, db=settings.MARKERDB):
+    def __init__(self, query=None, search_from=0, size=20, db=settings.SEARCH_MARKERDB):
         ''' Query the elastic server for given search query '''
-        self.url = (settings.ELASTICSEARCH_URL + '/' + db + '/_search?size=' + str(size) +
+        self.url = (settings.SEARCH_ELASTIC_URL + '/' + db + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
         self.query = query
         self.size = size
@@ -16,7 +16,7 @@ class Elastic:
 
     @classmethod
     def range_overlap_query(cls, seqid, start_range, end_range,
-                            search_from=0, size=20, db=settings.MARKERDB,
+                            search_from=0, size=20, db=settings.SEARCH_MARKERDB,
                             field_list=None):
         ''' Constructs a range overlap query '''
         query = {"filtered":
@@ -44,7 +44,7 @@ class Elastic:
 
     @classmethod
     def field_search_query(cls, query_term, fields,
-                           search_from=0, size=20, db=settings.MARKERDB):
+                           search_from=0, size=20, db=settings.SEARCH_MARKERDB):
         ''' Constructs a field search query '''
         query = {"query": {"query_string": {"query": query_term, "fields": fields}}}
         return cls(query, search_from, size, db)
