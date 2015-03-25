@@ -6,7 +6,7 @@ from db.api import FeaturepropResource, FeaturepropFullResource
 from db.api import OrganismResource
 from tastypie.api import Api
 from django_template import settings
-from es.views import reverse_proxy
+from search.views import reverse_proxy
 
 # register tastypie api
 api = Api(api_name='dev')
@@ -26,7 +26,7 @@ api.register(CvtermpropResource())
 urlpatterns = patterns('',
                        url(r'^', include('bands.urls', namespace="bands")),
                        url(r'^api/', include(api.urls)),
-                       url(r'^search/', include('es.urls', namespace="es")),
+                       url(r'^search/', include('search.urls', namespace="search")),
                        url(r'^gene/', include('gene.urls')),
                        url(r'^marker/', include('marker.urls')),
                        url(r'^region/', include('region.urls')),

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from es.elastic_model import Elastic
+from search.elastic_model import Elastic
 from django.conf import settings
 
 

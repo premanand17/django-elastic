@@ -3,7 +3,7 @@
 {% block header %}
 
 {% load staticfiles %}
-<script src="{% static "es/results_pagination.js" %}" charset="utf-8"></script>
+<script src="{% static "search/results_pagination.js" %}" charset="utf-8"></script>
 <script type='text/javascript'>
 $(document).ready(function() {
 	var query = {% autoescape off %}{{ query }}.query{% endautoescape %};

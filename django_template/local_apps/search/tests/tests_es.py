@@ -1,7 +1,7 @@
 from django.test import TestCase, override_settings
 from django.conf import settings
 from django.core.management import call_command
-from es.tests.settings_idx import IDX
+from search.tests.settings_idx import IDX
 import requests
 import time
 

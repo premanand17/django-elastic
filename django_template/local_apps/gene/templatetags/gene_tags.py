@@ -1,6 +1,6 @@
 from django import template
 from db.models import FeatureDbxref, FeatureSynonym
-from es.elastic_model import Elastic
+from search.elastic_model import Elastic
 from django_template import settings
 
 register = template.Library()
