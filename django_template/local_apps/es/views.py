@@ -44,13 +44,3 @@ def range_overlap_search(request, src, start, stop, search_db=settings.MARKERDB 
     context["stop"] = stop
     return render(request, 'search/searchresults.html', context,
                   content_type='text/html')
-
-
-def filtered_range_search(request, src, start, stop, db):
-    ''' Pass the range parameters to the range_search routine. '''
-    return range_overlap_search(request, src, start, stop, db)
-
-
-def filtered_search(request, query, db):
-    ''' Pass the search parameters to the regular search routine '''
-    return search(request, query, db)
