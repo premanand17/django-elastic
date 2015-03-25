@@ -16,26 +16,30 @@ class Elastic:
 
     @classmethod
     def range_overlap_query(cls, seqid, start_range, end_range,
-                            search_from=0, size=20, db=settings.MARKERDB):
+                            search_from=0, size=20, db=settings.MARKERDB,
+                            field_list=None):
         ''' Constructs a range overlap query '''
-        query = {"query":
-                 {"filtered":
-                  {"query":
-                   {"term": {"seqid": seqid}},
-                   "filter": {"or":
-                              [{"range": {"start": {"gte": start_range, "lte": end_range}}},
-                               {"range": {"end": {"gte": start_range, "lte": end_range}}},
-                               {"bool":
-                                {"must":
-                                 [{"range": {"start": {"lte": start_range}}},
-                                  {"range": {"end": {"gte": end_range}}}
-                                  ]
-                                 }
+        query = {"filtered":
+                 {"query":
+                  {"term": {"seqid": seqid}},
+                  "filter": {"or":
+                             [{"range": {"start": {"gte": start_range, "lte": end_range}}},
+                              {"range": {"end": {"gte": start_range, "lte": end_range}}},
+                              {"bool":
+                               {"must":
+                                [{"range": {"start": {"lte": start_range}}},
+                                 {"range": {"end": {"gte": end_range}}}
+                                 ]
                                 }
-                               ]
-                              }
-                   }
-                  }}
+                               }
+                              ]
+                             }
+                  }
+                 }
+        if field_list is not None:
+            query = {"_source": field_list, "query": query}
+        else:
+            query = {"query": query}
         return cls(query, search_from, size, db)
 
     @classmethod
