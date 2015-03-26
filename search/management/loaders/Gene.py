@@ -103,6 +103,7 @@ class GeneManager:
             return response
 
     def update_gene(self, **options):
+        ''' Use gene span GFF coordinates to add coordinates '''
         index_name = self._get_index_name(**options)
 
         if options['build']:
@@ -139,7 +140,7 @@ class GeneManager:
                            gdata["dbxrefs"]["entrez"])
                     continue
 
-            esid = gdata["_id"]
+            esid = gdata["idx_id"]
             data = json.dumps({"doc":
                                {"featureloc":
                                 {"start": gff.start,
@@ -165,32 +166,38 @@ class GeneManager:
         ''' Create the mapping for gene names indexing '''
         index_name = self._get_index_name(**options)
 
-        props = {"properties":
-                 {"gene_symbol": {"type": "string", "boost": 4,
-                                  "index": "not_analyzed"},
-                  "organism": {"type": "string"},
-                  "hgnc": {"type": "string"},
-                  "dbxrefs": {"type": "object"},
-                  "synonyms": {"type": "string"},
-                  "biotype": {"type": "string"},
-                  "featureloc": {"properties":
-                                 {"start": {"type": "integer"},
-                                  "end": {"type": "integer"},
-                                  "seqid": {"type": "string"},
-                                  "build": {"type": "string"}
-                                  }
-                                 }
+        data = {"settings":
+                {"analysis":
+                 {"analyzer":
+                  {"full_name":
+                   {"filter": ["standard", "lowercase"],
+                    "tokenizer": "keyword"}
+                   }
+                  }
+                 },
+                "mappings":
+                {"gene":
+                 {"properties":
+                  {"gene_symbol": {"boost": 4, "type": "string", "analyzer": "full_name"},
+                   "biotype": {"type": "string"},
+                   "featureloc": {"properties": {"start": {"type": "integer"},
+                                                 "end": {"type": "integer"},
+                                                 "seqid": {"type": "string"},
+                                                 "build": {"type": "string"}}},
+                   "synonyms": {"type": "string", "analyzer": "full_name"},
+                   "hgnc": {"type": "string"},
+                   "dbxrefs": {"type": "object"},
+                   "organism": {"type": "string"}
+                   }
                   }
                  }
+                }
 
-        data = {"gene": props}
         ''' create index and add mapping '''
-        requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name)
         response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                                index_name+'/_mapping/gene',
+                                index_name,
                                 data=json.dumps(data))
-        print (response.text)
-        return
+        return response
 
     def _get_index_name(self, **options):
         if options['indexName']:
