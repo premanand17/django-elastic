@@ -6,7 +6,7 @@ from django.conf import settings
 def region_page(request, region):
     ''' Region search'''
     data = {"query": {"match": {"attr.region_id": region}}}
-    elastic = Elastic(data, db=settings.REGIONDB)
+    elastic = Elastic(data, db=settings.SEARCH_REGIONDB)
     context = elastic.get_result()
     context['title'] = "Region"
     print(context)
