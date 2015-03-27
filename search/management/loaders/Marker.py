@@ -1,21 +1,17 @@
-import gzip
 import re
 import json
 import requests
 from django.conf import settings
+from search.management.loaders.Loader import Loader
 
 
-class MarkerManager:
+class MarkerManager(Loader):
 
     def create_load_snp_index(self, **options):
         ''' Index snp data '''
-        index_name = self._get_index_name(**options)
-        self._create_snp_index(**options)
-
-        if options['indexSNP'].endswith('.gz'):
-            f = gzip.open(options['indexSNP'], 'rb')
-        else:
-            f = open(options['indexSNP'], 'rb')
+        index_name = self.get_index_name(**options)
+        self._create_snp_mapping(**options)
+        f = self.open_file_to_load('indexSNP', **options)
 
         data = ''
         n = 0
@@ -46,7 +42,6 @@ class MarkerManager:
                 nn += 1
                 if(n > 5000):
                     n = 0
-
                     if(lastSrc != src):
                         print ('\nLoading '+src)
                     print('.', end="", flush=True)
@@ -55,19 +50,15 @@ class MarkerManager:
                                             data=data)
                     data = ''
                     lastSrc = src
-
         finally:
             response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
                                     index_name+'/marker/_bulk', data=data)
         return response
 
-    def _create_snp_index(self, **options):
-        ''' Create the mapping for snp indexing '''
-        index_name = self._get_index_name(**options)
-
+    def _create_snp_mapping(self, **options):
+        ''' Create the mapping for snp index '''
         props = {"properties":
-                 {"id": {"type": "string", "index": "not_analyzed",
-                         "boost": 4},
+                 {"id": {"type": "string", "index": "not_analyzed", "boost": 4},
                   "seqid": {"type": "string", "index": "not_analyzed"},
                   "ref": {"type": "string", "index": "no"},
                   "alt": {"type": "string", "index": "no"},
@@ -76,17 +67,5 @@ class MarkerManager:
                   "info": {"type": "string", "index": "no"}
                   }
                  }
-
-        data = {"marker": props}
-
-        ''' create index and add mapping '''
-        requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name)
-        requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                     index_name+'/_mapping/marker',
-                     data=json.dumps(data))
-        return
-
-    def _get_index_name(self, **options):
-        if options['indexName']:
-            return options['indexName'].lower()
-        return "dbsnp"
+        mapping_json = {"marker": props}
+        self.mapping(mapping_json, **options)

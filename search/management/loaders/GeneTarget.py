@@ -1,21 +1,17 @@
-import gzip
 import re
 import json
 import requests
 from django.conf import settings
+from search.management.loaders.Loader import Loader
 
 
-class GeneTargetManager:
+class GeneTargetManager(Loader):
 
     def create_load_gene_target_index(self, **options):
         ''' Index gene target data '''
-        index_name = self._get_index_name(**options)
-        self._create_gene_target_index(**options)
-
-        if options['indexGTarget'].endswith('.gz'):
-            f = gzip.open(options['indexGTarget'], 'rb')
-        else:
-            f = open(options['indexGTarget'], 'rb')
+        index_name = self.get_index_name(**options)
+        self._create_gene_mapping(**options)
+        f = self.open_file_to_load('indexGTarget', **options)
 
         data = ''
         n = 0
@@ -70,10 +66,8 @@ class GeneTargetManager:
                                     index_name+'/gene_target/_bulk', data=data)
         return response
 
-    def _create_gene_target_index(self, **options):
-        ''' Create the mapping for gene target indexing '''
-        index_name = self._get_index_name(**options)
-
+    def _create_gene_mapping(self, **options):
+        ''' Create the mapping for gene target index '''
         props = {"properties":
                  {"ensg": {"type": "string", "index": "not_analyzed", "boost": 4},
                   "name": {"type": "string", "index": "not_analyzed"},
@@ -100,17 +94,5 @@ class GeneTargetManager:
                   "CD4_Activated": {"type": "float"}
                   }
                  }
-
-        data = {"gene_target": props}
-
-        ''' create index and add mapping '''
-        requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name)
-        requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                     index_name+'/_mapping/gene_target',
-                     data=json.dumps(data))
-        return
-
-    def _get_index_name(self, **options):
-        if options['indexName']:
-            return options['indexName'].lower()
-        return "ensg_gene_target"
+        mapping_json = {"gene_target": props}
+        self.mapping(mapping_json, **options)
