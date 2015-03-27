@@ -1,14 +1,14 @@
-import gzip
 import re
 import requests
 from django.conf import settings
-import json
 from db.management.loaders.GFF import GFF
 from search.elastic_model import Elastic
+from search.management.loaders.Loader import Loader
 import sys
+import json
 
 
-class GeneManager:
+class GeneManager(Loader):
 
     def load_genename(self, **options):
         '''
@@ -18,18 +18,15 @@ class GeneManager:
         hgnc id, approved symbol, status, locus type, previous symbols
         synonyms, entrez gene id, ensembl gene id
         '''
-        index_name = self._get_index_name(**options)
-        self._create_genename_index(**options)
+        index_name = self.get_index_name(**options)
+        self._create_mapping(**options)
 
         if options['org']:
             org = options['org']
         else:
             org = 'human'
 
-        if options['indexGene'].endswith('.gz'):
-            f = gzip.open(options['indexGene'], 'rb')
-        else:
-            f = open(options['indexGene'], 'rb')
+        f = self.open_file_to_load('indexGene', **options)
 
         col = []
         synonymColumns = ["previous symbols", "synonyms",
@@ -112,10 +109,7 @@ class GeneManager:
             print("Please supply a build version!")
             sys.exit()
 
-        if options['indexGeneGFF'].endswith('.gz'):
-            f = gzip.open(options['indexGeneGFF'], 'rb')
-        else:
-            f = open(options['indexGeneGFF'], 'rb')
+        f = self.open_file_to_load('indexGeneGFF', **options)
         for line in f:
             line = line.decode("utf-8").rstrip()
             if(line.startswith("##")):
@@ -157,25 +151,12 @@ class GeneManager:
 
     def _call_elasticsearch(self, name, fields, indexName):
         ''' Call elasticsearch '''
-        data = {"query": {"query_string": {"query": name,
-                                           "fields": fields}}}
-        elastic = Elastic(data, 0, 20, indexName)
+        elastic = Elastic.field_search_query(name, fields, 0, 20, indexName)
         return elastic.get_result()
 
-    def _create_genename_index(self, **options):
+    def _create_mapping(self, **options):
         ''' Create the mapping for gene names indexing '''
-        index_name = self._get_index_name(**options)
-
-        data = {"settings":
-                {"analysis":
-                 {"analyzer":
-                  {"full_name":
-                   {"filter": ["standard", "lowercase"],
-                    "tokenizer": "keyword"}
-                   }
-                  }
-                 },
-                "mappings":
+        data = {"mappings":
                 {"gene":
                  {"properties":
                   {"gene_symbol": {"boost": 4, "type": "string", "analyzer": "full_name"},
@@ -192,14 +173,5 @@ class GeneManager:
                   }
                  }
                 }
-
         ''' create index and add mapping '''
-        response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                                index_name,
-                                data=json.dumps(data))
-        return response
-
-    def _get_index_name(self, **options):
-        if options['indexName']:
-            return options['indexName'].lower()
-        return "genename"
+        self.mapping(data, analyzer=self.KEYWORD_ANALYZER, **options)
