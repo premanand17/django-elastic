@@ -19,10 +19,16 @@ class Loader:
     def mapping(self, mapping_json, analyzer=None, **options):
         ''' Put the mapping to the Elastic server '''
         index_name = self.get_index_name(**options)
+        resp = requests.get(settings.SEARCH_ELASTIC_URL + '/' + index_name)
+        if(resp.status_code == 200):
+            print('WARNING: '+index_name + ' mapping already exists!')
+
         if analyzer is not None:
             mapping_json = self.append_analyzer(mapping_json, analyzer)
-        requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name, data=json.dumps(mapping_json))
-        return
+        resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name, data=json.dumps(mapping_json))
+
+        if(resp.status_code != 200):
+            print('WARNING: ' + index_name + ' mapping status: ' + str(resp.status_code))
 
     def append_analyzer(self, json, analyzer):
         ''' Append analyzer to mapping '''
