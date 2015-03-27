@@ -16,7 +16,7 @@ setup(
     url='http://github.com/D-I-L/django-search',
     description='A Django app to run and view Elastic search queries.',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
-    install_requires=["requests==2.6.0", "Django==1.7.7"],
+    install_requires=["requests>=2.6.0", "Django>=1.7"],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
