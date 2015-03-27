@@ -12,9 +12,10 @@ setup(
     version='0.1a1',
     packages=find_packages(),
     include_package_data=True,
+    url='http://github.com/D-I-L/django-search',
     description='A Django app to run and view Elastic search queries.',
     long_description=README,
-    install_requires=["requests", "Django"],
+    install_requires=["requests==2.6.0", "Django==1.7.7"],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
