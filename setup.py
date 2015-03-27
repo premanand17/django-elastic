@@ -13,6 +13,7 @@ setup(
     version='0.1a1',
     packages=find_packages(),
     include_package_data=True,
+    zip_safe=False,
     url='http://github.com/D-I-L/django-search',
     description='A Django app to run and view Elastic search queries.',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
