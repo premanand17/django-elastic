@@ -14,6 +14,7 @@ setup(
     include_package_data=True,
     description='A Django app to run and view Elastic search queries.',
     long_description=README,
+    install_requires=["requests", "django"],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
