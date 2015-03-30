@@ -49,6 +49,15 @@ class Elastic:
         query = {"query": {"query_string": {"query": query_term, "fields": fields}}}
         return cls(query, search_from, size, db)
 
+    def get_mapping(self, mapping_type=None):
+        self.mapping_url = (settings.SEARCH_ELASTIC_URL + '/' + self.db + '/_mapping')
+        if mapping_type is not None:
+            self.mapping_url += '/'+mapping_type
+        response = requests.get(self.mapping_url)
+        if response.status_code != 200:
+            return json.dumps({"error": response.status_code})
+        return response.json()
+
     def get_result(self):
         ''' Return the elastic context result '''
         response = requests.post(self.url, data=json.dumps(self.query))
