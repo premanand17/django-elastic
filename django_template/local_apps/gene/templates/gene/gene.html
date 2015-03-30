@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load gene_tags %}
+
+{% block content %}
+
+<h2>Gene</h2>
+<!-- elasticsearch gene section -->
+{% if gene %}
+	{% show_es_gene_section gene_symbol=gene %}
+{% endif %}
+<hr/>
+
+<!-- chado database -->
+{% if feature %}
+	{% show_gene_section feature %}
+	<h2>SNPs</h2>
+	{% for loc in locs %}
+ 		<a href="/search/{{ loc.srcfeature.uniquename }}:{{ loc.fmin }}-{{ loc.fmax }}">{{ loc.srcfeature.uniquename }}:{{ loc.fmin }}-{{ loc.fmax }}</a>
+	{% endfor %}
+{% else %}
+	{{ error }}
+{% endif %}
+    
+{% endblock %}
