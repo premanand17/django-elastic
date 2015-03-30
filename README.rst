@@ -17,15 +17,11 @@ pip install -e git://github.com/D-I-L/django-search.git#egg=search
         'search',
     )
 
-3. Include the search URLconf in your project urls.py like this::
+3. Add the URL of your Elasticsearch to the settings.py::
+
+# elastic search engine
+SEARCH_ELASTIC_URL = 'http://127.0.0.1:9200/'
+
+4. Include the search URLconf in your project urls.py like this::
 
   url(r'^search/', include('search.urls', namespace="search")),
-    
-To run in DEBUG mode include the reverse proxy:
-
-    if(settings.DEBUG):
-        urlpatterns.append(url(r'^'+settings.MARKERDB+'|' +
-                               settings.MARKERDB+',\w+/_search'+'|' +
-                               settings.GENEDB + '|' +
-                               settings.REGIONDB,
-                               reverse_proxy),)

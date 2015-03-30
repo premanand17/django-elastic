@@ -2,21 +2,18 @@ from db.management.loaders.GFF import GFF
 from django.conf import settings
 import re
 import requests
-import gzip
 import json
+from search.management.loaders.Loader import Loader
 
 
-class GFFManager:
+class GFFManager(Loader):
 
     def create_load_gff_index(self, **options):
         ''' Index gff data '''
         self._create_gff_mapping(**options)
-        index_name = self._get_index_name(**options)
+        index_name = self.get_index_name(**options)
         index_type = self._get_index_type(**options)
-        if options['indexGFF'].endswith('.gz'):
-            f = gzip.open(options['indexGFF'], 'rb')
-        else:
-            f = open(options['indexGFF'], 'rb')
+        f = self.open_file_to_load('indexGFF', **options)
 
         json_data = ''
         line_num = 0
@@ -67,48 +64,22 @@ class GFFManager:
         return response
 
     def _create_gff_mapping(self, **options):
-        ''' Create the mapping for region indexing '''
-        index_name = self._get_index_name(**options)
+        ''' Create the mapping for gff index '''
         index_type = self._get_index_type(**options)
-        print('Mapping for index ' + index_name + ' and type ' + index_type)
-        props = {"properties": {"seqid": {"type": "string"},
-                                "source": {"type": "string"},
-                                "type": {"type": "string",
-                                         "index": "not_analyzed"},
-                                "start": {"type": "integer",
-                                          "index": "not_analyzed"},
-                                "end": {"type": "integer",
-                                        "index": "not_analyzed"},
-                                "score": {"type": "string",
-                                          "index": "no"},
-                                "strand": {"type": "string",
-                                           "index": "no"},
-                                "phase": {"type": "string",
-                                          "index": "no"},
-                                "attr": {"type": "object"}
-                                }
+        props = {"properties":
+                 {"seqid": {"type": "string"},
+                  "source": {"type": "string"},
+                  "type": {"type": "string", "index": "not_analyzed"},
+                  "start": {"type": "integer", "index": "not_analyzed"},
+                  "end": {"type": "integer", "index": "not_analyzed"},
+                  "score": {"type": "string", "index": "no"},
+                  "strand": {"type": "string", "index": "no"},
+                  "phase": {"type": "string", "index": "no"},
+                  "attr": {"type": "object"}
+                  }
                  }
-
-        # check if index exists
-        response = requests.get(settings.SEARCH_ELASTIC_URL + '/' + index_name)
-        if(response.status_code != 200):
-            print('Response status code ' + str(response.status_code) +
-                  'Creating new index ')
-        else:
-            print('Response status code ' + str(response.status_code) +
-                  ' Index already exists...Overriding the mapping')
-        requests.put(settings.SEARCH_ELASTIC_URL + '/' + index_name)
-        data = {index_type: props}
-        response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                                index_name+'/_mapping/' + index_type,
-                                data=json.dumps(data))
-        print (response.text)
-        return
-
-    def _get_index_name(self, **options):
-        if options['indexName']:
-            return options['indexName'].lower()
-        return "gff"
+        mapping_json = {index_type: props}
+        self.mapping(mapping_json, **options)
 
     def _get_index_type(self, **options):
         if options['indexType']:
