@@ -6,22 +6,22 @@ import requests
 import time
 
 
-@override_settings(MARKERDB=IDX['MARKER']['indexName'])
+@override_settings(SEARCH_MARKERDB=IDX['MARKER']['indexName'])
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
 
 
-@override_settings(MARKERDB=IDX['MARKER']['indexName'])
+@override_settings(SEARCH_MARKERDB=IDX['MARKER']['indexName'])
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(settings.SEARCH_ELASTIC_URL + '/' + IDX['MARKER']['indexName'])
 
 
-@override_settings(MARKERDB=IDX['MARKER']['indexName'])
-class EsTest(TestCase):
+@override_settings(SEARCH_MARKERDB=IDX['MARKER']['indexName'])
+class ElasticViewsTest(TestCase):
 
-    def test_es(self):
+    def test_server(self):
         ''' Test elasticsearch server is running and status '''
         try:
             resp = requests.get(settings.SEARCH_ELASTIC_URL + '/_cluster/health/test__marker')
