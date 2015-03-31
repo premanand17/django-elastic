@@ -3,6 +3,7 @@ import json
 import requests
 from django.conf import settings
 import re
+from search.elastic_model import Elastic
 
 
 class Loader:
@@ -27,6 +28,7 @@ class Loader:
         if analyzer is not None:
             mapping_json = self.append_analyzer(mapping_json, analyzer)
         resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name, data=json.dumps(mapping_json))
+        self.mapping_json = mapping_json
 
         if(resp.status_code != 200):
             print('WARNING: ' + index_name + ' mapping status: ' + str(resp.status_code))
@@ -48,6 +50,19 @@ class Loader:
             return gzip.open(options[file_name], 'rb')
         else:
             return open(options[file_name], 'rb')
+
+    def is_str(self, column_name, idx_name, idx_type):
+        ''' Looks at the mapping to determine if the type is a string '''
+        if not self.mapping_json:
+            elastic = Elastic(db=idx_name)
+            self.mapping_json = elastic.get_mapping(idx_type)
+        try:
+            map_type = self.mapping_json["mappings"][idx_type]["properties"][column_name]["type"]
+        except KeyError:
+            return False
+        if map_type == 'string':
+            return True
+        return False
 
 
 class DelimeterLoader(Loader):
@@ -83,7 +98,9 @@ class DelimeterLoader(Loader):
                         doc_data[column_names[idx]] = attrs
                         continue
 
-                    if p.isdigit():
+                    if self.is_str(column_names[idx], idx_name, idx_type):
+                        doc_data[column_names[idx]] = p
+                    elif p.isdigit():
                         doc_data[column_names[idx]] = int(p)
                     elif self._isfloat(p):
                         doc_data[column_names[idx]] = float(p)
