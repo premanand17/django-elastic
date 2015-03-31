@@ -42,5 +42,5 @@ class DiseaseManager(Loader):
                   "tier": {"type": "integer", "index": "not_analyzed"},
                   }
                  }
-        mapping_json = {"disease": props}
+        mapping_json = {"mappings": {"disease": props}}
         self.mapping(mapping_json, **options)
