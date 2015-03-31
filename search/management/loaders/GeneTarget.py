@@ -1,70 +1,19 @@
-import re
-import json
-import requests
-from django.conf import settings
-from search.management.loaders.Loader import Loader
+from search.management.loaders.Loader import DelimeterLoader
 
 
-class GeneTargetManager(Loader):
+class GeneTargetManager(DelimeterLoader):
 
     def create_load_gene_target_index(self, **options):
         ''' Index gene target data '''
-        index_name = self.get_index_name(**options)
+        idx_name = self.get_index_name(**options)
         self._create_gene_mapping(**options)
         f = self.open_file_to_load('indexGTarget', **options)
-
-        data = ''
-        n = 0
-        nn = 0
-
-        try:
-            for line in f:
-                line = line.rstrip().decode("utf-8")
-                parts = re.split('\t', line)
-                if nn == 0:
-                    nn += 1
-                    continue
-
-                data += '{"index": {"_id": "%s"}}\n' % nn
-                data += json.dumps({"ensg": parts[0],
-                                    "name": parts[1],
-                                    "biotype": parts[2],
-                                    "strand": parts[3],
-                                    "baitChr": parts[4],
-                                    "baitStart": int(parts[5]),
-                                    "baitEnd": int(parts[6]),
-                                    "baitID": parts[7],
-                                    "baitName": parts[8],
-                                    "oeChr": parts[9],
-                                    "oeStart": int(parts[10]),
-                                    "oeEnd": int(parts[11]),
-                                    "oeID": parts[12],
-                                    "oeName": parts[13],
-                                    "dist": abs(int(float(parts[14]))),
-                                    "Monocyte": float(parts[15]),
-                                    "Macrophage": float(parts[16]),
-                                    "Erythroblast": float(parts[17]),
-                                    "Megakaryocyte": float(parts[18]),
-                                    "CD4_Naive": float(parts[19]),
-                                    "CD4_Non_Activated": float(parts[20]),
-                                    "CD4_Total": float(parts[21]),
-                                    "CD4_Activated": float(parts[22])
-                                    })+'\n'
-
-                n += 1
-                nn += 1
-                if(n > 5000):
-                    n = 0
-                    print('.', end="", flush=True)
-                    response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                                            index_name+'/gene_target/_bulk',
-                                            data=data)
-                    data = ''
-
-        finally:
-            response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                                    index_name+'/gene_target/_bulk', data=data)
-        return response
+        column_names = ["ensg", "name", "biotype", "strand",
+                        "baitChr", "baitStart", "baitEnd", "baitID", "baitName",
+                        "oeChr", "oeStart", "oeEnd", "oeID", "oeName", "dist",
+                        "Monocyte", "Macrophage", "Erythroblast", "Megakaryocyte",
+                        "CD4_Naive", "CD4_Non_Activated", "CD4_Total", "CD4_Activated"]
+        self.load(column_names, f, idx_name, 'gene_target')
 
     def _create_gene_mapping(self, **options):
         ''' Create the mapping for gene target index '''
