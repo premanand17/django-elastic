@@ -1,4 +1,3 @@
-from django.conf import settings
 import os
 
 SEARCH_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
