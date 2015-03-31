@@ -1,67 +1,16 @@
-from db.management.loaders.GFF import GFF
-from django.conf import settings
-import re
-import requests
-import json
-from search.management.loaders.Loader import Loader
+from search.management.loaders.Loader import DelimeterLoader
 
 
-class GFFManager(Loader):
+class GFFManager(DelimeterLoader):
 
     def create_load_gff_index(self, **options):
         ''' Index gff data '''
         self._create_gff_mapping(**options)
-        index_name = self.get_index_name(**options)
-        index_type = self._get_index_type(**options)
+        idx_name = self.get_index_name(**options)
+        idx_type = self._get_index_type(**options)
         f = self.open_file_to_load('indexGFF', **options)
-
-        json_data = ''
-        line_num = 0
-        auto_num = 1
-
-        try:
-            for line in f:
-                line = line.rstrip().decode("utf-8")
-                current_line = line
-                if(current_line.startswith("#")):
-                    continue
-                parts = re.split('\t', current_line)
-                if(len(parts) != 9):
-                    continue
-
-                if options['isGTF']:
-                    gff = GFF(current_line, key_value_delim=' ')
-                else:
-                    gff = GFF(current_line)
-                attrs = gff.attrs
-                idx_id = index_type + '_' + str(auto_num)
-                json_data += '{"index": {"_id": "%s"}}\n' % idx_id
-                json_data += json.dumps({"seqid": gff.seqid,
-                                         "source": gff.source,
-                                         "type": gff.type,
-                                         "start": gff.start,
-                                         "end": gff.end,
-                                         "score": gff.score,
-                                         "strand": gff.strand,
-                                         "phase": gff.phase,
-                                         "attr": attrs
-                                         }) + '\n'
-                line_num += 1
-                auto_num += 1
-                if(line_num > 5000):
-                    line_num = 0
-                    print('.', end="", flush=True)
-                    response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                                            index_name+'/' + index_type +
-                                            '/_bulk', data=json_data
-                                            )
-                    json_data = ''
-        finally:
-            response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                                    index_name+'/' + index_type +
-                                    '/_bulk', data=json_data
-                                    )
-        return response
+        column_names = ["seqid", "source", "type", "start", "end", "score", "strand", "phase", "attr"]
+        self.load(column_names, f, idx_name, idx_type, is_GFF=True, is_GTF=options['isGTF'])
 
     def _create_gff_mapping(self, **options):
         ''' Create the mapping for gff index '''
@@ -78,7 +27,7 @@ class GFFManager(Loader):
                   "attr": {"type": "object"}
                   }
                  }
-        mapping_json = {index_type: props}
+        mapping_json = {"mappings": {index_type: props}}
         self.mapping(mapping_json, **options)
 
     def _get_index_type(self, **options):
