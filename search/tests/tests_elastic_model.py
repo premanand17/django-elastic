@@ -19,7 +19,7 @@ def tearDownModule():
 
 
 @override_settings(SEARCH_MARKERDB=IDX['MARKER']['indexName'])
-class EsTest(TestCase):
+class ElasticModelTest(TestCase):
 
     def test_mapping(self):
         elastic = Elastic(db=settings.SEARCH_MARKERDB)

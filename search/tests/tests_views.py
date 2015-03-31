@@ -19,9 +19,9 @@ def tearDownModule():
 
 
 @override_settings(SEARCH_MARKERDB=IDX['MARKER']['indexName'])
-class EsTest(TestCase):
+class ElasticViewsTest(TestCase):
 
-    def test_es(self):
+    def test_server(self):
         ''' Test elasticsearch server is running and status '''
         try:
             resp = requests.get(settings.SEARCH_ELASTIC_URL + '/_cluster/health/test__marker')
