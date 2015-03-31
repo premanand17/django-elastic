@@ -4,7 +4,6 @@ from django.core.management import call_command
 from search.tests.settings_idx import IDX
 import requests
 import time
-from search.elastic_model import Elastic
 
 
 @override_settings(SEARCH_MARKERDB=IDX['MARKER']['indexName'])
@@ -36,13 +35,6 @@ class EsTest(TestCase):
             self.assertTrue(False, 'request connection exception')
         except requests.exceptions.RequestException:
             self.assertTrue(False, 'request exception')
-
-    def test_mapping(self):
-        elastic = Elastic(db=settings.SEARCH_MARKERDB)
-        mapping = elastic.get_mapping()
-        self.assertTrue(settings.SEARCH_MARKERDB in mapping, "Database name in mapping result")
-        if settings.SEARCH_MARKERDB in mapping:
-            self.assertTrue("mappings" in mapping[settings.SEARCH_MARKERDB], "Mapping result found")
 
     def test_snp_search(self):
         ''' Test a single SNP search '''
