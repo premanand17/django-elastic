@@ -94,5 +94,16 @@ class GeneTargetManager(Loader):
                   "CD4_Activated": {"type": "float"}
                   }
                  }
-        mapping_json = {"gene_target": props}
-        self.mapping(mapping_json, **options)
+        meta = {"Monocyte": "tissue_type",
+                "Macrophage": "tissue_type",
+                "Erythroblast": "tissue_type",
+                "Megakaryocyte": "tissue_type",
+                "CD4_Naive": "tissue_type",
+                "CD4_Non_Activated": "tissue_type",
+                "CD4_Total": "tissue_type",
+                "CD4_Activated": "tissue_type"
+                }
+        meta = {"tissue_type": meta}
+        props["_meta"] = meta
+        mapping_json = {"mappings": {"gene_target": props}}
+        self.mapping(mapping_json, meta=meta, **options)
