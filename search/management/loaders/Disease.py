@@ -43,4 +43,4 @@ class DiseaseManager(Loader):
                   }
                  }
         mapping_json = {"disease": props}
-        self.mapping(mapping_json, **options)
+        self.mapping(mapping_json, 'disease', **options)
