@@ -47,6 +47,7 @@ class Loader:
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
             print('ERROR: ' + idx_name + ' load status: ' + str(resp.status_code))
+            print(resp.content)
 
     def document_update(self, idx_name, idx_type, doc_id, update_json):
         ''' Update a document as described in the Elastic API
@@ -101,6 +102,8 @@ class DelimeterLoader(Loader):
                     continue
                 parts = re.split(delim, current_line)
                 if len(parts) != len(column_names):
+                    print("WARNING: unexpected number of columns")
+                    print(line)
                     continue
 
                 idx_id = str(auto_num)
@@ -137,6 +140,7 @@ class DelimeterLoader(Loader):
                     json_data = ''
         finally:
             self.bulk_load(idx_name, idx_type, json_data)
+            print('No. documents loaded: '+str(auto_num))
 
     def _getAttributes(self, attrs, key_value_delim='='):
         ''' Parse the attributes column '''
