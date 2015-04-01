@@ -1,4 +1,0 @@
--r ./requirements-dev.txt
-
-# local apps
--e git+http://github.com/D-I-L/django-search.git#egg=search

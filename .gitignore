@@ -8,6 +8,4 @@ __pycache__/
 .settings
 .coverage
 *.swp
-settings_secret.py
 *_initial.py
-tmp
