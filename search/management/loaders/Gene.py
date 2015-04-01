@@ -1,6 +1,4 @@
 import re
-import requests
-from django.conf import settings
 from db.management.loaders.GFF import GFF
 from search.elastic_model import Elastic
 from search.management.loaders.Loader import Loader
@@ -18,7 +16,7 @@ class GeneManager(Loader):
         hgnc id, approved symbol, status, locus type, previous symbols
         synonyms, entrez gene id, ensembl gene id
         '''
-        index_name = self.get_index_name(**options)
+        idx_name = self.get_index_name(**options)
         self._create_mapping(**options)
 
         if options['org']:
@@ -33,7 +31,7 @@ class GeneManager(Loader):
                           "approved name",
                           "accession numbers", "locus type"]
         dbxrefColumns = ["entrez", "ensembl", "mgi", "refseq"]
-        nn = 0
+        idx_n = 0
         n = 0
         data = ''
 
@@ -76,7 +74,7 @@ class GeneManager(Loader):
                             for syn in syns:
                                 synonym_data.append(syn.strip())
 
-                    data += '{"index": {"_id": "%s"}}\n' % nn
+                    data += '{"index": {"_id": "%s"}}\n' % idx_n
                     data += json.dumps({"gene_symbol":
                                         col_dict["approved symbol"],
                                         "organism": org,
@@ -84,25 +82,19 @@ class GeneManager(Loader):
                                         "dbxrefs": dbxref_data,
                                         "synonyms": synonym_data
                                         })+'\n'
-                    nn += 1
+                    idx_n += 1
                     n += 1
 
                     if(n > 5000):
                         n = 0
-                        response = requests.put(settings
-                                                .SEARCH_ELASTIC_URL+'/' +
-                                                index_name+'/gene/_bulk',
-                                                data=data)
+                        self.bulk_load(idx_name, 'gene', data)
                         data = ''
         finally:
-            response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
-                                    index_name+'/gene/_bulk', data=data)
-            return response
+            self.bulk_load(idx_name, 'gene', data)
 
     def update_gene(self, **options):
         ''' Use gene span GFF coordinates to add coordinates '''
-        index_name = self.get_index_name(**options)
-
+        idx_name = self.get_index_name(**options)
         if options['build']:
             build = options['build']
         else:
@@ -116,11 +108,9 @@ class GeneManager(Loader):
                 continue
             gff = GFF(line)
 
-            context = self._call_elasticsearch(gff.attrs["Name"],
-                                               ["gene_symbol"], index_name)
+            context = self._call_elasticsearch(gff.attrs["Name"], ["gene_symbol"], idx_name)
             if context["total"] != 1:
-                context = self._call_elasticsearch(gff.attrs["Name"],
-                                                   ["synonyms"], index_name)
+                context = self._call_elasticsearch(gff.attrs["Name"], ["synonyms"], idx_name)
             if context["total"] != 1:
                 print ("IGNORE "+gff.attrs["Name"]+" "+gff.attrs["biotype"])
                 continue
@@ -134,7 +124,6 @@ class GeneManager(Loader):
                            gdata["dbxrefs"]["entrez"])
                     continue
 
-            esid = gdata["idx_id"]
             data = json.dumps({"doc":
                                {"featureloc":
                                 {"start": gff.start,
@@ -144,10 +133,7 @@ class GeneManager(Loader):
                                  },
                                 "biotype": gff.attrs["biotype"]}
                                })
-            response = requests.post(settings.SEARCH_ELASTIC_URL+'/' +
-                                     index_name+'/gene/'+esid+'/_update',
-                                     data=data)
-        return response
+            self.document_update(idx_name, 'gene', gdata["idx_id"], data)
 
     def _call_elasticsearch(self, name, fields, indexName):
         ''' Call elasticsearch '''
