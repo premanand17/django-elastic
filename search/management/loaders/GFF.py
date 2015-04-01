@@ -27,8 +27,8 @@ class GFFManager(DelimeterLoader):
                   "attr": {"type": "object"}
                   }
                  }
-        mapping_json = {"mappings": {index_type: props}}
-        self.mapping(mapping_json, **options)
+        mapping_json = {index_type: props}
+        self.mapping(mapping_json, index_type, **options)
 
     def _get_index_type(self, **options):
         if options['indexType']:

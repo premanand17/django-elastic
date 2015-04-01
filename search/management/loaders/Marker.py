@@ -15,7 +15,7 @@ class MarkerManager(DelimeterLoader):
         ''' Create the mapping for snp index '''
         props = {"properties":
                  {"id": {"type": "string", "index": "not_analyzed"},
-                  "seqid": {"type": "string", "index": "not_analyzed"},
+                  "seqid": {"type": "integer", "index": "not_analyzed"},
                   "ref": {"type": "string", "index": "no"},
                   "alt": {"type": "string", "index": "no"},
                   "qual": {"type": "string", "index": "no"},
@@ -24,5 +24,5 @@ class MarkerManager(DelimeterLoader):
                   "info": {"type": "string", "index": "no"}
                   }
                  }
-        mapping_json = {"mappings": {"marker": props}}
-        self.mapping(mapping_json, **options)
+        mapping_json = {"marker": props}
+        self.mapping(mapping_json, 'marker', **options)
