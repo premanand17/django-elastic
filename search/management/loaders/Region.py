@@ -4,10 +4,19 @@
 # import requests
 # from django.conf import settings
 # from django.core.management.base import CommandError
-# 
-# 
-# class RegionManager:
-# 
+#
+#
+
+
+class RegionManager:
+
+    def create_load_region_index(self, **options):
+        return
+
+    def create_region_index(self, **options):
+        return
+
+#
 #     def create_load_region_index(self, **options):
 #         ''' Index region data '''
 #         print('GFF file to be loaded: ' + options['indexRegion'])
@@ -19,16 +28,16 @@
 #             region_type = options['regionType'].lower()
 #         else:
 #             region_type = 'assoc'
-# 
+#
 #         index_name = self.create_index_name(**options)
 #         index_type = 'region'
-# 
+#
 #         f = open(options['indexRegion'], 'r')
 #         json_data = ''
 #         line_num = 0
 #         auto_num = 1
 #         lastLine = ''
-# 
+#
 #         try:
 #             for line in f:
 #                 current_line = line.rstrip()
@@ -58,7 +67,7 @@
 #                 auto_num += 1
 #                 if(line_num > 5):
 #                     line_num = 0
-# 
+#
 #                     if(lastLine != line):
 #                         print ('\nAutonum ' + str(auto_num) +
 #                                ' Loading from line:' + line)
@@ -69,14 +78,14 @@
 #                                             )
 #                     json_data = ''
 #                     lastLine = line
-# 
+#
 #         finally:
 #             response = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
 #                                     index_name+'/' + index_type +
 #                                     '/_bulk', data=json_data
 #                                     )
 #         return response
-# 
+#
 #     def create_region_index(self, **options):
 #         ''' Create the mapping for region indexing '''
 #         index_name = self.create_index_name(**options)
@@ -99,7 +108,7 @@
 #                                 "attr": {"type": "object"}
 #                                 }
 #                  }
-# 
+#
 #         # check if index exists
 #         response = requests.get(settings.SEARCH_ELASTIC_URL + '/' + index_name)
 #         if(response.status_code != 200):
@@ -115,7 +124,7 @@
 #                                 data=json.dumps(data))
 #         print (response.text)
 #         return
-# 
+#
 #     def create_index_name(self, **options):
 #         ''' Create the index name combining build, disease code '''
 #         if options['build']:
