@@ -42,13 +42,11 @@ class Loader:
             print(resp.content)
 
     def bulk_load(self, idx_name, idx_type, json_data):
-        print('Index Name ' + idx_name + ' Index type ' + idx_type)
         ''' Bulk load documents '''
         resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
             print('ERROR: ' + idx_name + ' load status: ' + str(resp.status_code))
-            print(resp.content)
 
     def get_index_name(self, **options):
         ''' Get indexName option '''
