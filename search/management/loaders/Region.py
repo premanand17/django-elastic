@@ -136,4 +136,3 @@ class RegionManager:
 #         else:
 #             index_name = "disease_region" + "_" + org_build
 #         return index_name
-
