@@ -42,11 +42,13 @@ class Loader:
             print(resp.content)
 
     def bulk_load(self, idx_name, idx_type, json_data):
+        print('Index Name ' + idx_name + ' Index type ' + idx_type)
         ''' Bulk load documents '''
         resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
             print('ERROR: ' + idx_name + ' load status: ' + str(resp.status_code))
+            print(resp.content)
 
     def get_index_name(self, **options):
         ''' Get indexName option '''
@@ -149,3 +151,27 @@ class DelimeterLoader(Loader):
             return True
         except ValueError:
             return False
+
+
+class JSONLoader(Loader):
+
+    def load(self, raw_json_data, idx_name, idx_type='json'):
+        ''' Index raw json data '''
+        json_data = ''
+        line_num = 0
+        auto_num = 1
+        try:
+            for row in raw_json_data:
+                idx_id = str(auto_num)
+                json_data += '{"index": {"_id": "%s"}}\n' % idx_id
+                json_data += json.dumps(row) + '\n'
+                auto_num += 1
+                line_num += 1
+
+                if(line_num > 5000):
+                    line_num = 0
+                    print('.', end="", flush=True)
+                    self.bulk_load(idx_name, idx_type, json_data)
+                    json_data = ''
+        finally:
+            self.bulk_load(idx_name, idx_type, json_data)
