@@ -24,5 +24,5 @@ class MarkerManager(DelimeterLoader):
                   "info": {"type": "string", "index": "no"}
                   }
                  }
-        mapping_json = {"mappings": {"marker": props}}
-        self.mapping(mapping_json, **options)
+        mapping_json = {"marker": props}
+        self.mapping(mapping_json, 'marker', **options)

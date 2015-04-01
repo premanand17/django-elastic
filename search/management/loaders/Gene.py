@@ -101,7 +101,7 @@ class GeneManager(Loader):
 
     def update_gene(self, **options):
         ''' Use gene span GFF coordinates to add coordinates '''
-        index_name = self._get_index_name(**options)
+        index_name = self.get_index_name(**options)
 
         if options['build']:
             build = options['build']
@@ -156,22 +156,20 @@ class GeneManager(Loader):
 
     def _create_mapping(self, **options):
         ''' Create the mapping for gene names indexing '''
-        data = {"mappings":
-                {"gene":
-                 {"properties":
-                  {"gene_symbol": {"boost": 4, "type": "string", "analyzer": "full_name"},
-                   "biotype": {"type": "string"},
-                   "featureloc": {"properties": {"start": {"type": "integer"},
-                                                 "end": {"type": "integer"},
-                                                 "seqid": {"type": "string"},
-                                                 "build": {"type": "string"}}},
-                   "synonyms": {"type": "string", "analyzer": "full_name"},
-                   "hgnc": {"type": "string"},
-                   "dbxrefs": {"type": "object"},
-                   "organism": {"type": "string"}
-                   }
+        data = {"gene":
+                {"properties":
+                 {"gene_symbol": {"boost": 4, "type": "string", "analyzer": "full_name"},
+                  "biotype": {"type": "string"},
+                  "featureloc": {"properties": {"start": {"type": "integer"},
+                                                "end": {"type": "integer"},
+                                                "seqid": {"type": "string"},
+                                                "build": {"type": "string"}}},
+                  "synonyms": {"type": "string", "analyzer": "full_name"},
+                  "hgnc": {"type": "string"},
+                  "dbxrefs": {"type": "object"},
+                  "organism": {"type": "string"}
                   }
                  }
                 }
         ''' create index and add mapping '''
-        self.mapping(data, analyzer=self.KEYWORD_ANALYZER, **options)
+        self.mapping(data, 'gene', analyzer=self.KEYWORD_ANALYZER, **options)

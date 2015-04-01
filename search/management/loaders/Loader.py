@@ -18,25 +18,28 @@ class Loader:
           }
          }
 
-    def mapping(self, mapping_json, analyzer=None, **options):
+    def mapping(self, mapping_json, idx_type, analyzer=None, **options):
         ''' Put the mapping to the Elastic server '''
-        index_name = self.get_index_name(**options)
-        resp = requests.get(settings.SEARCH_ELASTIC_URL + '/' + index_name)
+        idx_name = self.get_index_name(**options)
+        url = settings.SEARCH_ELASTIC_URL + '/' + idx_name
+        resp = requests.get(url)
         if(resp.status_code == 200):
-            print('WARNING: '+index_name + ' mapping already exists!')
+            print('WARNING: '+idx_name + ' index already exists!')
+        else:
+            # create index
+            if analyzer is not None:
+                resp = requests.put(url, json.dumps({'settings': analyzer}))
+            else:
+                requests.put(url)
 
-        if analyzer is not None:
-            mapping_json = self.append_analyzer(mapping_json, analyzer)
-        resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + index_name, data=json.dumps(mapping_json))
+        # add mapping to index
+        url += '/_mapping/' + idx_type
+        resp = requests.put(url, data=json.dumps(mapping_json))
         self.mapping_json = mapping_json
 
         if(resp.status_code != 200):
-            print('WARNING: ' + index_name + ' mapping status: ' + str(resp.status_code))
-
-    def append_analyzer(self, json, analyzer):
-        ''' Append analyzer to mapping '''
-        json['settings'] = analyzer
-        return json
+            print('WARNING: ' + idx_name + ' mapping status: ' + str(resp.status_code))
+            print(resp.content)
 
     def get_index_name(self, **options):
         ''' Get indexName option '''
