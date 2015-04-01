@@ -41,6 +41,13 @@ class Loader:
             print('WARNING: ' + idx_name + ' mapping status: ' + str(resp.status_code))
             print(resp.content)
 
+    def bulk_load(self, idx_name, idx_type, json_data):
+        ''' Bulk load documents '''
+        resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
+                            '/_bulk', data=json_data)
+        if(resp.status_code != 200):
+            print('ERROR: ' + idx_name + ' load status: ' + str(resp.status_code))
+
     def get_index_name(self, **options):
         ''' Get indexName option '''
         if options['indexName']:
@@ -117,12 +124,10 @@ class DelimeterLoader(Loader):
                 if(line_num > 5000):
                     line_num = 0
                     print('.', end="", flush=True)
-                    requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
-                                 '/_bulk', data=json_data)
+                    self.bulk_load(idx_name, idx_type, json_data)
                     json_data = ''
         finally:
-            requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
-                         '/_bulk', data=json_data)
+            self.bulk_load(idx_name, idx_type, json_data)
 
     def _getAttributes(self, attrs, key_value_delim='='):
         ''' Parse the attributes column '''
