@@ -48,6 +48,15 @@ class Loader:
         if(resp.status_code != 200):
             print('ERROR: ' + idx_name + ' load status: ' + str(resp.status_code))
 
+    def document_update(self, idx_name, idx_type, doc_id, update_json):
+        ''' Update a document as described in the Elastic API
+        http://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html '''
+        resp = requests.post(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' +
+                             idx_type + '/' + doc_id + '/_update', data=update_json)
+        if(resp.status_code != 200):
+            print('ERROR: ' + idx_name + 'document id: ' + doc_id +
+                  ' update status: ' + str(resp.status_code))
+
     def get_index_name(self, **options):
         ''' Get indexName option '''
         if options['indexName']:
