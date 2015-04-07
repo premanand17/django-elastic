@@ -4,6 +4,10 @@ import requests
 from django.conf import settings
 import re
 from search.elastic_model import Elastic
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class Loader:
@@ -24,7 +28,7 @@ class Loader:
         url = settings.SEARCH_ELASTIC_URL + '/' + idx_name
         resp = requests.get(url)
         if(resp.status_code == 200):
-            print('WARNING: '+idx_name + ' index already exists!')
+            logger.warn('WARNING: '+idx_name + ' index already exists!')
         else:
             # create index
             if analyzer is not None:
@@ -38,16 +42,25 @@ class Loader:
         self.mapping_json = mapping_json
 
         if(resp.status_code != 200):
-            print('WARNING: ' + idx_name + ' mapping status: ' + str(resp.status_code))
-            print(resp.content)
+            logger.warn('WARNING: ' + idx_name + ' mapping status: ' + str(resp.status_code))
+            logger.warn(resp.content)
 
     def bulk_load(self, idx_name, idx_type, json_data):
         ''' Bulk load documents '''
         resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
-            print('ERROR: ' + idx_name + ' load status: ' + str(resp.status_code))
-            print(resp.content)
+            logger.error('ERROR: ' + idx_name + ' load status: ' + str(resp.status_code))
+            logger.error(resp.content)
+
+        # report errors found during loading
+        if resp.json()['errors']:
+            logger.error("ERROR: bulk load error found")
+            for item in resp.json()['items']:
+                for key in item.keys():
+                    if 'error' in item[key]:
+                        logger.error("ERROR LOADING:")
+                        logger.error(item)
 
     def document_update(self, idx_name, idx_type, doc_id, update_json):
         ''' Update a document as described in the Elastic API
@@ -55,8 +68,8 @@ class Loader:
         resp = requests.post(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' +
                              idx_type + '/' + doc_id + '/_update', data=update_json)
         if(resp.status_code != 200):
-            print('ERROR: ' + idx_name + 'document id: ' + doc_id +
-                  ' update status: ' + str(resp.status_code))
+            logger.error('ERROR: ' + idx_name + 'document id: ' + doc_id +
+                         ' update status: ' + str(resp.status_code))
 
     def get_index_name(self, **options):
         ''' Get indexName option '''
@@ -102,8 +115,8 @@ class DelimeterLoader(Loader):
                     continue
                 parts = re.split(delim, current_line)
                 if len(parts) != len(column_names):
-                    print("WARNING: unexpected number of columns")
-                    print(line)
+                    logger.warn("WARNING: unexpected number of columns")
+                    logger.warn(line)
                     continue
 
                 idx_id = str(auto_num)
@@ -140,7 +153,7 @@ class DelimeterLoader(Loader):
                     json_data = ''
         finally:
             self.bulk_load(idx_name, idx_type, json_data)
-            print('No. documents loaded: '+str(auto_num))
+            logger.info('No. documents loaded: '+str(auto_num-1))
 
     def _getAttributes(self, attrs, key_value_delim='='):
         ''' Parse the attributes column '''
