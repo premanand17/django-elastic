@@ -24,7 +24,7 @@ class ElasticViewsTest(TestCase):
     def test_server(self):
         ''' Test elasticsearch server is running and status '''
         try:
-            resp = requests.get(settings.SEARCH_ELASTIC_URL + '/_cluster/health/test__marker')
+            resp = requests.get(settings.SEARCH_ELASTIC_URL + '/_cluster/health/')
             self.assertEqual(resp.status_code, 200, "Health page status code")
             self.assertFalse(resp.json()['status'] == 'red', 'Health report - red')
         except requests.exceptions.Timeout:
