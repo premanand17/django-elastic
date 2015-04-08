@@ -9,7 +9,7 @@ class MarkerManager(DelimeterLoader):
         self._create_snp_mapping(**options)
         f = self.open_file_to_load('indexSNP', **options)
         column_names = ["seqid", "start", "id", "ref", "alt", "qual", "filter", "info"]
-        self.load(column_names, f, idx_name, 'marker')
+        self.load(column_names, f, idx_name, 'marker', chunk=20000)
 
     def _create_snp_mapping(self, **options):
         ''' Create the mapping for snp index '''

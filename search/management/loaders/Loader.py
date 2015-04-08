@@ -47,6 +47,8 @@ class Loader:
 
     def bulk_load(self, idx_name, idx_type, json_data):
         ''' Bulk load documents '''
+#         nb = sys.getsizeof(json_data)
+#         print(str(nb))
         resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
@@ -101,7 +103,7 @@ class Loader:
 class DelimeterLoader(Loader):
 
     def load(self, column_names, file_handle, idx_name, idx_type='tab', delim='\t',
-             is_GFF=False, is_GTF=False):
+             is_GFF=False, is_GTF=False, chunk=5000):
         ''' Index tab data '''
         json_data = ''
         line_num = 0
@@ -146,7 +148,7 @@ class DelimeterLoader(Loader):
 
                 line_num += 1
                 auto_num += 1
-                if(line_num > 5000):
+                if(line_num > chunk):
                     line_num = 0
                     print('.', end="", flush=True)
                     self.bulk_load(idx_name, idx_type, json_data)
