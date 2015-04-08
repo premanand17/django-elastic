@@ -5,6 +5,10 @@ from django.http.response import HttpResponse
 from django.core.urlresolvers import NoReverseMatch
 import requests
 from search.elastic_model import Elastic
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
@@ -20,6 +24,7 @@ def reverse_proxy(request):
     url = "%s%s" % (settings.SEARCH_ELASTIC_URL, path)
     requestor = getattr(requests, request.method.lower())
     proxy_resp = requestor(url, data=request.body, files=request.FILES)
+    logger.warn('using reverse_proxy() in DEBUG mode ('+url+')')
     return HttpResponse(proxy_resp.content,
                         content_type=proxy_resp.headers.get('content-type'))
 
