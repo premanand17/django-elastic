@@ -42,16 +42,17 @@
 	}
 	
 	addCounter = function(query, db) {
-		var url = 'http://'+window.location.host +'/'+db+'/_count?';
-		var es_data = JSON.stringify({
-			"query": query
-		});
+		var url = window.location.pathname;
+		if(url.match(/\/db\//g)) {
+			url = url+'/count';
+		} else {
+			url = url+'db/'+db+'/count';
+		}
 
 		$.ajax({
 	       	url: url,
 	       	dataType: "json",
-	       	type: "POST",
-	       	data: es_data,
+	       	type: "GET",
 	       	success: function(json){
 	       	$('#'+db+' span').replaceWith("<span class='badge'>"+
 	       				json.count+"</span>");
@@ -86,7 +87,13 @@
 	
 	// update results when a new page number is clicked
 	updateResults = function(thisPage, paginationId, overviewId, db, size, total, query, npages) {
-		var url = 'http://'+window.location.host +'/'+db+'/_search?';
+		var url = window.location.pathname;
+		if(url.match(/\/db\//g)) {
+			url = url+'/page';
+		} else {
+			url = url+'db/'+db+'/page';
+		}
+		
 		var page = $( thisPage ).text().match(/[0-9]+/);
 		if( page === null ) {
 			var label = $( thisPage ).children('a').first().attr('aria-label');
@@ -108,14 +115,8 @@
 			thisPage = thisPage.filter(function() { return $.text([this]) === ''+page+''; })
 		} else
 			page = page[0]
-		
 
-		
-        var es_from = (((page-1)*size));
-        var es_data = JSON.stringify({
-				"from" : es_from, "size" : size,
-				"query": query
-				});
+
         $('.active').removeClass('active');
         $('span .pagination-sr').remove();
         $(thisPage).addClass('active');
@@ -125,7 +126,14 @@
         	url: url,
         	dataType: "json",
         	type: "POST",
-        	data: es_data,
+        	data: {
+				"from" : (((page-1)*size)), "size" : size
+			},
+		    beforeSend: function(xhr, settings) {
+		        if (!this.crossDomain) {
+		            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+		        }
+		    },
         	success: function(json){
         		$('#results').empty();
         		var hits = json.hits.hits;
@@ -159,5 +167,22 @@
         	}
         });
 	}
+	
+	getCookie = function(name) {
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie != '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
+
 
 }( window.results_pagination = window.results_pagination || {}, jQuery ));
