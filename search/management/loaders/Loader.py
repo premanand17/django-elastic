@@ -22,12 +22,12 @@ class Loader:
           }
          }
 
-    def mapping(self, mapping_json, idx_type, analyzer=None, **options):
+    def mapping(self, mapping_json, idx_type, meta=None, analyzer=None, **options):
         ''' Put the mapping to the Elastic server '''
         idx_name = self.get_index_name(**options)
         url = settings.SEARCH_ELASTIC_URL + '/' + idx_name
         resp = requests.get(url)
-        if(resp.status_code == 200):
+        if resp.status_code == 200:
             logger.warn('WARNING: '+idx_name + ' index already exists!')
         else:
             # create index
@@ -35,6 +35,9 @@ class Loader:
                 resp = requests.put(url, json.dumps({'settings': analyzer}))
             else:
                 requests.put(url)
+
+        if meta is not None:
+            mapping_json[idx_type]["_meta"] = meta
 
         # add mapping to index
         url += '/_mapping/' + idx_type

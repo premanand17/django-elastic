@@ -53,6 +53,6 @@ class GeneTargetManager(DelimeterLoader):
                 "CD4_Activated": "tissue_type"
                 }
         meta = {"tissue_type": meta}
-        props["_meta"] = meta
+        # props["_meta"] = meta
         mapping_json = {"gene_target": props}
-        self.mapping(mapping_json, meta=meta, idx_type='gene_target', **options)
+        self.mapping(mapping_json, idx_type='gene_target', meta=meta, **options)
