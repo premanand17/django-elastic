@@ -66,7 +66,7 @@ class Elastic:
         return response.json()
 
     def get_count(self):
-        ''' Return the elastic context result '''
+        ''' Return the elastic count for a query result '''
         url = settings.SEARCH_ELASTIC_URL + '/' + self.db + '/_count?'
         response = requests.post(url, data=json.dumps(self.query))
         return response.json()
