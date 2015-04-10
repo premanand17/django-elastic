@@ -2,6 +2,10 @@ import json
 import requests
 from django.conf import settings
 import re
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class Elastic:
@@ -43,10 +47,13 @@ class Elastic:
         return cls(query, search_from, size, db)
 
     @classmethod
-    def field_search_query(cls, query_term, fields,
+    def field_search_query(cls, query_term, fields=None,
                            search_from=0, size=20, db=settings.SEARCH_MARKERDB):
         ''' Constructs a field search query '''
-        query = {"query": {"query_string": {"query": query_term, "fields": fields}}}
+        query = {"query": {"query_string": {"query": query_term}}}
+        if fields is not None:
+            query["query"]["query_string"]["fields"] = fields
+
         return cls(query, search_from, size, db)
 
     def get_mapping(self, mapping_type=None):
@@ -58,9 +65,17 @@ class Elastic:
             return json.dumps({"error": response.status_code})
         return response.json()
 
-    def get_result(self):
+    def get_count(self):
+        ''' Return the elastic count for a query result '''
+        url = settings.SEARCH_ELASTIC_URL + '/' + self.db + '/_count?'
+        response = requests.post(url, data=json.dumps(self.query))
+        return response.json()
+
+    def get_result(self, asJson=False):
         ''' Return the elastic context result '''
         response = requests.post(self.url, data=json.dumps(self.query))
+        if asJson:
+            return response.json()
         context = {"query": self.query}
         c_dbs = {}
         dbs = self.db.split(",")
