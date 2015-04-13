@@ -4,6 +4,7 @@ from django.core.management import call_command
 from search.tests.settings_idx import IDX
 import requests
 import time
+import json
 
 
 @override_settings(SEARCH_MARKERDB=IDX['MARKER']['indexName'])
@@ -55,12 +56,26 @@ class ElasticViewsTest(TestCase):
         for snp in resp.context['data']:
             self._SNPtest(snp)
 
+    def test_ajax_search(self):
+        ''' Test the search count '''
+        self._check_ajax('/search/rs%2A/db/')
+        self._check_ajax('/search/1%3A1-2880054/db/')
+
+    def _check_ajax(self, url_path):
+        resp = self.client.get(url_path+settings.SEARCH_MARKERDB+'/count')
+        self.assertEqual(resp.status_code, 200)
+        json_string = str(resp.content, encoding='utf8')
+        data = json.loads(json_string)
+        self.assertTrue('count' in data)
+        data = {'from': 20, 'size': 10}
+        resp = self.client.post(url_path+settings.SEARCH_MARKERDB+'/show', data)
+        self.assertEqual(resp.status_code, 200)
+
     def test_range(self):
         ''' Test a range query '''
-        resp = self.client.get('/search/chr1:10600-10650/')
+        resp = self.client.get('/search/1:10019-113834947/db/'+settings.SEARCH_MARKERDB)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
-
         for snp in resp.context['data']:
             self._SNPtest(snp)
 
