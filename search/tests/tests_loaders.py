@@ -1,10 +1,10 @@
 from django.test import TestCase
 from django.core.management import call_command
-from search.tests.settings_idx import IDX
+from search.tests.settings_idx import IDX, IDX_UPDATE
 from django.conf import settings
 import requests
 import time
-from search.management.loaders.Utils import GFF
+from search.management.loaders.Utils import GFF, GFFError
 
 
 def setUpModule():
@@ -12,6 +12,8 @@ def setUpModule():
     for idx_kwargs in IDX.values():
         call_command('index_search', **idx_kwargs)
     time.sleep(2)
+    for idx_kwargs in IDX_UPDATE.values():
+        call_command('index_search', **idx_kwargs)
 
 
 def tearDownModule():
@@ -42,6 +44,10 @@ class ElasticLoadersTest(TestCase):
         gff = GFF(line, key_value_delim=' ')
         attrs = gff.getAttributes()
         self.assertTrue('gene_id' in attrs, "GFF attributes parse")
+
+        # check for gff errors
+        line = "chr22\tt1dbase\tvariant\t37191071\t37191071\t.\t+\t."
+        self.assertRaises(GFFError, GFF, line=line)
 
     def _check_index(self, index_name, index_type, count=None):
         self._check(settings.SEARCH_ELASTIC_URL + '/' + index_name)

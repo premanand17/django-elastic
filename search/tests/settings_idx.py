@@ -24,3 +24,7 @@ IDX = {'GENE': {'indexName': 'test__gene_'+settings.SEARCH_SUFFIX,
        'GENE_TARGET': {'indexName': 'test__gene_target'+settings.SEARCH_SUFFIX,
                        'indexGTarget': SEARCH_TEST_DATA_PATH+'gene_targets.tab.gz'},
        }
+
+IDX_UPDATE = {'GENE_UPDATE': {'indexName': 'test__gene_'+settings.SEARCH_SUFFIX, 'build': 'GRCh38',
+                              'indexGeneGFF': SEARCH_TEST_DATA_PATH+'genespan.gff.gz'},
+              }
