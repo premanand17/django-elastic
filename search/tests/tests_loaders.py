@@ -4,6 +4,7 @@ from search.tests.settings_idx import IDX
 from django.conf import settings
 import requests
 import time
+from search.management.loaders.Utils import GFF
 
 
 def setUpModule():
@@ -31,6 +32,16 @@ class ElasticLoadersTest(TestCase):
         ''' Test disease loader '''
         index_name = IDX['MARKER']['indexName']
         self._check_index(index_name, 'marker')
+
+    def test_utils(self):
+        line = "chr22\tt1dbase\tvariant\t37191071\t37191071\t.\t+\t.\tName=rs229533;region_id=36"
+        gff = GFF(line)
+        attrs = gff.getAttributes()
+        self.assertTrue('Name' in attrs, "GFF attributes parse")
+        line = '1\thavana\texon\t137682\t137965\t.\t-\t.\tgene_id "ENSG00000269981"; gene_version "1";'
+        gff = GFF(line, key_value_delim=' ')
+        attrs = gff.getAttributes()
+        self.assertTrue('gene_id' in attrs, "GFF attributes parse")
 
     def _check_index(self, index_name, index_type, count=None):
         self._check(settings.SEARCH_ELASTIC_URL + '/' + index_name)
