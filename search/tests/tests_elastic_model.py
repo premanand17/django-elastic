@@ -27,3 +27,11 @@ class ElasticModelTest(TestCase):
         self.assertTrue(settings.SEARCH_MARKERDB in mapping, "Database name in mapping result")
         if settings.SEARCH_MARKERDB in mapping:
             self.assertTrue("mappings" in mapping[settings.SEARCH_MARKERDB], "Mapping result found")
+
+        # check using the index type
+        mapping = elastic.get_mapping('marker')
+        self.assertTrue(settings.SEARCH_MARKERDB in mapping, "Database name in mapping result")
+
+        # err check
+        mapping = elastic.get_mapping('marker/xx')
+        self.assertTrue('error' in mapping, "Database name in mapping result")
