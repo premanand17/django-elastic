@@ -37,7 +37,7 @@ def range_overlap_search(request, src, start, stop, search_db=settings.SEARCH_MA
 def ajax_search(request, query, search_db, ajax):
     ''' Return count or paginated search result as a JSON '''
     if ajax == 'count':
-        elastic = Elastic.field_search_query(query, db=search_db)
+        elastic = Elastic.field_search_query(query, fields, db=search_db)
         return JsonResponse(elastic.get_count())
     search_from = request.POST.get("from")
     size = request.POST.get("size")
