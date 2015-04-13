@@ -42,7 +42,7 @@ def ajax_search(request, query, search_db, ajax):
     search_from = request.POST.get("from")
     size = request.POST.get("size")
     elastic = Elastic.field_search_query(query, fields, search_from, size, db=search_db)
-    return JsonResponse(elastic.get_result(asJson=True))
+    return JsonResponse(elastic.get_json_response())
 
 
 def ajax_range_overlap_search(request, src, start, stop, search_db, ajax):
@@ -53,4 +53,4 @@ def ajax_range_overlap_search(request, src, start, stop, search_db, ajax):
     search_from = request.POST.get("from")
     size = request.POST.get("size")
     elastic = Elastic.range_overlap_query(src, start, stop, search_from, size, db=search_db)
-    return JsonResponse(elastic.get_result(asJson=True))
+    return JsonResponse(elastic.get_json_response())
