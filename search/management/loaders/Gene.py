@@ -102,38 +102,56 @@ class GeneManager(Loader):
             sys.exit()
 
         f = self.open_file_to_load('indexGeneGFF', **options)
-        for line in f:
-            line = line.decode("utf-8").rstrip()
-            if(line.startswith("##")):
-                continue
-            gff = GFF(line)
+        line_num = 0
+        auto_num = 1
+        json_data = ''
+        chunk = 1000
 
-            context = self._call_elasticsearch(gff.attrs["Name"], ["gene_symbol"], idx_name)
-            if context["total"] != 1:
-                context = self._call_elasticsearch(gff.attrs["Name"], ["synonyms"], idx_name)
-            if context["total"] != 1:
-                print ("IGNORE "+gff.attrs["Name"]+" "+gff.attrs["biotype"])
-                continue
+        try:
+            for line in f:
+                line = line.decode("utf-8").rstrip()
+                if(line.startswith("##")):
+                    continue
+                gff = GFF(line)
 
-            gdata = context["data"][0]
-            if "entrezGene_id" in gff.attrs and "entrez" in gdata["dbxrefs"]:
-                if gff.attrs["entrezGene_id"] != gdata["dbxrefs"]["entrez"]:
-                    print ("Entrez ID not matching "+gff.attrs["Name"] + " " +
-                           gff.attrs["biotype"] + " Entrez:" +
-                           gff.attrs["entrezGene_id"] + " != " +
-                           gdata["dbxrefs"]["entrez"])
+                context = self._call_elasticsearch(gff.attrs["Name"], ["gene_symbol"], idx_name)
+                if context["total"] != 1:
+                    context = self._call_elasticsearch(gff.attrs["Name"], ["synonyms"], idx_name)
+                if context["total"] != 1:
+                    print ("IGNORE "+gff.attrs["Name"]+" "+gff.attrs["biotype"])
                     continue
 
-            data = json.dumps({"doc":
-                               {"featureloc":
-                                {"start": gff.start,
-                                 "end": gff.end,
-                                 "seqid": gff.seqid,
-                                 "build": build
-                                 },
-                                "biotype": gff.attrs["biotype"]}
-                               })
-            self.document_update(idx_name, 'gene', gdata["idx_id"], data)
+                gdata = context["data"][0]
+                if "entrezGene_id" in gff.attrs and "entrez" in gdata["dbxrefs"]:
+                    if gff.attrs["entrezGene_id"] != gdata["dbxrefs"]["entrez"]:
+                        print ("Entrez ID not matching "+gff.attrs["Name"] + " " +
+                               gff.attrs["biotype"] + " Entrez:" +
+                               gff.attrs["entrezGene_id"] + " != " +
+                               gdata["dbxrefs"]["entrez"])
+                        continue
+
+                doc_data = {"update": {"_id": gdata["idx_id"], "_type": "gene",
+                                       "_index": idx_name, "_retry_on_conflict": 3}}
+                json_data += json.dumps(doc_data) + '\n'
+                doc_data = {"doc": {"featureloc":
+                                    {"start": gff.start,
+                                     "end": gff.end,
+                                     "seqid": gff.seqid,
+                                     "build": build
+                                     },
+                                    "biotype": gff.attrs["biotype"]
+                                    }
+                            }
+                json_data += json.dumps(doc_data) + '\n'
+                line_num += 1
+                auto_num += 1
+                if(line_num > chunk):
+                    line_num = 0
+                    print('.', end="", flush=True)
+                    self.bulk_load(idx_name, 'gene', json_data)
+                    json_data = ''
+        finally:
+            self.bulk_load(idx_name, 'gene', json_data)
 
     def _call_elasticsearch(self, name, fields, indexName):
         ''' Call elasticsearch '''
