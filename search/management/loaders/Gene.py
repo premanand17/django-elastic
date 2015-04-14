@@ -4,6 +4,10 @@ from search.management.loaders.Loader import Loader
 from search.management.loaders.Utils import GFF
 import sys
 import json
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class GeneManager(Loader):
@@ -54,7 +58,7 @@ class GeneManager(Loader):
                         col_dict[col[idx]] = part
 
                 if("status" in col_dict and col_dict["status"] == 'Approved'):
-                    print("loading... "+col_dict["approved symbol"])
+                    logger.debug("loading... "+col_dict["approved symbol"])
 
                     dbxref_data = {}
                     for dbType in dbxrefColumns:
@@ -124,10 +128,10 @@ class GeneManager(Loader):
                 gdata = context["data"][0]
                 if "entrezGene_id" in gff.attrs and "entrez" in gdata["dbxrefs"]:
                     if gff.attrs["entrezGene_id"] != gdata["dbxrefs"]["entrez"]:
-                        print ("Entrez ID not matching "+gff.attrs["Name"] + " " +
-                               gff.attrs["biotype"] + " Entrez:" +
-                               gff.attrs["entrezGene_id"] + " != " +
-                               gdata["dbxrefs"]["entrez"])
+                        logger.debug("Entrez ID not matching "+gff.attrs["Name"] + " " +
+                                     gff.attrs["biotype"] + " Entrez:" +
+                                     gff.attrs["entrezGene_id"] + " != " +
+                                     gdata["dbxrefs"]["entrez"])
                         continue
 
                 doc_data = {"update": {"_id": gdata["idx_id"], "_type": "gene",
