@@ -23,8 +23,10 @@ pip install -e git://github.com/D-I-L/django-search.git#egg=search
 SEARCH = {
     'default': {
         'ELASTIC_URL': 'http://127.0.0.1:9200/',
-        'MARKER_IDX': 'dbsnp142',
-        'DEFAULT_IDX': 'dbsnp142',
+        'IDX': {
+            'MARKER': 'dbsnp142',
+            'DEFAULT': 'dbsnp142',
+        },
         'TEST': 'test_suffix',
     }
 }

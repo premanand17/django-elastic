@@ -15,9 +15,15 @@ class ElasticSettings:
         return cls.attrs(cluster).get(name, None)
 
     @classmethod
-    def default_idx(cls):
-        ''' Get the default index '''
-        return cls.getattr('DEFAULT_IDX')
+    def idx(cls, name='DEFAULT'):
+        ''' Get the index. For the DEFAULT if not defined return the first index. '''
+        idxs = cls.getattr('IDX')
+        if name in idxs:
+            return idxs[name]
+        else:
+            if name == 'DEFAULT':
+                return idxs[list(idxs.keys())[0]]
+            return None
 
     @classmethod
     def url(cls, cluster='default'):
@@ -27,6 +33,6 @@ class ElasticSettings:
     @classmethod
     def indices_str(cls, cluster='default'):
         ''' Get a comma separated list of indices (assumes names contain _IDX) '''
-        attrs = cls.attrs()
-        s = set([v for (k, v) in attrs.items() if '_IDX' in k])
+        attrs = cls.attrs(cluster).get('IDX')
+        s = set([v for v in attrs.values()])
         return ','.join(str(e) for e in s)
