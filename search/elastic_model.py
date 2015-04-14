@@ -1,18 +1,19 @@
 import json
 import requests
-from django.conf import settings
 import re
 import logging
+from search.elastic_settings import ElasticSettings
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
 class Elastic:
+    ''' Elastic search '''
 
-    def __init__(self, query=None, search_from=0, size=20, db=settings.SEARCH_MARKERDB):
+    def __init__(self, query=None, search_from=0, size=20, db=ElasticSettings.default_idx()):
         ''' Query the elastic server for given search query '''
-        self.url = (settings.SEARCH_ELASTIC_URL + '/' + db + '/_search?size=' + str(size) +
+        self.url = (ElasticSettings.url() + '/' + db + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
         self.query = query
         self.size = size
@@ -20,7 +21,7 @@ class Elastic:
 
     @classmethod
     def range_overlap_query(cls, seqid, start_range, end_range,
-                            search_from=0, size=20, db=settings.SEARCH_MARKERDB,
+                            search_from=0, size=20, db=ElasticSettings.default_idx(),
                             field_list=None):
         ''' Constructs a range overlap query '''
         query = {"filtered":
@@ -48,7 +49,7 @@ class Elastic:
 
     @classmethod
     def field_search_query(cls, query_term, fields=None,
-                           search_from=0, size=20, db=settings.SEARCH_MARKERDB):
+                           search_from=0, size=20, db=ElasticSettings.default_idx()):
         ''' Constructs a field search query '''
         query = {"query": {"query_string": {"query": query_term}}}
         if fields is not None:
@@ -57,7 +58,7 @@ class Elastic:
         return cls(query, search_from, size, db)
 
     def get_mapping(self, mapping_type=None):
-        self.mapping_url = (settings.SEARCH_ELASTIC_URL + '/' + self.db + '/_mapping')
+        self.mapping_url = (ElasticSettings.url() + '/' + self.db + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
         response = requests.get(self.mapping_url)
@@ -67,7 +68,7 @@ class Elastic:
 
     def get_count(self):
         ''' Return the elastic count for a query result '''
-        url = settings.SEARCH_ELASTIC_URL + '/' + self.db + '/_count?'
+        url = ElasticSettings.url() + '/' + self.db + '/_count?'
         response = requests.post(url, data=json.dumps(self.query))
         return response.json()
 

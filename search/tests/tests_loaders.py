@@ -1,10 +1,10 @@
 from django.test import TestCase
 from django.core.management import call_command
 from search.tests.settings_idx import IDX, IDX_UPDATE
-from django.conf import settings
 import requests
 import time
 from search.management.loaders.Utils import GFF, GFFError
+from search.elastic_settings import ElasticSettings
 
 
 def setUpModule():
@@ -19,8 +19,7 @@ def setUpModule():
 def tearDownModule():
     ''' Remove loaded test indices '''
     for key in IDX:
-        requests.delete(settings.SEARCH_ELASTIC_URL +
-                        '/' + IDX[key]['indexName'])
+        requests.delete(ElasticSettings.url() + '/' + IDX[key]['indexName'])
 
 
 class ElasticLoadersTest(TestCase):
@@ -50,8 +49,8 @@ class ElasticLoadersTest(TestCase):
         self.assertRaises(GFFError, GFF, line=line)
 
     def _check_index(self, index_name, index_type, count=None):
-        self._check(settings.SEARCH_ELASTIC_URL + '/' + index_name)
-        response = self._check(settings.SEARCH_ELASTIC_URL + '/' + index_name +
+        self._check(ElasticSettings.url() + '/' + index_name)
+        response = self._check(ElasticSettings.url() + '/' + index_name +
                                '/' + index_type + '/_count')
         if count is not None:
             self.assertEqual(response.json()['count'], count,

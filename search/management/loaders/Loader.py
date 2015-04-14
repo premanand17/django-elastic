@@ -1,9 +1,8 @@
 import gzip
 import json
 import requests
-from django.conf import settings
 import re
-from search.elastic_model import Elastic
+from search.elastic_model import Elastic, ElasticSettings
 import logging
 
 # Get an instance of a logger
@@ -25,7 +24,7 @@ class Loader:
     def mapping(self, mapping_json, idx_type, meta=None, analyzer=None, **options):
         ''' Put the mapping to the Elastic server '''
         idx_name = self.get_index_name(**options)
-        url = settings.SEARCH_ELASTIC_URL + '/' + idx_name
+        url = ElasticSettings.url() + '/' + idx_name
         resp = requests.get(url)
         if resp.status_code == 200:
             logger.warn('WARNING: '+idx_name + ' index already exists!')
@@ -51,7 +50,7 @@ class Loader:
         ''' Bulk load documents '''
 #         nb = sys.getsizeof(json_data)
 #         print(str(nb))
-        resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
+        resp = requests.put(ElasticSettings.url()+'/' + idx_name+'/' + idx_type +
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
             logger.error('ERROR: '+idx_name+' load status: '+str(resp.status_code)+' '+resp.content)
