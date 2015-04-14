@@ -1,8 +1,12 @@
 import re
-from django.conf import settings
 import requests
 import json
 from search.management.loaders.Loader import Loader
+from search.elastic_model import ElasticSettings
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class DiseaseManager(Loader):
@@ -24,13 +28,13 @@ class DiseaseManager(Loader):
                     "colour": parts[3],
                     "tier": int(parts[4])
                     }
-            resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' +
+            resp = requests.put(ElasticSettings.url()+'/' +
                                 index_name+'/disease/'+parts[2],
                                 data=json.dumps(data))
             if resp.status_code == 201:
-                print ("Loaded "+parts[0])
+                logger.debug("Loaded "+parts[0])
             else:
-                print ("Problem loading "+parts[0])
+                logger.error("Problem loading "+parts[0])
 
     def _create_disease_mapping(self, **options):
         ''' Create the mapping for disease indexing '''

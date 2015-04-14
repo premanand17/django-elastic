@@ -1,9 +1,8 @@
 import gzip
 import json
 import requests
-from django.conf import settings
 import re
-from search.elastic_model import Elastic
+from search.elastic_model import Elastic, ElasticSettings
 import logging
 
 # Get an instance of a logger
@@ -22,12 +21,12 @@ class Loader:
           }
          }
 
-    def mapping(self, mapping_json, idx_type, analyzer=None, **options):
+    def mapping(self, mapping_json, idx_type, meta=None, analyzer=None, **options):
         ''' Put the mapping to the Elastic server '''
         idx_name = self.get_index_name(**options)
-        url = settings.SEARCH_ELASTIC_URL + '/' + idx_name
+        url = ElasticSettings.url() + '/' + idx_name
         resp = requests.get(url)
-        if(resp.status_code == 200):
+        if resp.status_code == 200:
             logger.warn('WARNING: '+idx_name + ' index already exists!')
         else:
             # create index
@@ -36,24 +35,25 @@ class Loader:
             else:
                 requests.put(url)
 
+        if meta is not None:
+            mapping_json[idx_type]["_meta"] = meta
+
         # add mapping to index
         url += '/_mapping/' + idx_type
         resp = requests.put(url, data=json.dumps(mapping_json))
         self.mapping_json = mapping_json
 
         if(resp.status_code != 200):
-            logger.warn('WARNING: ' + idx_name + ' mapping status: ' + str(resp.status_code))
-            logger.warn(resp.content)
+            logger.warn('WARNING: '+idx_name+' mapping status: '+str(resp.status_code)+' '+resp.content)
 
     def bulk_load(self, idx_name, idx_type, json_data):
         ''' Bulk load documents '''
 #         nb = sys.getsizeof(json_data)
 #         print(str(nb))
-        resp = requests.put(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' + idx_type +
+        resp = requests.put(ElasticSettings.url()+'/' + idx_name+'/' + idx_type +
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
-            logger.error('ERROR: ' + idx_name + ' load status: ' + str(resp.status_code))
-            logger.error(resp.content)
+            logger.error('ERROR: '+idx_name+' load status: '+str(resp.status_code)+' '+resp.content)
 
         # report errors found during loading
         if resp.json()['errors']:
@@ -63,15 +63,6 @@ class Loader:
                     if 'error' in item[key]:
                         logger.error("ERROR LOADING:")
                         logger.error(item)
-
-    def document_update(self, idx_name, idx_type, doc_id, update_json):
-        ''' Update a document as described in the Elastic API
-        http://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html '''
-        resp = requests.post(settings.SEARCH_ELASTIC_URL+'/' + idx_name+'/' +
-                             idx_type + '/' + doc_id + '/_update', data=update_json)
-        if(resp.status_code != 200):
-            logger.error('ERROR: ' + idx_name + 'document id: ' + doc_id +
-                         ' update status: ' + str(resp.status_code))
 
     def get_index_name(self, **options):
         ''' Get indexName option '''
@@ -89,10 +80,9 @@ class Loader:
     def is_str(self, column_name, idx_name, idx_type):
         ''' Looks at the mapping to determine if the type is a string '''
         if not self.mapping_json:
-            elastic = Elastic(db=idx_name)
-            self.mapping_json = elastic.get_mapping(idx_type)
+            self.mapping_json = Elastic(db=idx_name).get_mapping(idx_type)[idx_name]['mappings']
         try:
-            map_type = self.mapping_json["mappings"][idx_type]["properties"][column_name]["type"]
+            map_type = self.mapping_json[idx_type]["properties"][column_name]["type"]
         except KeyError:
             return False
         if map_type == 'string':
@@ -117,8 +107,7 @@ class DelimeterLoader(Loader):
                     continue
                 parts = re.split(delim, current_line)
                 if len(parts) != len(column_names):
-                    logger.warn("WARNING: unexpected number of columns")
-                    logger.warn(line)
+                    logger.warn("WARNING: unexpected number of columns: ["+str(line_num+1)+'] '+line)
                     continue
 
                 idx_id = str(auto_num)

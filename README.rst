@@ -20,7 +20,16 @@ pip install -e git://github.com/D-I-L/django-search.git#egg=search
 3. Add the URL of your Elasticsearch to the settings.py::
 
 # elastic search engine
-SEARCH_ELASTIC_URL = 'http://127.0.0.1:9200/'
+SEARCH = {
+    'default': {
+        'ELASTIC_URL': 'http://127.0.0.1:9200/',
+        'IDX': {
+            'MARKER': 'dbsnp142',
+            'DEFAULT': 'dbsnp142',
+        },
+        'TEST': 'test_suffix',
+    }
+}
 
 4. Include the search URLconf in your project urls.py like this::
 

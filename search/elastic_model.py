@@ -1,18 +1,19 @@
 import json
 import requests
-from django.conf import settings
 import re
 import logging
+from search.elastic_settings import ElasticSettings
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
 class Elastic:
+    ''' Elastic search '''
 
-    def __init__(self, query=None, search_from=0, size=20, db=settings.SEARCH_MARKERDB):
+    def __init__(self, query=None, search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
         ''' Query the elastic server for given search query '''
-        self.url = (settings.SEARCH_ELASTIC_URL + '/' + db + '/_search?size=' + str(size) +
+        self.url = (ElasticSettings.url() + '/' + db + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
         self.query = query
         self.size = size
@@ -20,7 +21,7 @@ class Elastic:
 
     @classmethod
     def range_overlap_query(cls, seqid, start_range, end_range,
-                            search_from=0, size=20, db=settings.SEARCH_MARKERDB,
+                            search_from=0, size=20, db=ElasticSettings.idx('DEFAULT'),
                             field_list=None):
         ''' Constructs a range overlap query '''
         query = {"filtered":
@@ -48,7 +49,7 @@ class Elastic:
 
     @classmethod
     def field_search_query(cls, query_term, fields=None,
-                           search_from=0, size=20, db=settings.SEARCH_MARKERDB):
+                           search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
         ''' Constructs a field search query '''
         query = {"query": {"query_string": {"query": query_term}}}
         if fields is not None:
@@ -57,7 +58,7 @@ class Elastic:
         return cls(query, search_from, size, db)
 
     def get_mapping(self, mapping_type=None):
-        self.mapping_url = (settings.SEARCH_ELASTIC_URL + '/' + self.db + '/_mapping')
+        self.mapping_url = (ElasticSettings.url() + '/' + self.db + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
         response = requests.get(self.mapping_url)
@@ -67,15 +68,21 @@ class Elastic:
 
     def get_count(self):
         ''' Return the elastic count for a query result '''
-        url = settings.SEARCH_ELASTIC_URL + '/' + self.db + '/_count?'
+        url = ElasticSettings.url() + '/' + self.db + '/_count?'
         response = requests.post(url, data=json.dumps(self.query))
         return response.json()
 
-    def get_result(self, asJson=False):
-        ''' Return the elastic context result '''
+    def get_json_response(self):
+        ''' Return the elastic json response '''
         response = requests.post(self.url, data=json.dumps(self.query))
-        if asJson:
-            return response.json()
+        logger.debug("curl '" + self.url + "&pretty' -d '" + json.dumps(self.query) + "'")
+        if response.status_code != 200:
+            logger.warn("Error: elastic response 200:" + self.url)
+        return response.json()
+
+    def get_result(self):
+        ''' Return the elastic context result '''
+        json_response = self.get_json_response()
         context = {"query": self.query}
         c_dbs = {}
         dbs = self.db.split(",")
@@ -90,23 +97,18 @@ class Elastic:
         context["db"] = self.db
 
         content = []
-        if response.status_code != 200:
-            context["error"] = ("Error: elastic response " +
-                                json.dumps(response.json()))
-            return context
-
-        if(len(response.json()['hits']['hits']) >= 1):
-            for hit in response.json()['hits']['hits']:
+        if(len(json_response['hits']['hits']) >= 1):
+            for hit in json_response['hits']['hits']:
                 self._addInfo(content, hit)
                 hit['_source']['idx_type'] = hit['_type']
                 hit['_source']['idx_id'] = hit['_id']
                 content.append(hit['_source'])
-                #print(hit['_source']) @IgnorePep8
+                # print(hit['_source'])
 
         context["data"] = content
-        context["total"] = response.json()['hits']['total']
-        if(int(response.json()['hits']['total']) < self.size):
-            context["size"] = response.json()['hits']['total']
+        context["total"] = json_response['hits']['total']
+        if(int(json_response['hits']['total']) < self.size):
+            context["size"] = json_response['hits']['total']
         else:
             context["size"] = self.size
         return context
