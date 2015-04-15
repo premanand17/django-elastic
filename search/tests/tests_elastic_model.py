@@ -12,7 +12,7 @@ import time
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
-    time.sleep(1)
+    time.sleep(2)
 
 
 @override_settings(SEARCH={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
