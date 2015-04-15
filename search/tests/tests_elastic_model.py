@@ -2,7 +2,7 @@ from django.test import TestCase, override_settings
 from django.core.management import call_command
 from search.tests.settings_idx import IDX
 import requests
-from search.elastic_model import Elastic, QueryMatch, QueryBool, Query
+from search.elastic_model import Elastic, QueryBool, Query, BuildQuery
 from search.elastic_settings import ElasticSettings
 import json
 
@@ -46,5 +46,5 @@ class ElasticModelTest(TestCase):
         query_bool.must_not([{"term": {"seqid": "2"}}])
         query_bool.should({"range": {"start": {"gte": 113834945}}})
         query_bool.should([{"range": {"start": {"gte": 113834944}}}])
-        query = Query.filtered(QueryMatch.match_all(), query_bool, sources=["id", "seqid"])
+        query = BuildQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"])
         print("curl 'http://jenkins:9200/dbsnp142/_search?pretty=true' -d '"+json.dumps(query.query)+"'")
