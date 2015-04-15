@@ -41,6 +41,7 @@ class Elastic:
                              }
                   }
                  }
+
         if field_list is not None:
             query = {"_source": field_list, "query": query}
         else:
@@ -127,3 +128,87 @@ class Elastic:
             else:
                 if info not in hit['_source']:
                     hit['_source'][info] = ""
+
+
+class Query:
+
+    def __init__(self, query, sources=None):
+        ''' Query the elastic server for given search query '''
+        self.query = {"query": query}
+        if sources is not None:
+            self.query["_source"] = sources
+
+    @classmethod
+    def filtered(cls, query_match, query_bool, sources=None):
+        ''' '''
+        if not isinstance(query_match, QueryMatch):
+            raise QueryError("not a QueryMatch")
+
+        query_filter = QueryFilter.bool(query_bool)
+        query = {"filtered": {"query": query_match.qmatch}}
+        query["filtered"].update(query_filter.filter)
+        return cls(query, sources)
+
+
+class QueryMatch:
+
+    def __init__(self, qmatch):
+        ''' Match query '''
+        self.qmatch = qmatch
+
+    @classmethod
+    def match_all(cls):
+        qmatch = {"match_all": {}}
+        return cls(qmatch)
+
+
+class QueryBool:
+
+    def __init__(self):
+        ''' Bool query '''
+        self.bool = {"bool": {}}
+
+    def must(self, must_arr):
+        self._update("must", must_arr)
+
+    def must_not(self, must_not_arr):
+        self._update("must_not", must_not_arr)
+
+    def should(self, should_arr):
+        self._update("should", should_arr)
+
+    def _update(self, name, arr):
+        if not isinstance(arr, list):
+            arr = [arr]
+        if name in self.bool["bool"]:
+            self.bool["bool"][name].extend(arr)
+        else:
+            self.bool["bool"][name] = arr
+
+
+class QueryFilter:
+
+    def __init__(self, qfilter):
+        ''' Filter query '''
+        self.filter = {"filter": qfilter}
+
+    @classmethod
+    def bool(cls, query_bool):
+        if not isinstance(query_bool, QueryBool):
+            raise QueryError("not a QueryBool")
+        return cls(query_bool.bool)
+
+#     @classmethod
+#     def or(cls, query_or):
+#         if not isinstance(query_or, QueryOr):
+#             raise QueryError("not a QueryOr")
+#         return cls(query_or.or)
+
+
+class QueryError(Exception):
+    ''' GFF parse error  '''
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
