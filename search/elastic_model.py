@@ -18,7 +18,7 @@ class Elastic:
                     '&from='+str(search_from))
         if build_query is not None:
             if not isinstance(build_query, ElasticQuery):
-                raise QueryError("not a ElasticQuery")
+                raise QueryError("not an ElasticQuery")
             self.query = build_query.query
         self.size = size
         self.db = db
