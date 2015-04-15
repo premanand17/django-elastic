@@ -3,6 +3,7 @@ import requests
 import re
 import logging
 from search.elastic_settings import ElasticSettings
+from builtins import classmethod
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -11,11 +12,14 @@ logger = logging.getLogger(__name__)
 class Elastic:
     ''' Elastic search '''
 
-    def __init__(self, query=None, search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
+    def __init__(self, build_query=None, search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
         ''' Query the elastic server for given search query '''
         self.url = (ElasticSettings.url() + '/' + db + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
-        self.query = query
+        if build_query is not None:
+            if not isinstance(build_query, ElasticQuery):
+                raise QueryError("not a ElasticQuery")
+            self.query = build_query.query
         self.size = size
         self.db = db
 
@@ -24,47 +28,19 @@ class Elastic:
                             search_from=0, size=20, db=ElasticSettings.idx('DEFAULT'),
                             field_list=None):
         ''' Constructs a range overlap query '''
-        query = {"filtered":
-                 {"query":
-                  {"term": {"seqid": seqid}},
-                  "filter": {"or":
-                             [{"range": {"start": {"gte": start_range, "lte": end_range}}},
-                              {"range": {"end": {"gte": start_range, "lte": end_range}}},
-                              {"bool":
-                               {"must":
-                                [{"range": {"start": {"lte": start_range}}},
-                                 {"range": {"end": {"gte": end_range}}}
-                                 ]
-                                }
-                               }
-                              ]
-                             }
-                  }
-                 }
-
-#         query_filter = Filter({"or": {"range": {"start": {"gte": start_range, "lte": end_range}}}})
-#         query_filter.extend("or", {"range": {"end": {"gte": start_range, "lte": end_range}}})
-# 
-#         query_bool = QueryBool()
-#         query_bool.must([{"range": {"start": {"lte": start_range}}}, {"range": {"end": {"gte": end_range}}}])
-#         query_filter.extend("or", query_bool.bool)
-# 
-#         q = BuildQuery.filtered(Query.term({"seqid": seqid}), query_filter)
-
-        if field_list is not None:
-            query = {"_source": field_list, "query": query}
-        else:
-            query = {"query": query}
+        query_bool = QueryBool(must_arr=[{"range": {"start": {"lte": start_range}}},
+                                         {"range": {"end": {"gte": end_range}}}])
+        query_filter = Filter({"or": {"range": {"start": {"gte": start_range, "lte": end_range}}}})
+        query_filter.extend("or", {"range": {"end": {"gte": start_range, "lte": end_range}}})
+        query_filter.extend("or", query_bool.bool)
+        query = ElasticQuery.filtered(Query.term({"seqid": seqid}), query_filter, field_list)
         return cls(query, search_from, size, db)
 
     @classmethod
     def field_search_query(cls, query_term, fields=None,
                            search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
         ''' Constructs a field search query '''
-        query = {"query": {"query_string": {"query": query_term}}}
-        if fields is not None:
-            query["query"]["query_string"]["fields"] = fields
-
+        query = ElasticQuery.query_string(query_term, fields)
         return cls(query, search_from, size, db)
 
     def get_mapping(self, mapping_type=None):
@@ -139,7 +115,8 @@ class Elastic:
                     hit['_source'][info] = ""
 
 
-class BuildQuery:
+class ElasticQuery:
+    ''' Utility to assist in constructing Elastic queries. '''
 
     def __init__(self, query, sources=None):
         ''' Query the elastic server for given search query '''
@@ -148,14 +125,21 @@ class BuildQuery:
             self.query["_source"] = sources
 
     @classmethod
+    def bool(cls, query_bool):
+        if not isinstance(query_bool, QueryBool):
+            raise QueryError("not a QueryBool")
+        return cls(query_bool.bool)
+
+    @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None):
         ''' '''
         if not isinstance(query_bool, QueryBool):
             raise QueryError("not a QueryBool")
-        return BuildQuery.filtered(query_match, Filter(query_bool.bool), sources)
+        return ElasticQuery.filtered(query_match, Filter(query_bool.bool), sources)
 
     @classmethod
     def filtered(cls, query_match, query_filter, sources=None):
+        ''' Builds a filtered query. '''
         if not isinstance(query_match, Query):
             raise QueryError("not a QueryMatch")
         if not isinstance(query_filter, Filter):
@@ -163,6 +147,22 @@ class BuildQuery:
         query = {"filtered": {"query": query_match.qmatch}}
         query["filtered"].update(query_filter.filter)
         return cls(query, sources)
+
+    @classmethod
+    def query_string(cls, query_term, fields=None, sources=None):
+        ''' String query using a query parser in order to parse its content.
+        Simple wildcards can be used with the fields supplied
+        (e.g. "fields" : ["city.*"].) '''
+        query = {"query_string": {"query": query_term}}
+        if fields is not None:
+            query["query_string"]["fields"] = fields
+        return cls(query, sources)
+
+    @classmethod
+    def query_match(cls, match_id, match_str):
+        ''' Basic match query '''
+        query = {"match": {match_id: match_str}}
+        return cls(query)
 
 
 class Query:
@@ -184,9 +184,15 @@ class Query:
 
 class QueryBool:
 
-    def __init__(self):
+    def __init__(self, must_arr=None, must_not_arr=None, should_arr=None):
         ''' Bool query '''
         self.bool = {"bool": {}}
+        if must_arr is not None:
+            self.must(must_arr)
+        if must_not_arr is not None:
+            self.must_not(must_not_arr)
+        if should_arr is not None:
+            self.should(should_arr)
 
     def must(self, must_arr):
         self._update("must", must_arr)
@@ -207,7 +213,7 @@ class QueryBool:
 
 
 class Filter:
-
+    ''' http://www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-filters.html '''
     def __init__(self, qfilter):
         ''' Filter '''
         self.filter = {"filter": qfilter}
