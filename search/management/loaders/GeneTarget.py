@@ -11,8 +11,11 @@ class GeneTargetManager(DelimeterLoader):
         column_names = ["ensg", "name", "biotype", "strand",
                         "baitChr", "baitStart", "baitEnd", "baitID", "baitName",
                         "oeChr", "oeStart", "oeEnd", "oeID", "oeName", "dist",
-                        "Monocyte", "Macrophage", "Erythroblast", "Megakaryocyte",
-                        "CD4_Naive", "CD4_Non_Activated", "CD4_Total", "CD4_Activated"]
+                        "Monocytes", "Macrophages_M0", "Macrophages_M1", "Macrophages_M2", "Neutrophils",
+                        "Megakaryocytes", "Endothelial_precursors", "Erythroblasts", "Foetal_thymus", "Naive_CD4",
+                        "Total_CD4_MF", "Total_CD4_Activated", "Total_CD4_NonActivated", "Naive_CD8", "Total_CD8",
+                        "Naive_B", "Total_B"]
+
         self.load(column_names, f, idx_name, 'gene_target')
 
     def _create_gene_mapping(self, **options):
@@ -33,24 +36,42 @@ class GeneTargetManager(DelimeterLoader):
                   "oeID": {"type": "string", "index": "no"},
                   "oeName": {"type": "string", "index": "no"},
                   "dist": {"type": "integer", "index": "not_analyzed"},
-                  "Monocyte": {"type": "float"},
-                  "Macrophage": {"type": "float"},
-                  "Erythroblast": {"type": "float"},
-                  "Megakaryocyte": {"type": "float"},
-                  "CD4_Naive": {"type": "float"},
-                  "CD4_Non_Activated": {"type": "float"},
-                  "CD4_Total": {"type": "float"},
-                  "CD4_Activated": {"type": "float"}
+                  "Monocytes": {"type": "float"},
+                  "Macrophages_M0": {"type": "float"},
+                  "Macrophages_M1": {"type": "float"},
+                  "Macrophages_M2": {"type": "float"},
+                  "Neutrophils": {"type": "float"},
+                  "Megakaryocytes": {"type": "float"},
+                  "Endothelial_precursors": {"type": "float"},
+                  "Erythroblasts": {"type": "float"},
+                  "Foetal_thymus": {"type": "float"},
+                  "Naive_CD4": {"type": "float"},
+                  "Total_CD4_MF": {"type": "float"},
+                  "Total_CD4_Activated": {"type": "float"},
+                  "Total_CD4_NonActivated": {"type": "float"},
+                  "Naive_CD8": {"type": "float"},
+                  "Total_CD8": {"type": "float"},
+                  "Naive_B": {"type": "float"},
+                  "Total_B": {"type": "float"}
                   }
                  }
-        meta = {"Monocyte": "tissue_type",
-                "Macrophage": "tissue_type",
-                "Erythroblast": "tissue_type",
-                "Megakaryocyte": "tissue_type",
-                "CD4_Naive": "tissue_type",
-                "CD4_Non_Activated": "tissue_type",
-                "CD4_Total": "tissue_type",
-                "CD4_Activated": "tissue_type"
+        meta = {"Monocytes": "tissue_type",
+                "Macrophages_M0": "tissue_type",
+                "Macrophages_M1": "tissue_type",
+                "Macrophages_M2": "tissue_type",
+                "Neutrophils": "tissue_type",
+                "Megakaryocytes": "tissue_type",
+                "Endothelial_precursors": "tissue_type",
+                "Erythroblasts": "tissue_type",
+                "Foetal_thymus": "tissue_type",
+                "Naive_CD4": "tissue_type",
+                "Total_CD4_MF": "tissue_type",
+                "Total_CD4_Activated": "tissue_type",
+                "Total_CD4_NonActivated": "tissue_type",
+                "Naive_CD8": "tissue_type",
+                "Total_CD8": "tissue_type",
+                "Naive_B": "tissue_type",
+                "Total_B": "tissue_type"
                 }
         meta = {"tissue_type": meta}
         # props["_meta"] = meta
