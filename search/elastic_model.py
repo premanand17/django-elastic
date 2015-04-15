@@ -42,6 +42,15 @@ class Elastic:
                   }
                  }
 
+#         query_filter = Filter({"or": {"range": {"start": {"gte": start_range, "lte": end_range}}}})
+#         query_filter.extend("or", {"range": {"end": {"gte": start_range, "lte": end_range}}})
+# 
+#         query_bool = QueryBool()
+#         query_bool.must([{"range": {"start": {"lte": start_range}}}, {"range": {"end": {"gte": end_range}}}])
+#         query_filter.extend("or", query_bool.bool)
+# 
+#         q = BuildQuery.filtered(Query.term({"seqid": seqid}), query_filter)
+
         if field_list is not None:
             query = {"_source": field_list, "query": query}
         else:
@@ -130,7 +139,7 @@ class Elastic:
                     hit['_source'][info] = ""
 
 
-class Query:
+class BuildQuery:
 
     def __init__(self, query, sources=None):
         ''' Query the elastic server for given search query '''
@@ -139,18 +148,24 @@ class Query:
             self.query["_source"] = sources
 
     @classmethod
-    def filtered(cls, query_match, query_bool, sources=None):
+    def filtered_bool(cls, query_match, query_bool, sources=None):
         ''' '''
-        if not isinstance(query_match, QueryMatch):
-            raise QueryError("not a QueryMatch")
+        if not isinstance(query_bool, QueryBool):
+            raise QueryError("not a QueryBool")
+        return BuildQuery.filtered(query_match, Filter(query_bool.bool), sources)
 
-        query_filter = QueryFilter.bool(query_bool)
+    @classmethod
+    def filtered(cls, query_match, query_filter, sources=None):
+        if not isinstance(query_match, Query):
+            raise QueryError("not a QueryMatch")
+        if not isinstance(query_filter, Filter):
+            raise QueryError("not a Filter")
         query = {"filtered": {"query": query_match.qmatch}}
         query["filtered"].update(query_filter.filter)
         return cls(query, sources)
 
 
-class QueryMatch:
+class Query:
 
     def __init__(self, qmatch):
         ''' Match query '''
@@ -159,6 +174,11 @@ class QueryMatch:
     @classmethod
     def match_all(cls):
         qmatch = {"match_all": {}}
+        return cls(qmatch)
+
+    @classmethod
+    def term(cls, term):
+        qmatch = {"term": term}
         return cls(qmatch)
 
 
@@ -186,23 +206,24 @@ class QueryBool:
             self.bool["bool"][name] = arr
 
 
-class QueryFilter:
+class Filter:
 
     def __init__(self, qfilter):
-        ''' Filter query '''
+        ''' Filter '''
         self.filter = {"filter": qfilter}
 
-    @classmethod
-    def bool(cls, query_bool):
-        if not isinstance(query_bool, QueryBool):
-            raise QueryError("not a QueryBool")
-        return cls(query_bool.bool)
+    def filter(self, qfilter):
+        return self.filter
 
-#     @classmethod
-#     def or(cls, query_or):
-#         if not isinstance(query_or, QueryOr):
-#             raise QueryError("not a QueryOr")
-#         return cls(query_or.or)
+    def extend(self, filter_name, arr):
+        if not isinstance(arr, list):
+            arr = [arr]
+        if filter_name in self.filter["filter"]:
+            if not isinstance(self.filter["filter"][filter_name], list):
+                self.filter["filter"][filter_name] = [self.filter["filter"][filter_name]]
+            self.filter["filter"][filter_name].extend(arr)
+        else:
+            self.filter["filter"][filter_name] = arr
 
 
 class QueryError(Exception):
