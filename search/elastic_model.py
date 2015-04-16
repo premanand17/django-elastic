@@ -127,13 +127,14 @@ class ElasticQuery:
 
     @classmethod
     def bool(cls, query_bool):
+        ''' Bool Query '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
         return cls(query_bool.query)
 
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None):
-        ''' '''
+        ''' Filtered query with Bool filter. '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
         return ElasticQuery.filtered(query_match, Filter(query_bool), sources)
@@ -141,13 +142,8 @@ class ElasticQuery:
     @classmethod
     def filtered(cls, query_match, query_filter, sources=None):
         ''' Builds a filtered query. '''
-        if not isinstance(query_match, Query):
-            raise QueryError("not a QueryMatch")
-        if not isinstance(query_filter, Filter):
-            raise QueryError("not a Filter")
-        query = {"filtered": {"query": query_match.query}}
-        query["filtered"].update(query_filter.filter)
-        return cls(query, sources)
+        query = FilteredQuery(query_match, query_filter)
+        return cls(query.query, sources)
 
     @classmethod
     def query_string(cls, query_term, fields=None, sources=None):
@@ -183,6 +179,18 @@ class Query:
         ''' Term Query '''
         query = {"term": term}
         return cls(query)
+
+
+class FilteredQuery(Query):
+    ''' Filtered Query - used to combine a query and a filter. '''
+    def __init__(self, query, query_filter):
+        ''' Bool query '''
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
+        if not isinstance(query_filter, Filter):
+            raise QueryError("not a Filter")
+        self.query = {"filtered": {"query": query.query}}
+        self.query["filtered"].update(query_filter.filter)
 
 
 class BoolQuery(Query):
