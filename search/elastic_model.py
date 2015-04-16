@@ -28,7 +28,7 @@ class Elastic:
                             search_from=0, size=20, db=ElasticSettings.idx('DEFAULT'),
                             field_list=None):
         ''' Constructs a range overlap query '''
-        query_bool = QueryBool(must_arr=[{"range": {"start": {"lte": start_range}}},
+        query_bool = BoolQuery(must_arr=[{"range": {"start": {"lte": start_range}}},
                                          {"range": {"end": {"gte": end_range}}}])
         query_filter = Filter({"or": {"range": {"start": {"gte": start_range, "lte": end_range}}}})
         query_filter.extend("or", {"range": {"end": {"gte": start_range, "lte": end_range}}})
@@ -126,15 +126,15 @@ class ElasticQuery:
 
     @classmethod
     def bool(cls, query_bool):
-        if not isinstance(query_bool, QueryBool):
-            raise QueryError("not a QueryBool")
+        if not isinstance(query_bool, BoolQuery):
+            raise QueryError("not a BoolQuery")
         return cls(query_bool.bool)
 
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None):
         ''' '''
-        if not isinstance(query_bool, QueryBool):
-            raise QueryError("not a QueryBool")
+        if not isinstance(query_bool, BoolQuery):
+            raise QueryError("not a BoolQuery")
         return ElasticQuery.filtered(query_match, Filter(query_bool.bool), sources)
 
     @classmethod
@@ -182,7 +182,7 @@ class Query:
         return cls(qmatch)
 
 
-class QueryBool:
+class BoolQuery:
 
     def __init__(self, must_arr=None, must_not_arr=None, should_arr=None):
         ''' Bool query '''

@@ -2,7 +2,7 @@ from django.test import TestCase, override_settings
 from django.core.management import call_command
 from search.tests.settings_idx import IDX
 import requests
-from search.elastic_model import Elastic, QueryBool, Query, ElasticQuery, Filter
+from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, Filter
 from search.elastic_settings import ElasticSettings
 import time
 
@@ -44,7 +44,7 @@ class ElasticModelTest(TestCase):
 
     def test_filtered_bool_query(self):
         ''' Test building and running a filtered boolean query. '''
-        query_bool = QueryBool()
+        query_bool = BoolQuery()
         query_bool.must([{"term": {"id": "rs373328635"}}])
         query_bool.must_not([{"term": {"seqid": "2"}}])
         query_bool.should({"range": {"start": {"gte": 10054}}})
@@ -55,7 +55,7 @@ class ElasticModelTest(TestCase):
 
     def test_filtered_query(self):
         ''' Test building and running a filtered query. '''
-        query_bool = QueryBool(must_arr=[{"range": {"start": {"lte": 1}}},
+        query_bool = BoolQuery(must_arr=[{"range": {"start": {"lte": 1}}},
                                          {"range": {"end": {"gte": 1000000}}}])
         query_filter = Filter({"or": {"range": {"start": {"gte": 1, "lte": 1000000}}}})
         query_filter.extend("or", {"range": {"end": {"gte": 1, "lte": 1000000}}})
