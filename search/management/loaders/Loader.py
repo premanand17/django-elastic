@@ -44,7 +44,7 @@ class Loader:
         self.mapping_json = mapping_json
 
         if(resp.status_code != 200):
-            logger.warn('WARNING: '+idx_name+' mapping status: '+str(resp.status_code)+' '+resp.content)
+            logger.warn('WARNING: '+idx_name+' mapping status: '+str(resp.status_code)+' '+str(resp.content))
 
     def bulk_load(self, idx_name, idx_type, json_data):
         ''' Bulk load documents '''
@@ -53,7 +53,7 @@ class Loader:
         resp = requests.put(ElasticSettings.url()+'/' + idx_name+'/' + idx_type +
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
-            logger.error('ERROR: '+idx_name+' load status: '+str(resp.status_code)+' '+resp.content)
+            logger.error('ERROR: '+idx_name+' load status: '+str(resp.status_code)+' '+str(resp.content))
 
         # report errors found during loading
         if resp.json()['errors']:
