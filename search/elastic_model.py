@@ -28,11 +28,12 @@ class Elastic:
                             search_from=0, size=20, db=ElasticSettings.idx('DEFAULT'),
                             field_list=None):
         ''' Constructs a range overlap query '''
-        query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range).range,
-                                         RangeQuery("end", gte=end_range).range])
-        query_filter = Filter({"or": RangeQuery("start", gte=start_range, lte=end_range).range})
-        query_filter.extend("or", RangeQuery("end", gte=start_range, lte=end_range).range)
-        query_filter.extend("or", query_bool.bool)
+        query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range).query,
+                                         RangeQuery("end", gte=end_range).query])
+        query_or = Query({"or": RangeQuery("start", gte=start_range, lte=end_range).query})
+        query_filter = Filter(query_or)
+        query_filter.extend("or", RangeQuery("end", gte=start_range, lte=end_range))
+        query_filter.extend("or", query_bool)
         query = ElasticQuery.filtered(Query.term({"seqid": seqid}), query_filter, field_list)
         return cls(query, search_from, size, db)
 
@@ -128,14 +129,14 @@ class ElasticQuery:
     def bool(cls, query_bool):
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
-        return cls(query_bool.bool)
+        return cls(query_bool.query)
 
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None):
         ''' '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
-        return ElasticQuery.filtered(query_match, Filter(query_bool.bool), sources)
+        return ElasticQuery.filtered(query_match, Filter(query_bool), sources)
 
     @classmethod
     def filtered(cls, query_match, query_filter, sources=None):
@@ -144,7 +145,7 @@ class ElasticQuery:
             raise QueryError("not a QueryMatch")
         if not isinstance(query_filter, Filter):
             raise QueryError("not a Filter")
-        query = {"filtered": {"query": query_match.qmatch}}
+        query = {"filtered": {"query": query_match.query}}
         query["filtered"].update(query_filter.filter)
         return cls(query, sources)
 
@@ -167,27 +168,29 @@ class ElasticQuery:
 
 class Query:
 
-    def __init__(self, qmatch):
+    def __init__(self, query):
         ''' Match query '''
-        self.qmatch = qmatch
+        self.query = query
 
     @classmethod
     def match_all(cls):
-        qmatch = {"match_all": {}}
-        return cls(qmatch)
+        ''' Match All Query '''
+        query = {"match_all": {}}
+        return cls(query)
 
     @classmethod
     def term(cls, term):
-        qmatch = {"term": term}
-        return cls(qmatch)
+        ''' Term Query '''
+        query = {"term": term}
+        return cls(query)
 
 
-class BoolQuery:
+class BoolQuery(Query):
     ''' Bool Query - a query that matches documents matching boolean
     combinations of other queries'''
     def __init__(self, must_arr=None, must_not_arr=None, should_arr=None):
         ''' Bool query '''
-        self.bool = {"bool": {}}
+        self.query = {"bool": {}}
         if must_arr is not None:
             self.must(must_arr)
         if must_not_arr is not None:
@@ -207,50 +210,60 @@ class BoolQuery:
     def _update(self, name, arr):
         if not isinstance(arr, list):
             arr = [arr]
-        if name in self.bool["bool"]:
-            self.bool["bool"][name].extend(arr)
+        if name in self.query["bool"]:
+            self.query["bool"][name].extend(arr)
         else:
-            self.bool["bool"][name] = arr
+            self.query["bool"][name] = arr
 
 
-class RangeQuery:
+class RangeQuery(Query):
     ''' Range Query - matches documents with fields that have terms
     within a certain range.'''
     def __init__(self, name, gt=None, lt=None, gte=None, lte=None, boost=None):
         ''' Bool query '''
-        self.range = {"range": {name: {}}}
+        self.query = {"range": {name: {}}}
         if gt is not None:
-            self.range["range"][name]["gt"] = gt
+            self.query["range"][name]["gt"] = gt
         if lt is not None:
-            self.range["range"][name]["lt"] = lt
+            self.query["range"][name]["lt"] = lt
         if gte is not None:
-            self.range["range"][name]["gte"] = gte
+            self.query["range"][name]["gte"] = gte
         if lte is not None:
-            self.range["range"][name]["lte"] = lte
+            self.query["range"][name]["lte"] = lte
 
 
 class Filter:
     ''' http://www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-filters.html '''
-    def __init__(self, qfilter):
-        ''' Filter '''
-        self.filter = {"filter": qfilter}
+    def __init__(self, query):
+        ''' Filter based on the Query object passed in the constructor '''
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
+        self.filter = {"filter": query.query}
 
     def filter(self, qfilter):
         return self.filter
 
     def extend(self, filter_name, arr):
+        if not isinstance(arr, Query):
+            raise QueryError("not a Query")
+
         if not isinstance(arr, list):
             arr = [arr]
+
+        filter_arr = []
+        for q in arr:
+            filter_arr.append(q.query)
+
         if filter_name in self.filter["filter"]:
             if not isinstance(self.filter["filter"][filter_name], list):
                 self.filter["filter"][filter_name] = [self.filter["filter"][filter_name]]
-            self.filter["filter"][filter_name].extend(arr)
+            self.filter["filter"][filter_name].extend(filter_arr)
         else:
-            self.filter["filter"][filter_name] = arr
+            self.filter["filter"][filter_name] = filter_arr
 
 
 class QueryError(Exception):
-    ''' GFF parse error  '''
+    ''' Query error  '''
     def __init__(self, value):
         self.value = value
 

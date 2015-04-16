@@ -2,7 +2,8 @@ from django.test import TestCase, override_settings
 from django.core.management import call_command
 from search.tests.settings_idx import IDX
 import requests
-from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, Filter
+from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, Filter,\
+    RangeQuery
 from search.elastic_settings import ElasticSettings
 import time
 
@@ -57,9 +58,10 @@ class ElasticModelTest(TestCase):
         ''' Test building and running a filtered query. '''
         query_bool = BoolQuery(must_arr=[{"range": {"start": {"lte": 1}}},
                                          {"range": {"end": {"gte": 1000000}}}])
-        query_filter = Filter({"or": {"range": {"start": {"gte": 1, "lte": 1000000}}}})
-        query_filter.extend("or", {"range": {"end": {"gte": 1, "lte": 1000000}}})
-        query_filter.extend("or", query_bool.bool)
+        query_or = Query({"or": RangeQuery("start", gte=1, lte=1000000).query})
+        query_filter = Filter(query_or)
+        query_filter.extend("or", RangeQuery("end", gte=1, lte=1000000))
+        query_filter.extend("or", query_bool)
         query = ElasticQuery.filtered(Query.term({"seqid": 1}), query_filter)
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
