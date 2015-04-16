@@ -28,10 +28,10 @@ class Elastic:
                             search_from=0, size=20, db=ElasticSettings.idx('DEFAULT'),
                             field_list=None):
         ''' Constructs a range overlap query '''
-        query_bool = BoolQuery(must_arr=[{"range": {"start": {"lte": start_range}}},
-                                         {"range": {"end": {"gte": end_range}}}])
-        query_filter = Filter({"or": {"range": {"start": {"gte": start_range, "lte": end_range}}}})
-        query_filter.extend("or", {"range": {"end": {"gte": start_range, "lte": end_range}}})
+        query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range).range,
+                                         RangeQuery("end", gte=end_range).range])
+        query_filter = Filter({"or": RangeQuery("start", gte=start_range, lte=end_range).range})
+        query_filter.extend("or", RangeQuery("end", gte=start_range, lte=end_range).range)
         query_filter.extend("or", query_bool.bool)
         query = ElasticQuery.filtered(Query.term({"seqid": seqid}), query_filter, field_list)
         return cls(query, search_from, size, db)
@@ -183,7 +183,8 @@ class Query:
 
 
 class BoolQuery:
-
+    ''' Bool Query - a query that matches documents matching boolean
+    combinations of other queries'''
     def __init__(self, must_arr=None, must_not_arr=None, should_arr=None):
         ''' Bool query '''
         self.bool = {"bool": {}}
@@ -210,6 +211,22 @@ class BoolQuery:
             self.bool["bool"][name].extend(arr)
         else:
             self.bool["bool"][name] = arr
+
+
+class RangeQuery:
+    ''' Range Query - matches documents with fields that have terms
+    within a certain range.'''
+    def __init__(self, name, gt=None, lt=None, gte=None, lte=None, boost=None):
+        ''' Bool query '''
+        self.range = {"range": {name: {}}}
+        if gt is not None:
+            self.range["range"][name]["gt"] = gt
+        if lt is not None:
+            self.range["range"][name]["lt"] = lt
+        if gte is not None:
+            self.range["range"][name]["gte"] = gte
+        if lte is not None:
+            self.range["range"][name]["lte"] = lte
 
 
 class Filter:
