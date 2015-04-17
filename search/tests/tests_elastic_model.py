@@ -2,8 +2,8 @@ from django.test import TestCase, override_settings
 from django.core.management import call_command
 from search.tests.settings_idx import IDX
 import requests
-from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, Filter,\
-    RangeQuery
+from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, \
+    RangeQuery, OrFilter, AndFilter
 from search.elastic_settings import ElasticSettings
 import time
 
@@ -54,15 +54,21 @@ class ElasticModelTest(TestCase):
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
 
-    def test_filtered_query(self):
+    def test_or_filtered_query(self):
         ''' Test building and running a filtered query. '''
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=1),
-                                         RangeQuery("end", gte=1000000)])
-        query_or = Query({"or": RangeQuery("start", gte=1, lte=1000000).query})
-        query_filter = Filter(query_or)
-        query_filter.extend("or", RangeQuery("end", gte=1, lte=100000))
-        query_filter.extend("or", query_bool)
-        query = ElasticQuery.filtered(Query.term("seqid", 1), query_filter)
+                                         RangeQuery("end", gte=100000)])
+        or_filter = OrFilter(RangeQuery("start", gte=1, lte=100000))
+        or_filter.extend(query_bool)
+        query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter)
+        elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_and_filtered_query(self):
+        ''' Test building and running a filtered query. '''
+        query_bool = BoolQuery(must_arr=[RangeQuery("start", gte=1)])
+        and_filter = AndFilter(query_bool)
+        query = ElasticQuery.filtered(Query.term("seqid", 1), and_filter)
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
 
