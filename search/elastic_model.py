@@ -129,7 +129,7 @@ class ElasticQuery:
 
     @classmethod
     def query_string(cls, query_term, fields=None, sources=None):
-        query = Query.query_string(query_term, fields, sources)
+        query = Query.query_string(query_term, fields)
         return cls(query, sources)
 
     @classmethod
@@ -164,14 +164,14 @@ class Query:
         return cls(query)
 
     @classmethod
-    def query_string(cls, query_term, fields=None, sources=None):
+    def query_string(cls, query_term, fields=None):
         ''' String query using a query parser in order to parse its content.
         Simple wildcards can be used with the fields supplied
         (e.g. "fields" : ["city.*"].) '''
         query = {"query_string": {"query": query_term}}
         if fields is not None:
             query["query_string"]["fields"] = fields
-        return cls(query, sources)
+        return cls(query)
 
 
 class FilteredQuery(Query):
