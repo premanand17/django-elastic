@@ -221,8 +221,7 @@ class BoolQuery(Query):
                 raise QueryError("not a Query")
 
         arr = []
-        for e in qarr:
-            arr.append(e.query)
+        [arr.append(q.query) for q in qarr]
 
         if name in self.query["bool"]:
             self.query["bool"][name].extend(arr)
@@ -265,8 +264,7 @@ class Filter:
             arr = [arr]
 
         filter_arr = []
-        for q in arr:
-            filter_arr.append(q.query)
+        [filter_arr.append(q.query) for q in arr]
 
         if filter_name in self.filter["filter"]:
             if not isinstance(self.filter["filter"][filter_name], list):
