@@ -1,12 +1,12 @@
 from django.core.management.base import BaseCommand
 from optparse import make_option
 import logging
-from search.management.loaders.Marker import MarkerManager
-from search.management.loaders.Region import RegionManager
-from search.management.loaders.Gene import GeneManager
-from search.management.loaders.Disease import DiseaseManager
-from search.management.loaders.GeneTarget import GeneTargetManager
-from search.management.loaders.GFF import GFFManager
+from search.management.loaders.marker import MarkerManager
+from search.management.loaders.region import RegionManager
+from search.management.loaders.gene import GeneManager
+from search.management.loaders.disease import DiseaseManager
+from search.management.loaders.gene_target import GeneTargetManager
+from search.management.loaders.gff import GFFManager
 
 
 # Get an instance of a logger
