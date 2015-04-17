@@ -46,23 +46,23 @@ class ElasticModelTest(TestCase):
     def test_filtered_bool_query(self):
         ''' Test building and running a filtered boolean query. '''
         query_bool = BoolQuery()
-        query_bool.must([{"term": {"id": "rs373328635"}}])
-        query_bool.must_not([{"term": {"seqid": "2"}}])
-        query_bool.should({"range": {"start": {"gte": 10054}}})
-        query_bool.should([{"range": {"start": {"gte": 10050}}}])
+        query_bool.must([Query.term("id", "rs373328635")])
+        query_bool.must_not([Query.term("seqid", 2)])
+        query_bool.should(RangeQuery("start", gte=10054))
+        query_bool.should([RangeQuery("start", gte=10050)])
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"])
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
 
     def test_filtered_query(self):
         ''' Test building and running a filtered query. '''
-        query_bool = BoolQuery(must_arr=[{"range": {"start": {"lte": 1}}},
-                                         {"range": {"end": {"gte": 1000000}}}])
+        query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=1),
+                                         RangeQuery("end", gte=1000000)])
         query_or = Query({"or": RangeQuery("start", gte=1, lte=1000000).query})
         query_filter = Filter(query_or)
-        query_filter.extend("or", RangeQuery("end", gte=1, lte=1000000))
+        query_filter.extend("or", RangeQuery("end", gte=1, lte=100000))
         query_filter.extend("or", query_bool)
-        query = ElasticQuery.filtered(Query.term({"seqid": 1}), query_filter)
+        query = ElasticQuery.filtered(Query.term("seqid", 1), query_filter)
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
 
@@ -79,3 +79,9 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery.query_match("id", "rs2476601")
         elastic = Elastic(query)
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
+
+    def test_bool_query(self):
+        query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
+        query = ElasticQuery.bool(query_bool)
+        elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs373328635)")

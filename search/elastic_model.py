@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Elastic:
-    ''' Elastic search '''
+    ''' Used to run Elastic searches and return results or mappings. '''
 
     def __init__(self, build_query=None, search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
         ''' Query the elastic server for given search query '''
@@ -27,13 +27,13 @@ class Elastic:
                             search_from=0, size=20, db=ElasticSettings.idx('DEFAULT'),
                             field_list=None):
         ''' Constructs a range overlap query '''
-        query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range).query,
-                                         RangeQuery("end", gte=end_range).query])
+        query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range),
+                                         RangeQuery("end", gte=end_range)])
         query_or = Query({"or": RangeQuery("start", gte=start_range, lte=end_range).query})
         query_filter = Filter(query_or)
         query_filter.extend("or", RangeQuery("end", gte=start_range, lte=end_range))
         query_filter.extend("or", query_bool)
-        query = ElasticQuery.filtered(Query.term({"seqid": seqid}), query_filter, field_list)
+        query = ElasticQuery.filtered(Query.term("seqid", seqid), query_filter, field_list)
         return cls(query, search_from, size, db)
 
     @classmethod
@@ -44,6 +44,7 @@ class Elastic:
         return cls(query, search_from, size, db)
 
     def get_mapping(self, mapping_type=None):
+        ''' Return the mappings for an index. '''
         self.mapping_url = (ElasticSettings.url() + '/' + self.db + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
@@ -102,41 +103,44 @@ class ElasticQuery:
     ''' Utility to assist in constructing Elastic queries. '''
 
     def __init__(self, query, sources=None):
-        ''' Query the elastic server for given search query '''
+        ''' Query the elastic server for given search query. '''
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
         self.query = {"query": query.query}
         if sources is not None:
             self.query["_source"] = sources
 
     @classmethod
     def bool(cls, query_bool):
-        ''' Bool Query '''
+        ''' Factory method for creating elastic Bool Query. '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
         return cls(query_bool)
 
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None):
-        ''' Filtered query with Bool filter. '''
+        ''' Factory method for creating elastic filtered query with Bool filter. '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
         return ElasticQuery.filtered(query_match, Filter(query_bool), sources)
 
     @classmethod
     def filtered(cls, query_match, query_filter, sources=None):
-        ''' Builds a filtered query. '''
+        ''' Factory method for creating elastic Filtered Query. '''
         query = FilteredQuery(query_match, query_filter)
         return cls(query, sources)
 
     @classmethod
     def query_string(cls, query_term, fields=None, sources=None):
+        ''' Factory method for creating elastic Query String Query '''
         query = Query.query_string(query_term, fields)
         return cls(query, sources)
 
     @classmethod
-    def query_match(cls, match_id, match_str):
-        ''' Basic match query '''
+    def query_match(cls, match_id, match_str, sources=None):
+        ''' Factory method for creating elastic Match Query. '''
         query = Query.query_match(match_id, match_str)
-        return cls(query)
+        return cls(query, sources)
 
 
 class Query:
@@ -152,9 +156,9 @@ class Query:
         return cls(query)
 
     @classmethod
-    def term(cls, term):
+    def term(cls, name, value):
         ''' Term Query '''
-        query = {"term": term}
+        query = {"term": {name: value}}
         return cls(query)
 
     @classmethod
@@ -208,9 +212,18 @@ class BoolQuery(Query):
     def should(self, should_arr):
         self._update("should", should_arr)
 
-    def _update(self, name, arr):
-        if not isinstance(arr, list):
-            arr = [arr]
+    def _update(self, name, qarr):
+        if not isinstance(qarr, list):
+            qarr = [qarr]
+
+        for q in qarr:
+            if not isinstance(q, Query):
+                raise QueryError("not a Query")
+
+        arr = []
+        for e in qarr:
+            arr.append(e.query)
+
         if name in self.query["bool"]:
             self.query["bool"][name].extend(arr)
         else:
