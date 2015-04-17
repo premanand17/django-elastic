@@ -143,29 +143,33 @@ class ElasticQuery:
 
 
 class Query:
-
+    ''' http://www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-queries.html '''
     def __init__(self, query):
-        ''' Match query '''
         self.query = query
 
     @classmethod
     def match_all(cls):
-        ''' Match All Query '''
+        ''' Factory method for Match All Query '''
         return cls({"match_all": {}})
 
     @classmethod
     def term(cls, name, value):
-        ''' Term Query '''
+        ''' Factory method for Term Query '''
         return cls({"term": {name: value}})
 
     @classmethod
+    def terms(cls, name, arr, minimum_should_match=1):
+        ''' Factory method for Terms Query '''
+        return cls({"terms": {name: arr, "minimum_should_match": minimum_should_match}})
+
+    @classmethod
     def match(cls, match_id, match_str):
-        ''' Basic match query '''
+        ''' Factory method for Basic match query '''
         return cls({"match": {match_id: match_str}})
 
     @classmethod
     def string(cls, query_term, fields=None):
-        ''' String query using a query parser in order to parse its content.
+        ''' Factory method for String Query.
         Simple wildcards can be used with the fields supplied
         (e.g. "fields" : ["city.*"].) '''
         query = {"query_string": {"query": query_term}}

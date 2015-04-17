@@ -3,7 +3,7 @@ from django.core.management import call_command
 from search.tests.settings_idx import IDX
 import requests
 from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, \
-    RangeQuery, OrFilter, AndFilter
+    RangeQuery, OrFilter, AndFilter, Filter
 from search.elastic_settings import ElasticSettings
 import time
 
@@ -43,7 +43,7 @@ class ElasticModelTest(TestCase):
         mapping = elastic.get_mapping('marker/xx')
         self.assertTrue('error' in mapping, "Database name in mapping result")
 
-    def test_filtered_bool_query(self):
+    def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
         query_bool = BoolQuery()
         query_bool.must([Query.term("id", "rs373328635")])
@@ -72,6 +72,11 @@ class ElasticModelTest(TestCase):
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
 
+    def test_term_filtered_query(self):
+        query = ElasticQuery.filtered(Query.term("seqid", 1), Filter(Query.term("id", "rs373328635")))
+        elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+
     def test_string_query(self):
         ''' Test building and running a string query. '''
         query_term = "rs2476601"
@@ -85,6 +90,18 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery.query_match("id", "rs2476601")
         elastic = Elastic(query)
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
+
+    def test_term_query(self):
+        ''' Test building and running a match query. '''
+        query = ElasticQuery(Query.term("id", "rs2476601"))
+        elastic = Elastic(query)
+        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
+
+    def test_terms_query(self):
+        ''' Test building and running a match query. '''
+        query = ElasticQuery(Query.terms("id", ["rs2476601", "rs373328635"]))
+        elastic = Elastic(query)
+        self.assertTrue(elastic.get_result()['total'] == 2, "Elastic string query retrieved marker (rs2476601)")
 
     def test_bool_query(self):
         query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
