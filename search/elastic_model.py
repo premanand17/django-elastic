@@ -1,6 +1,5 @@
 import json
 import requests
-import re
 import logging
 from search.elastic_settings import ElasticSettings
 from builtins import classmethod
@@ -86,11 +85,9 @@ class Elastic:
         content = []
         if(len(json_response['hits']['hits']) >= 1):
             for hit in json_response['hits']['hits']:
-                self._addInfo(content, hit)
                 hit['_source']['idx_type'] = hit['_type']
                 hit['_source']['idx_id'] = hit['_id']
                 content.append(hit['_source'])
-                # print(hit['_source'])
 
         context["data"] = content
         context["total"] = json_response['hits']['total']
@@ -100,28 +97,13 @@ class Elastic:
             context["size"] = self.size
         return context
 
-    def _addInfo(self, content, hit):
-        ''' Parse VCF INFO field and add to the search hit '''
-        if 'info' not in hit['_source']:
-            return
-        ''' Split and add INFO tags and values '''
-        infos = re.split(';', hit['_source']['info'])
-        for info in infos:
-            if "=" in info:
-                parts = re.split('=', info)
-                if parts[0] not in hit['_source']:
-                    hit['_source'][parts[0]] = parts[1]
-            else:
-                if info not in hit['_source']:
-                    hit['_source'][info] = ""
-
 
 class ElasticQuery:
     ''' Utility to assist in constructing Elastic queries. '''
 
     def __init__(self, query, sources=None):
         ''' Query the elastic server for given search query '''
-        self.query = {"query": query}
+        self.query = {"query": query.query}
         if sources is not None:
             self.query["_source"] = sources
 
@@ -130,7 +112,7 @@ class ElasticQuery:
         ''' Bool Query '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
-        return cls(query_bool.query)
+        return cls(query_bool)
 
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None):
@@ -143,22 +125,17 @@ class ElasticQuery:
     def filtered(cls, query_match, query_filter, sources=None):
         ''' Builds a filtered query. '''
         query = FilteredQuery(query_match, query_filter)
-        return cls(query.query, sources)
+        return cls(query, sources)
 
     @classmethod
     def query_string(cls, query_term, fields=None, sources=None):
-        ''' String query using a query parser in order to parse its content.
-        Simple wildcards can be used with the fields supplied
-        (e.g. "fields" : ["city.*"].) '''
-        query = {"query_string": {"query": query_term}}
-        if fields is not None:
-            query["query_string"]["fields"] = fields
+        query = Query.query_string(query_term, fields, sources)
         return cls(query, sources)
 
     @classmethod
     def query_match(cls, match_id, match_str):
         ''' Basic match query '''
-        query = {"match": {match_id: match_str}}
+        query = Query.query_match(match_id, match_str)
         return cls(query)
 
 
@@ -179,6 +156,22 @@ class Query:
         ''' Term Query '''
         query = {"term": term}
         return cls(query)
+
+    @classmethod
+    def query_match(cls, match_id, match_str):
+        ''' Basic match query '''
+        query = {"match": {match_id: match_str}}
+        return cls(query)
+
+    @classmethod
+    def query_string(cls, query_term, fields=None, sources=None):
+        ''' String query using a query parser in order to parse its content.
+        Simple wildcards can be used with the fields supplied
+        (e.g. "fields" : ["city.*"].) '''
+        query = {"query_string": {"query": query_term}}
+        if fields is not None:
+            query["query_string"]["fields"] = fields
+        return cls(query, sources)
 
 
 class FilteredQuery(Query):
