@@ -12,6 +12,7 @@ from search.elastic_settings import ElasticSettings
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
+    time.sleep(1)
 
 
 @override_settings(SEARCH={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
@@ -42,7 +43,6 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP search '''
-        time.sleep(1)
         resp = self.client.get('/search/rs2476601/')
         self.assertEqual(resp.status_code, 200)
 #         print(resp.context)
@@ -124,20 +124,20 @@ class ElasticViewsTest(TestCase):
 #         self.assertTrue('data' in resp.context)
 #         region = resp.context['data'][0]
 #         self._RegionTest(region)
-
-    def test_region_wildcard(self):
-        ''' Test a wild card search '''
-        resp = self.client.get('/search/22q12*/')
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue('data' in resp.context)
-
-        for region in resp.context['data']:
-            self._RegionTest(region)
-
-    def _RegionTest(self, region):
-        ''' Test the elements of a Region result '''
-        self.assertTrue(region['seqid'])
-        self.assertTrue(region['type'])
-        self.assertTrue(region['source'])
-        self.assertTrue(region['start'])
-        self.assertTrue(region['end'])
+#
+#     def test_region_wildcard(self):
+#         ''' Test a wild card search '''
+#         resp = self.client.get('/search/22q12*/')
+#         self.assertEqual(resp.status_code, 200)
+#         self.assertTrue('data' in resp.context)
+#
+#         for region in resp.context['data']:
+#             self._RegionTest(region)
+#
+#     def _RegionTest(self, region):
+#         ''' Test the elements of a Region result '''
+#         self.assertTrue(region['seqid'])
+#         self.assertTrue(region['type'])
+#         self.assertTrue(region['source'])
+#         self.assertTrue(region['start'])
+#         self.assertTrue(region['end'])
