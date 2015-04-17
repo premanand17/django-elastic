@@ -56,7 +56,7 @@ class Loader:
             logger.error('ERROR: '+idx_name+' load status: '+str(resp.status_code)+' '+str(resp.content))
 
         # report errors found during loading
-        if resp.json()['errors']:
+        if 'errors' in resp.json() and resp.json()['errors']:
             logger.error("ERROR: bulk load error found")
             for item in resp.json()['items']:
                 for key in item.keys():
