@@ -1,7 +1,7 @@
 import re
 import requests
 import json
-from search.management.loaders.Loader import Loader
+from search.management.loaders.loader import Loader
 from search.elastic_model import ElasticSettings
 import logging
 
