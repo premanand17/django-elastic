@@ -1,7 +1,7 @@
 import re
 from search.elastic_model import Elastic
-from search.management.loaders.Loader import Loader
-from search.management.loaders.Utils import GFF
+from search.management.loaders.loader import Loader
+from search.management.loaders.utils import GFF
 import sys
 import json
 import logging

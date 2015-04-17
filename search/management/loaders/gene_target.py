@@ -1,4 +1,4 @@
-from search.management.loaders.Loader import DelimeterLoader
+from search.management.loaders.loader import DelimeterLoader
 
 
 class GeneTargetManager(DelimeterLoader):

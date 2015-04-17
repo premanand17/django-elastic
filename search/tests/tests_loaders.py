@@ -3,7 +3,7 @@ from django.core.management import call_command
 from search.tests.settings_idx import IDX, IDX_UPDATE
 import requests
 import time
-from search.management.loaders.Utils import GFF, GFFError
+from search.management.loaders.utils import GFF, GFFError
 from search.elastic_settings import ElasticSettings
 
 
