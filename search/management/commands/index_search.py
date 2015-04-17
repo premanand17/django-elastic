@@ -7,6 +7,8 @@ from search.management.loaders.Gene import GeneManager
 from search.management.loaders.Disease import DiseaseManager
 from search.management.loaders.GeneTarget import GeneTargetManager
 from search.management.loaders.GFF import GFFManager
+from search.management.loaders.Alias import AliasManager
+from search.management.loaders.Criteria import CriteriaManager
 
 
 # Get an instance of a logger
@@ -28,7 +30,11 @@ class Command(BaseCommand):
            "Options for diseases:\n" \
            " --indexName [index name] --indexDisease disease.list\n" \
            "Options for GFF/GTF:\n" \
-           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]"
+           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]" \
+           "Options for Alias:\n" \
+           " --indexName [index name] --indexType gene --indexAlias gene_alias.tsv" \
+           "Options for Criteria:\n" \
+           " --indexName [index name] --indexType gene --indexCriteria"
 
     option_list = BaseCommand.option_list + (
         make_option('--indexSNP',
@@ -92,6 +98,14 @@ class Command(BaseCommand):
         make_option('--indexType',
                     dest='indexType',
                     help='Index type'),
+        ) + (
+        make_option('--indexAlias',
+                    dest='indexAlias',
+                    help='Load aliases'),
+        ) + (
+        make_option('--indexCriteria',
+                    dest='indexCriteria',
+                    help='Create and Load Criterias'),
         )
 
     def handle(self, *args, **options):
@@ -125,5 +139,14 @@ class Command(BaseCommand):
         elif options['indexGFF']:
             gff = GFFManager()
             gff.create_load_gff_index(**options)
+
+        elif options['indexAlias']:
+            alias = AliasManager()
+            alias.create_alias(**options)
+
+        elif options['indexCriteria']:
+            criteria = CriteriaManager()
+            criteria.create_criteria(**options)
+
         else:
             print(help)
