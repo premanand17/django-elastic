@@ -300,6 +300,14 @@ class AndFilter(Filter):
         Filter.extend(self, "and", arr)
 
 
+class NotFilter(Filter):
+    def __init__(self, query):
+        ''' And Filter based on the Query object(s) passed in the constructor '''
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
+        self.filter = {"filter": {"not": query.query}}
+
+
 class QueryError(Exception):
     ''' Query error  '''
     def __init__(self, value):

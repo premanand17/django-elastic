@@ -3,7 +3,7 @@ from django.core.management import call_command
 from search.tests.settings_idx import IDX
 import requests
 from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, \
-    RangeQuery, OrFilter, AndFilter, Filter
+    RangeQuery, OrFilter, AndFilter, Filter, NotFilter
 from search.elastic_settings import ElasticSettings
 import time
 
@@ -69,6 +69,13 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery(must_arr=[RangeQuery("start", gte=1)])
         and_filter = AndFilter(query_bool)
         query = ElasticQuery.filtered(Query.term("seqid", 1), and_filter)
+        elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_not_filtered_query(self):
+        ''' Test building and running a filtered query. '''
+        not_filter = NotFilter(RangeQuery("start", lte=10000))
+        query = ElasticQuery.filtered(Query.term("seqid", 1), not_filter)
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
 
