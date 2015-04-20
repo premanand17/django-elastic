@@ -1,7 +1,7 @@
 import json
 import requests
 import logging
-from search.elastic_settings import ElasticSettings
+from elastic.elastic_settings import ElasticSettings
 from builtins import classmethod
 
 # Get an instance of a logger
@@ -12,7 +12,7 @@ class Elastic:
     ''' Used to run Elastic searches and return results or mappings. '''
 
     def __init__(self, build_query=None, search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
-        ''' Query the elastic server for given search query '''
+        ''' Query the elastic server for given elastic query '''
         self.url = (ElasticSettings.url() + '/' + db + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
         if build_query is not None:
@@ -38,7 +38,7 @@ class Elastic:
     @classmethod
     def field_search_query(cls, query_term, fields=None,
                            search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
-        ''' Constructs a field search query '''
+        ''' Constructs a field elastic query '''
         query = ElasticQuery.query_string(query_term, fields)
         return cls(query, search_from, size, db)
 
@@ -102,7 +102,7 @@ class ElasticQuery:
     ''' Utility to assist in constructing Elastic queries. '''
 
     def __init__(self, query, sources=None):
-        ''' Query the elastic server for given search query. '''
+        ''' Query the elastic server for given elastic query. '''
         if not isinstance(query, Query):
             raise QueryError("not a Query")
         self.query = {"query": query.query}

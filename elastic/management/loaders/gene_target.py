@@ -1,4 +1,4 @@
-from search.management.loaders.loader import DelimeterLoader
+from elastic.management.loaders.loader import DelimeterLoader
 
 
 class GeneTargetManager(DelimeterLoader):

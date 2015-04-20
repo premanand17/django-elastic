@@ -1,10 +1,10 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from search.tests.settings_idx import IDX
+from elastic.tests.settings_idx import IDX
 import requests
-from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, \
+from elastic.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, \
     RangeQuery, OrFilter, AndFilter, Filter, NotFilter
-from search.elastic_settings import ElasticSettings
+from elastic.elastic_settings import ElasticSettings
 import time
 
 
