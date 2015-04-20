@@ -23,4 +23,4 @@ class MarkerManager(DelimeterLoader):
         props.add_property("start", "integer", index="not_analyzed")
         props.add_property("info", "string", index="no")
 
-        self.mapping(props.mapping_properties, 'marker', **options)
+        self.mapping(props, 'marker', **options)

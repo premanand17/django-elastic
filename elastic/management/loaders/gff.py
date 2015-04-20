@@ -1,4 +1,4 @@
-from elastic.management.loaders.loader import DelimeterLoader
+from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
 
 
 class GFFManager(DelimeterLoader):
@@ -14,21 +14,19 @@ class GFFManager(DelimeterLoader):
 
     def _create_gff_mapping(self, **options):
         ''' Create the mapping for gff index '''
-        index_type = self._get_index_type(**options)
-        props = {"properties":
-                 {"seqid": {"type": "string"},
-                  "source": {"type": "string"},
-                  "type": {"type": "string", "index": "not_analyzed"},
-                  "start": {"type": "integer", "index": "not_analyzed"},
-                  "end": {"type": "integer", "index": "not_analyzed"},
-                  "score": {"type": "string", "index": "no"},
-                  "strand": {"type": "string", "index": "no"},
-                  "phase": {"type": "string", "index": "no"},
-                  "attr": {"type": "object"}
-                  }
-                 }
-        mapping_json = {index_type: props}
-        self.mapping(mapping_json, index_type, **options)
+        idx_type = self._get_index_type(**options)
+        props = MappingProperties(idx_type)
+        props.add_property("seqid", "string")
+        props.add_property("source", "string")
+        props.add_property("type", "string", index="not_analyzed")
+        props.add_property("start", "integer", index="not_analyzed")
+        props.add_property("end", "integer", index="not_analyzed")
+        props.add_property("score", "string", index="no")
+        props.add_property("strand", "string", index="no")
+        props.add_property("phase", "string", index="no")
+        props.add_property("attr", "object")
+
+        self.mapping(props, idx_type, **options)
 
     def _get_index_type(self, **options):
         if options['indexType']:
