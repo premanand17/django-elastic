@@ -7,23 +7,23 @@ import json
 from elastic.elastic_settings import ElasticSettings
 
 
-@override_settings(SEARCH={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     time.sleep(1)
 
 
-@override_settings(SEARCH={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
 
 
-@override_settings(SEARCH={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 class ElasticViewsTest(TestCase):
 
     def test_server(self):
