@@ -1,30 +1,30 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from search.tests.settings_idx import IDX
+from elastic.tests.settings_idx import IDX
 import requests
-from search.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, Filter,\
-    RangeQuery
-from search.elastic_settings import ElasticSettings
+from elastic.elastic_model import Elastic, BoolQuery, Query, ElasticQuery, \
+    RangeQuery, OrFilter, AndFilter, Filter, NotFilter
+from elastic.elastic_settings import ElasticSettings
 import time
 
 
-@override_settings(SEARCH={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     time.sleep(2)
 
 
-@override_settings(SEARCH={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
 
 
-@override_settings(SEARCH={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 class ElasticModelTest(TestCase):
 
     def test_mapping(self):
@@ -43,7 +43,7 @@ class ElasticModelTest(TestCase):
         mapping = elastic.get_mapping('marker/xx')
         self.assertTrue('error' in mapping, "Database name in mapping result")
 
-    def test_filtered_bool_query(self):
+    def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
         query_bool = BoolQuery()
         query_bool.must([Query.term("id", "rs373328635")])
@@ -54,15 +54,33 @@ class ElasticModelTest(TestCase):
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
 
-    def test_filtered_query(self):
+    def test_or_filtered_query(self):
         ''' Test building and running a filtered query. '''
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=1),
-                                         RangeQuery("end", gte=1000000)])
-        query_or = Query({"or": RangeQuery("start", gte=1, lte=1000000).query})
-        query_filter = Filter(query_or)
-        query_filter.extend("or", RangeQuery("end", gte=1, lte=100000))
-        query_filter.extend("or", query_bool)
-        query = ElasticQuery.filtered(Query.term("seqid", 1), query_filter)
+                                         RangeQuery("end", gte=100000)])
+        or_filter = OrFilter(RangeQuery("start", gte=1, lte=100000))
+        or_filter.extend(query_bool)
+        query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter)
+        elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_and_filtered_query(self):
+        ''' Test building and running a filtered query. '''
+        query_bool = BoolQuery(must_arr=[RangeQuery("start", gte=1)])
+        and_filter = AndFilter(query_bool)
+        query = ElasticQuery.filtered(Query.term("seqid", 1), and_filter)
+        elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_not_filtered_query(self):
+        ''' Test building and running a filtered query. '''
+        not_filter = NotFilter(RangeQuery("start", lte=10000))
+        query = ElasticQuery.filtered(Query.term("seqid", 1), not_filter)
+        elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_term_filtered_query(self):
+        query = ElasticQuery.filtered(Query.term("seqid", 1), Filter(Query.term("id", "rs373328635")))
         elastic = Elastic(query, db=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
 
@@ -79,6 +97,18 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery.query_match("id", "rs2476601")
         elastic = Elastic(query)
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
+
+    def test_term_query(self):
+        ''' Test building and running a match query. '''
+        query = ElasticQuery(Query.term("id", "rs2476601"))
+        elastic = Elastic(query)
+        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
+
+    def test_terms_query(self):
+        ''' Test building and running a match query. '''
+        query = ElasticQuery(Query.terms("id", ["rs2476601", "rs373328635"]))
+        elastic = Elastic(query)
+        self.assertTrue(elastic.get_result()['total'] == 2, "Elastic string query retrieved marker (rs2476601)")
 
     def test_bool_query(self):
         query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))

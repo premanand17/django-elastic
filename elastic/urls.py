@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from search import views
+from elastic import views
 
 urlpatterns = [
                # range overlap queries @IgnorePep8
@@ -9,7 +9,7 @@ urlpatterns = [
                    views.range_overlap_search, name='filtered_range_search'),
 
                # query string
-               url(r'^(?P<query>[\.\w*]+)/$', views.search, name='search'),
+               url(r'^(?P<query>[\.\w*]+)/$', views.search, name='elastic'),
                url(r'^(?P<query>[\.\w*]+)/db/(?P<search_db>[\w]+)$',
                    views.search, name='filtered_search'),
 

@@ -1,5 +1,5 @@
 import os
-from search.elastic_settings import ElasticSettings
+from elastic.elastic_settings import ElasticSettings
 
 SEARCH_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SEARCH_TEST_DATA_PATH = os.path.join(SEARCH_BASE_DIR, 'tests/data/')

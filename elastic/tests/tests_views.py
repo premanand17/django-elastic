@@ -1,29 +1,29 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from search.tests.settings_idx import IDX
+from elastic.tests.settings_idx import IDX
 import requests
 import time
 import json
-from search.elastic_settings import ElasticSettings
+from elastic.elastic_settings import ElasticSettings
 
 
-@override_settings(SEARCH={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     time.sleep(1)
 
 
-@override_settings(SEARCH={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
 
 
-@override_settings(SEARCH={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 class ElasticViewsTest(TestCase):
 
     def test_server(self):
@@ -42,7 +42,7 @@ class ElasticViewsTest(TestCase):
             self.assertTrue(False, 'request exception')
 
     def test_snp_search(self):
-        ''' Test a single SNP search '''
+        ''' Test a single SNP elastic '''
         resp = self.client.get('/search/rs2476601/')
         self.assertEqual(resp.status_code, 200)
 #         print(resp.context)
@@ -51,7 +51,7 @@ class ElasticViewsTest(TestCase):
         self._SNPtest(snp)
 
     def test_snp_wildcard(self):
-        ''' Test a wild card search '''
+        ''' Test a wild card elastic '''
         resp = self.client.get('/search/rs3*/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
@@ -60,7 +60,7 @@ class ElasticViewsTest(TestCase):
             self._SNPtest(snp)
 
     def test_ajax_search(self):
-        ''' Test the search count '''
+        ''' Test the elastic count '''
         self._check_ajax('/search/rs%2A/db/')
         self._check_ajax('/search/1%3A1-2880054/db/')
 
@@ -118,16 +118,16 @@ class ElasticViewsTest(TestCase):
 #             self.assertTrue(False, 'request exception')
 #
 #     def test_region_search(self):
-#         ''' Test a single Region search '''
-#         resp = self.client.get('/search/22q12.2/')
+#         ''' Test a single Region elastic '''
+#         resp = self.client.get('/elastic/22q12.2/')
 #         self.assertEqual(resp.status_code, 200)
 #         self.assertTrue('data' in resp.context)
 #         region = resp.context['data'][0]
 #         self._RegionTest(region)
 #
 #     def test_region_wildcard(self):
-#         ''' Test a wild card search '''
-#         resp = self.client.get('/search/22q12*/')
+#         ''' Test a wild card elastic '''
+#         resp = self.client.get('/elastic/22q12*/')
 #         self.assertEqual(resp.status_code, 200)
 #         self.assertTrue('data' in resp.context)
 #
