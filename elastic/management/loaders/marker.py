@@ -20,7 +20,7 @@ class MarkerManager(DelimeterLoader):
         props.add_property("alt", "string", "no")
         props.add_property("qual", "string", "no")
         props.add_property("filter", "string", "no")
-        props.add_property("start", "string", "not_analyzed")
+        props.add_property("start", "integer", "not_analyzed")
         props.add_property("info", "string", "no")
 
         self.mapping(props.mapping_properties, 'marker', **options)
