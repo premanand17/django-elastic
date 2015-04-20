@@ -1,10 +1,10 @@
 from django.test import TestCase
 from django.core.management import call_command
-from search.tests.settings_idx import IDX, IDX_UPDATE
+from elastic.tests.settings_idx import IDX, IDX_UPDATE
 import requests
 import time
-from search.management.loaders.utils import GFF, GFFError
-from search.elastic_settings import ElasticSettings
+from elastic.management.loaders.utils import GFF, GFFError
+from elastic.elastic_settings import ElasticSettings
 
 
 def setUpModule():

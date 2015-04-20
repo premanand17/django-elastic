@@ -1,7 +1,7 @@
 import json
 import requests
 import logging
-from search.elastic_settings import ElasticSettings
+from elastic.elastic_settings import ElasticSettings
 from builtins import classmethod
 
 # Get an instance of a logger
@@ -12,7 +12,7 @@ class Elastic:
     ''' Used to run Elastic searches and return results or mappings. '''
 
     def __init__(self, build_query=None, search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
-        ''' Query the elastic server for given search query '''
+        ''' Query the elastic server for given elastic query '''
         self.url = (ElasticSettings.url() + '/' + db + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
         if build_query is not None:
@@ -29,17 +29,16 @@ class Elastic:
         ''' Constructs a range overlap query '''
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range),
                                          RangeQuery("end", gte=end_range)])
-        query_or = Query({"or": RangeQuery("start", gte=start_range, lte=end_range).query})
-        query_filter = Filter(query_or)
-        query_filter.extend("or", RangeQuery("end", gte=start_range, lte=end_range))
-        query_filter.extend("or", query_bool)
-        query = ElasticQuery.filtered(Query.term("seqid", seqid), query_filter, field_list)
+        or_filter = OrFilter(RangeQuery("start", gte=start_range, lte=end_range))
+        or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range))
+        or_filter.extend(query_bool)
+        query = ElasticQuery.filtered(Query.term("seqid", seqid), or_filter, field_list)
         return cls(query, search_from, size, db)
 
     @classmethod
     def field_search_query(cls, query_term, fields=None,
                            search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
-        ''' Constructs a field search query '''
+        ''' Constructs a field elastic query '''
         query = ElasticQuery.query_string(query_term, fields)
         return cls(query, search_from, size, db)
 
@@ -103,7 +102,7 @@ class ElasticQuery:
     ''' Utility to assist in constructing Elastic queries. '''
 
     def __init__(self, query, sources=None):
-        ''' Query the elastic server for given search query. '''
+        ''' Query the elastic server for given elastic query. '''
         if not isinstance(query, Query):
             raise QueryError("not a Query")
         self.query = {"query": query.query}
@@ -133,49 +132,63 @@ class ElasticQuery:
     @classmethod
     def query_string(cls, query_term, fields=None, sources=None):
         ''' Factory method for creating elastic Query String Query '''
-        query = Query.query_string(query_term, fields)
+        query = Query.string(query_term, fields)
         return cls(query, sources)
 
     @classmethod
     def query_match(cls, match_id, match_str, sources=None):
         ''' Factory method for creating elastic Match Query. '''
-        query = Query.query_match(match_id, match_str)
+        query = Query.match(match_id, match_str)
         return cls(query, sources)
 
 
 class Query:
-
+    ''' http://www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-queries.html '''
     def __init__(self, query):
-        ''' Match query '''
         self.query = query
 
     @classmethod
     def match_all(cls):
-        ''' Match All Query '''
-        query = {"match_all": {}}
-        return cls(query)
+        ''' Factory method for Match All Query '''
+        return cls({"match_all": {}})
 
     @classmethod
     def term(cls, name, value):
-        ''' Term Query '''
-        query = {"term": {name: value}}
-        return cls(query)
+        ''' Factory method for Term Query '''
+        return cls({"term": {name: value}})
 
     @classmethod
-    def query_match(cls, match_id, match_str):
-        ''' Basic match query '''
-        query = {"match": {match_id: match_str}}
-        return cls(query)
+    def terms(cls, name, arr, minimum_should_match=1):
+        ''' Factory method for Terms Query '''
+        return cls({"terms": {name: arr, "minimum_should_match": minimum_should_match}})
 
     @classmethod
-    def query_string(cls, query_term, fields=None):
-        ''' String query using a query parser in order to parse its content.
+    def match(cls, match_id, match_str):
+        ''' Factory method for Basic match query '''
+        return cls({"match": {match_id: match_str}})
+
+    @classmethod
+    def string(cls, query_term, fields=None):
+        ''' Factory method for String Query.
         Simple wildcards can be used with the fields supplied
         (e.g. "fields" : ["city.*"].) '''
         query = {"query_string": {"query": query_term}}
         if fields is not None:
             query["query_string"]["fields"] = fields
         return cls(query)
+
+    @classmethod
+    def is_array_query(cls, arr):
+        for e in arr:
+            if not isinstance(e, Query):
+                raise QueryError("not a Query")
+        return True
+
+    @classmethod
+    def query_to_str_array(cls, arr):
+        query_arr = []
+        [query_arr.append(q.query) for q in arr]
+        return query_arr
 
 
 class FilteredQuery(Query):
@@ -216,13 +229,8 @@ class BoolQuery(Query):
         if not isinstance(qarr, list):
             qarr = [qarr]
 
-        for q in qarr:
-            if not isinstance(q, Query):
-                raise QueryError("not a Query")
-
-        arr = []
-        [arr.append(q.query) for q in qarr]
-
+        Query.is_array_query(qarr)
+        arr = Query.query_to_str_array(qarr)
         if name in self.query["bool"]:
             self.query["bool"][name].extend(arr)
         else:
@@ -253,25 +261,51 @@ class Filter:
             raise QueryError("not a Query")
         self.filter = {"filter": query.query}
 
-    def filter(self, qfilter):
-        return self.filter
-
     def extend(self, filter_name, arr):
-        if not isinstance(arr, Query):
-            raise QueryError("not a Query")
-
         if not isinstance(arr, list):
             arr = [arr]
-
-        filter_arr = []
-        [filter_arr.append(q.query) for q in arr]
-
+        Query.is_array_query(arr)
+        filter_arr = Query.query_to_str_array(arr)
         if filter_name in self.filter["filter"]:
             if not isinstance(self.filter["filter"][filter_name], list):
                 self.filter["filter"][filter_name] = [self.filter["filter"][filter_name]]
             self.filter["filter"][filter_name].extend(filter_arr)
         else:
             self.filter["filter"][filter_name] = filter_arr
+
+
+class OrFilter(Filter):
+    def __init__(self, querys):
+        ''' Or Filter based on the Query object(s) passed in the constructor '''
+        if isinstance(querys, Query):
+            querys = [querys]
+        Query.is_array_query(querys)
+        arr = Query.query_to_str_array(querys)
+        self.filter = {"filter": {"or": arr}}
+
+    def extend(self, arr):
+        Filter.extend(self, "or", arr)
+
+
+class AndFilter(Filter):
+    def __init__(self, querys):
+        ''' And Filter based on the Query object(s) passed in the constructor '''
+        if isinstance(querys, Query):
+            querys = [querys]
+        Query.is_array_query(querys)
+        arr = Query.query_to_str_array(querys)
+        self.filter = {"filter": {"and": arr}}
+
+    def extend(self, arr):
+        Filter.extend(self, "and", arr)
+
+
+class NotFilter(Filter):
+    def __init__(self, query):
+        ''' And Filter based on the Query object(s) passed in the constructor '''
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
+        self.filter = {"filter": {"not": query.query}}
 
 
 class QueryError(Exception):

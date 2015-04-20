@@ -1,8 +1,8 @@
 import re
 import requests
 import json
-from search.management.loaders.loader import Loader
-from search.elastic_model import ElasticSettings
+from elastic.management.loaders.loader import Loader
+from elastic.elastic_model import ElasticSettings
 import logging
 
 # Get an instance of a logger

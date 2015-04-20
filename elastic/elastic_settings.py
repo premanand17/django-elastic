@@ -2,11 +2,11 @@ from django.conf import settings
 
 
 class ElasticSettings:
-    ''' Manage settings for the Elastic search app '''
+    ''' Manage settings for the Elastic elastic app '''
 
     @classmethod
     def attrs(cls, cluster='default'):
-        ''' Return list of attributes for a search cluster '''
+        ''' Return list of attributes for a elastic cluster '''
         return getattr(settings, 'SEARCH').get(cluster, None)
 
     @classmethod

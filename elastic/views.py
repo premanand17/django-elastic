@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http.response import JsonResponse
-from search.elastic_model import Elastic
-from search.elastic_settings import ElasticSettings
+from elastic.elastic_model import Elastic
+from elastic.elastic_settings import ElasticSettings
 import logging
 
 # Get an instance of a logger
@@ -12,20 +12,20 @@ fields = ["gene_symbol", "hgnc", "synonyms", "id",
 
 
 def search(request, query, search_db=ElasticSettings.indices_str()):
-    ''' Renders a search results page based on the query '''
+    ''' Renders a elastic results page based on the query '''
     elastic = Elastic.field_search_query(query, fields, 0, 20, db=search_db)
-    return render(request, 'search/searchresults.html', elastic.get_result(),
+    return render(request, 'elastic/searchresults.html', elastic.get_result(),
                   content_type='text/html')
 
 
 def range_overlap_search(request, src, start, stop, search_db=ElasticSettings.indices_str()):
-    ''' Renders a search result page based on the src, start and stop '''
+    ''' Renders a elastic result page based on the src, start and stop '''
     elastic = Elastic.range_overlap_query(src, start, stop, db=search_db)
     context = elastic.get_result()
     context["chromosome"] = src
     context["start"] = start
     context["stop"] = stop
-    return render(request, 'search/searchresults.html', context,
+    return render(request, 'elastic/searchresults.html', context,
                   content_type='text/html')
 
 
@@ -33,7 +33,7 @@ def range_overlap_search(request, src, start, stop, search_db=ElasticSettings.in
 
 
 def ajax_search(request, query, search_db, ajax):
-    ''' Return count or paginated search result as a JSON '''
+    ''' Return count or paginated elastic result as a JSON '''
     if ajax == 'count':
         elastic = Elastic.field_search_query(query, fields, db=search_db)
         return JsonResponse(elastic.get_count())
@@ -44,7 +44,7 @@ def ajax_search(request, query, search_db, ajax):
 
 
 def ajax_range_overlap_search(request, src, start, stop, search_db, ajax):
-    ''' Return count or paginated range search result as a JSON '''
+    ''' Return count or paginated range elastic result as a JSON '''
     if ajax == 'count':
         elastic = Elastic.range_overlap_query(src, start, stop, db=search_db)
         return JsonResponse(elastic.get_count())

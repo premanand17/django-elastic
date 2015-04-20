@@ -8,7 +8,7 @@ Quick start
 -----------
 
 1. Installation
-pip install -e git://github.com/D-I-L/django-search.git#egg=search
+pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 
 2. Add "search" to your INSTALLED_APPS setting like this::
 
@@ -33,4 +33,4 @@ SEARCH = {
 
 4. Include the search URLconf in your project urls.py like this::
 
-  url(r'^search/', include('search.urls', namespace="search")),
+  url(r'^search/', include('elastic.urls', namespace="elastic")),

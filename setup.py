@@ -9,13 +9,13 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
-    name='search',
+    name='elastic',
     version='0.1a1',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    url='http://github.com/D-I-L/django-search',
-    description='A Django app to run and view Elastic search queries.',
+    url='http://github.com/D-I-L/django-elastic',
+    description='A Django app to run and view Elastic elastic queries.',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
     install_requires=["requests>=2.6.0", "Django>=1.8"],
     classifiers=[
