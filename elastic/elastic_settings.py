@@ -7,7 +7,7 @@ class ElasticSettings:
     @classmethod
     def attrs(cls, cluster='default'):
         ''' Return list of attributes for a elastic cluster '''
-        return getattr(settings, 'SEARCH').get(cluster, None)
+        return getattr(settings, 'ELASTIC').get(cluster, None)
 
     @classmethod
     def getattr(cls, name, cluster='default'):

@@ -8,23 +8,23 @@ from elastic.elastic_settings import ElasticSettings
 import time
 
 
-@override_settings(SEARCH={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     time.sleep(2)
 
 
-@override_settings(SEARCH={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
 
 
-@override_settings(SEARCH={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                       'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+                                        'ELASTIC_URL': ElasticSettings.url()}})
 class ElasticModelTest(TestCase):
 
     def test_mapping(self):
