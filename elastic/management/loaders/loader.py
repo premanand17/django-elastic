@@ -90,6 +90,18 @@ class Loader:
         return False
 
 
+class MappingProperties():
+
+    def __init__(self, idx_type):
+        self.idx_type = idx_type
+        self.mapping_properties = {self.idx_type: {"properties": {}}}
+
+    def add_property(self, name, map_type, index=None):
+        self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
+        if index is not None:
+            self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
+
+
 class DelimeterLoader(Loader):
 
     def load(self, column_names, file_handle, idx_name, idx_type='tab', delim='\t',

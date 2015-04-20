@@ -1,4 +1,4 @@
-from elastic.management.loaders.loader import DelimeterLoader
+from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
 
 
 class MarkerManager(DelimeterLoader):
@@ -13,16 +13,14 @@ class MarkerManager(DelimeterLoader):
 
     def _create_snp_mapping(self, **options):
         ''' Create the mapping for snp index '''
-        props = {"properties":
-                 {"id": {"type": "string", "index": "not_analyzed"},
-                  "seqid": {"type": "string", "index": "not_analyzed"},
-                  "ref": {"type": "string", "index": "no"},
-                  "alt": {"type": "string", "index": "no"},
-                  "qual": {"type": "string", "index": "no"},
-                  "filter": {"type": "string", "index": "no"},
-                  "start": {"type": "integer", "index": "not_analyzed"},
-                  "info": {"type": "string", "index": "no"}
-                  }
-                 }
-        mapping_json = {"marker": props}
-        self.mapping(mapping_json, 'marker', **options)
+        props = MappingProperties('marker')
+        props.add_property("id", "string", "not_analyzed")
+        props.add_property("seqid", "string", "not_analyzed")
+        props.add_property("ref", "string", "no")
+        props.add_property("alt", "string", "no")
+        props.add_property("qual", "string", "no")
+        props.add_property("filter", "string", "no")
+        props.add_property("start", "string", "not_analyzed")
+        props.add_property("info", "string", "no")
+
+        self.mapping(props.mapping_properties, 'marker', **options)
