@@ -14,13 +14,13 @@ class MarkerManager(DelimeterLoader):
     def _create_snp_mapping(self, **options):
         ''' Create the mapping for snp index '''
         props = MappingProperties('marker')
-        props.add_property("id", "string", "not_analyzed")
-        props.add_property("seqid", "string", "not_analyzed")
-        props.add_property("ref", "string", "no")
-        props.add_property("alt", "string", "no")
-        props.add_property("qual", "string", "no")
-        props.add_property("filter", "string", "no")
-        props.add_property("start", "integer", "not_analyzed")
-        props.add_property("info", "string", "no")
+        props.add_property("id", "string", index="not_analyzed")
+        props.add_property("seqid", "string", index="not_analyzed")
+        props.add_property("ref", "string", index="no")
+        props.add_property("alt", "string", index="no")
+        props.add_property("qual", "string", index="no")
+        props.add_property("filter", "string", index="no")
+        props.add_property("start", "integer", index="not_analyzed")
+        props.add_property("info", "string", index="no")
 
         self.mapping(props.mapping_properties, 'marker', **options)

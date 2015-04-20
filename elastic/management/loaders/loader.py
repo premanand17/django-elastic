@@ -96,10 +96,17 @@ class MappingProperties():
         self.idx_type = idx_type
         self.mapping_properties = {self.idx_type: {"properties": {}}}
 
-    def add_property(self, name, map_type, index=None):
+    def add_property(self, name, map_type, index=None, analyzer=None):
         self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
         if index is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
+        if analyzer is not None:
+            self.mapping_properties[self.idx_type]["properties"][name].update({"analyzer": analyzer})
+
+    def add_properties(self, mapping_properties):
+        if not isinstance(mapping_properties, MappingProperties):
+            raise LoaderError("not a MappingProperties")
+        self.mapping_properties[self.idx_type]["properties"].update(mapping_properties.mapping_properties)
 
 
 class DelimeterLoader(Loader):
@@ -202,3 +209,12 @@ class JSONLoader(Loader):
                     json_data = ''
         finally:
             self.bulk_load(idx_name, idx_type, json_data)
+
+
+class LoaderError(Exception):
+    ''' Query error  '''
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
