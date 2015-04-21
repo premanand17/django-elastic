@@ -5,6 +5,7 @@ import requests
 import time
 from elastic.management.loaders.utils import GFF, GFFError
 from elastic.elastic_settings import ElasticSettings
+from elastic.management.snapshot import Snapshot
 
 
 def setUpModule():
@@ -20,6 +21,30 @@ def tearDownModule():
     ''' Remove loaded test indices '''
     for key in IDX:
         requests.delete(ElasticSettings.url() + '/' + IDX[key]['indexName'])
+
+
+class SnapshotTest(TestCase):
+
+    def test_show(self, snapshot=None):
+        call_command('show_snapshot')
+
+    def test_create_delete_repository(self):
+        repos = 'test_backup'
+        self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' not yet created')
+        call_command('repository', repos, dir="/gdxbase/elasticsearch/snapshot/test_snapshot/")
+        self.assertTrue(Snapshot.exists(repos, ''), 'Repository '+repos+' created')
+        call_command('repository', repos, delete=True)
+        self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' deleted')
+
+    def test_create_delete(self):
+        snapshot = 'test_'+ElasticSettings.getattr('TEST')
+        call_command('snapshot', snapshot,
+                     indices=IDX['MARKER']['indexName'])
+        self.assertTrue(Snapshot.exists(ElasticSettings.getattr('SNAPSHOT_REPOSITOTY'), snapshot),
+                        "Created snapshot "+snapshot)
+        call_command('snapshot', snapshot, delete=True)
+        self.assertFalse(Snapshot.exists(ElasticSettings.getattr('SNAPSHOT_REPOSITOTY'), snapshot),
+                         "Deleted snapshot "+snapshot)
 
 
 class ElasticLoadersTest(TestCase):
