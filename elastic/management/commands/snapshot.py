@@ -6,7 +6,7 @@ from elastic.elastic_settings import ElasticSettings
 class Command(BaseCommand):
     help = "Create or delete a snapshot. For example: " \
            "./manage.py snapshot SNAPSHOT [--indices idx1,idx2]"
-    help += " [--repo " + ElasticSettings.getattr('SNAPSHOT_REPOSITOTY') + "]"
+    help += " [--repo " + ElasticSettings.getattr('REPOSITORY') + "]"
     help += " [--delete]"
 
     def add_arguments(self, parser):
@@ -19,7 +19,7 @@ class Command(BaseCommand):
                             help='Indices (comma separated) to create a snapshot for.')
         parser.add_argument('--repo',
                             dest='repo',
-                            default=ElasticSettings.getattr('SNAPSHOT_REPOSITOTY'),
+                            default=ElasticSettings.getattr('REPOSITORY'),
                             help='Repository name')
         parser.add_argument('--delete',
                             dest='delete',

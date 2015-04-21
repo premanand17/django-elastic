@@ -6,7 +6,7 @@ from elastic.elastic_settings import ElasticSettings
 class Command(BaseCommand):
     help = "Restore a snapshot. For example: " \
            "./manage.py restore_snapshot SNAPSHOT [--url Elastic URL, e.g http://localhost:9200]"
-    help += " [--repo " + ElasticSettings.getattr('SNAPSHOT_REPOSITOTY') + "]"
+    help += " [--repo " + ElasticSettings.getattr('REPOSITORY') + "]"
 
     def add_arguments(self, parser):
         parser.add_argument('snapshot',
@@ -18,7 +18,7 @@ class Command(BaseCommand):
                             help='Elastic URL to restore to.')
         parser.add_argument('--repo',
                             dest='repo',
-                            default=ElasticSettings.getattr('SNAPSHOT_REPOSITOTY'),
+                            default=ElasticSettings.getattr('REPOSITORY'),
                             help='Repository name')
 
     def handle(self, *args, **options):

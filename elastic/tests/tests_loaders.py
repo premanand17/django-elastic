@@ -31,7 +31,7 @@ class SnapshotTest(TestCase):
     def test_create_delete_repository(self):
         repos = 'test_backup'
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' not yet created')
-        call_command('repository', repos, dir="/gdxbase/elasticsearch/snapshot/test_snapshot/")
+        call_command('repository', repos, dir="/tmp/test_snapshot/")
         self.assertTrue(Snapshot.exists(repos, ''), 'Repository '+repos+' created')
         call_command('repository', repos, delete=True)
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' deleted')
@@ -40,10 +40,10 @@ class SnapshotTest(TestCase):
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
         call_command('snapshot', snapshot,
                      indices=IDX['MARKER']['indexName'])
-        self.assertTrue(Snapshot.exists(ElasticSettings.getattr('SNAPSHOT_REPOSITOTY'), snapshot),
+        self.assertTrue(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
                         "Created snapshot "+snapshot)
         call_command('snapshot', snapshot, delete=True)
-        self.assertFalse(Snapshot.exists(ElasticSettings.getattr('SNAPSHOT_REPOSITOTY'), snapshot),
+        self.assertFalse(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
                          "Deleted snapshot "+snapshot)
 
 
