@@ -26,6 +26,7 @@ class Snapshot():
         ''' Show the information for the named snapshots. '''
         if all_repos:
             repo = ''
+            snapshots = ''
         url = ElasticSettings.url() + '/_snapshot/' + repo + '/' + snapshots
         resp = requests.get(url)
         if resp.status_code != 200:
