@@ -42,7 +42,7 @@ Snapshot and Restore
 
 The `snapshot and restore Elastic module`_ is used by the custom ``django-elastic``
 management commands described below. These can be used in creating and managing
-snapshots of indices. ::
+repositories containing snapshots of indices. ::
 
     ./manage.py show_snapshot --help
     ./manage.py snapshot --help
