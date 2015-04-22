@@ -85,7 +85,8 @@ Restore To Another Elastic Cluster
 To copy a snapshot to an instance of Elastic on the **same network**, use
 the ``url`` flag to point at the other cluster to copy to::
 
-    ./manage.py restore_snapshot snapshot_1 --repo tmp_restore --url http://cluster_url:9200
+    ./manage.py restore_snapshot snapshot_1 --repo tmp_restore \
+                       --url http://cluster_host:9200
 
 A repository can be used to copy indices to another cluster that is on 
 a **different network**. To do this tar and move data to the machine with 
@@ -108,7 +109,8 @@ View the repository and snapshot::
 
 Now use ``restore_snapshot`` to copy the data from the repository::
  
-    ./manage.py restore_snapshot snapshot_1 --repo tmp_restore --url http://localhost:9200
+    ./manage.py restore_snapshot snapshot_1 --repo tmp_restore \
+                       --url http://localhost:9200
 
 The URL parameter can be used to copy to other Elastic instances on
 the network. Now list the available indices to check that they have
