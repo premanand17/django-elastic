@@ -60,7 +60,7 @@ Create/delete repository
 The ``repository`` argument is used in the ``creation`` and ``deletion`` of a
 repository. To create a 'test_backup' repository::
 
-    ./manage.py repository test_backup --dir /path_to_elasticsearch/snapshot/test_snapshot/
+    ./manage.py repository test_backup --dir /path_to_backup/snapshot/test_snapshot/
 
 To delete the 'test_backup' repository::
 
@@ -68,8 +68,9 @@ To delete the 'test_backup' repository::
 
 Create/delete snapshot
 ~~~~~~~~~~~~~~~~~~~~~~
-The ``snapshot`` argument is used is used in the ``creation`` and ``deletion`` of a snapshot.
-To create a 'snapshot_1' snapshot of the index 'disease_region_grch38'::
+The ``snapshot`` argument is used is used in the ``creation`` and
+``deletion`` of a snapshot. To create a 'snapshot_1' snapshot of the
+index 'disease_region_grch38'::
 
     ./manage.py snapshot snapshot_1 --indices disease_region_grch38
 
@@ -79,14 +80,22 @@ To delete the 'snapshot_1' snapshot::
 
 Restoring on another cluster machine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Tar and move data to the machine with the cluster to copy the indices to. Un-tar and ensure 
-the directory has read-write permissions for everyone.::
+To copy a snapshot to an instance of Elastic on the same network, use
+the ``url`` flag to point at the other cluster to copy to.::
+
+    ./manage.py restore_snapshot snapshot_1 --repo tmp_restore --url http://cluster_url:9200
+
+A repository can be used to copy indices to another cluster that is on 
+a different network. To do this tar and move data to the machine with 
+the cluster to copy the indices to. Un-tar and ensure the directory has 
+read-write permissions for everyone.::
 
     tar cvf /tmp/snapshot_test/test_snapshot.tar  test_snapshot/
     chmod a+rwx -R test_snapshot
 
-Change the ``REPOSITORY`` and ``ELASTIC_URL`` settings in Django to point at the correct 
-Elastic cluster. Then create a new repository that points to the snapshot repository::
+Change the ``REPOSITORY`` and ``ELASTIC_URL`` settings in Django to
+point at the correct Elastic cluster. Then create a new repository 
+that points to the snapshot repository::
 
     ./manage.py repository tmp_restore --dir /tmp/snapshot_test/test_snapshot/
 
@@ -99,8 +108,9 @@ Now use restore to copy the data from the repository::
  
     ./manage.py restore_snapshot snapshot_1 --repo tmp_restore --url http://localhost:9200
 
-The URL parameter can be used to copy to other Elastic instances on the network. Now list 
-the available indices to check that they have been created::
+The URL parameter can be used to copy to other Elastic instances on
+the network. Now list the available indices to check that they have
+been created::
 
     curl 'http://localhost:9200/_cat/indices?v'
 
