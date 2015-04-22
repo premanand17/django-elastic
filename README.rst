@@ -40,13 +40,15 @@ pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 Snapshot and Restore
 --------------------
 
-The .. _snapshot and restore module: http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html 
-is used by the custom <strong>django-elastic</strong> management commands described below.
+The `snapshot and restore module`_ is used by the custom ``django-elastic`` 
+management commands described below.
 
     python manage.py show_snapshot --help
     python manage.py snapshot --help
     pyhton manage.py repository --help
     python manage.py restore_snapshot --help
+
+.. _snapshot and restore module: http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html 
 
 Create/delete repository
 ~~~~~~~~~~~~~~~~~~~~~~~~
