@@ -82,14 +82,14 @@ To delete the 'snapshot_1' snapshot::
 Restoring on another cluster machine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To copy a snapshot to an instance of Elastic on the same network, use
-the ``url`` flag to point at the other cluster to copy to.::
+the ``url`` flag to point at the other cluster to copy to::
 
     ./manage.py restore_snapshot snapshot_1 --repo tmp_restore --url http://cluster_url:9200
 
 A repository can be used to copy indices to another cluster that is on 
 a different network. To do this tar and move data to the machine with 
 the cluster to copy the indices to. Un-tar and ensure the directory has 
-read-write permissions for everyone.::
+read-write permissions for everyone::
 
     tar cvf /tmp/snapshot_test/test_snapshot.tar  test_snapshot/
     chmod a+rwx -R test_snapshot
