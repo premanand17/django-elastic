@@ -19,7 +19,7 @@ pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 
 3. Add the settings to the settings.py::
 
-# elastic search engine
+    # elastic search engine
     ELASTIC = {
         'default': {
             'ELASTIC_URL': 'http://127.0.0.1:9200/',
