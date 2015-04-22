@@ -55,7 +55,7 @@ Note that each command takes a ``--repo`` flag and if not provided the
 
 .. _snapshot and restore Elastic module: http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html 
 
-Create/delete repository
+Create/Delete Repository
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``repository`` argument is used in the ``creation`` and ``deletion`` of a
@@ -67,7 +67,7 @@ To delete the 'test_backup' repository::
 
     ./manage.py repository test_backup --delete
 
-Create/delete snapshot
+Create/Delete Snapshot
 ~~~~~~~~~~~~~~~~~~~~~~
 The ``snapshot`` argument is used is used in the ``creation`` and
 ``deletion`` of a snapshot. To create a 'snapshot_1' snapshot of the
@@ -79,8 +79,8 @@ To delete the 'snapshot_1' snapshot::
 
     ./manage.py snapshot snapshot_1 --delete
 
-Restoring on another cluster machine
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Restore To Another Elastic Cluster
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To copy a snapshot to an instance of Elastic on the same network, use
 the ``url`` flag to point at the other cluster to copy to::
 
