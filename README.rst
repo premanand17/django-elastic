@@ -7,7 +7,8 @@ Search is a Django app to run Elastic search queries.
 Quick start
 -----------
 
-1. Installation
+1. Installation::
+
     pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 
 2. Add "search" to your ``INSTALLED_APPS`` in ``settings.py``::
