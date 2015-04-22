@@ -1,7 +1,7 @@
 import re
 import requests
 import json
-from elastic.management.loaders.loader import Loader
+from elastic.management.loaders.loader import Loader, MappingProperties
 from elastic.elastic_model import ElasticSettings
 import logging
 
@@ -38,13 +38,11 @@ class DiseaseManager(Loader):
 
     def _create_disease_mapping(self, **options):
         ''' Create the mapping for disease indexing '''
-        props = {"properties":
-                 {"name": {"type": "string", "boost": 4, "index": "not_analyzed"},
-                  "code": {"type": "string", "index": "not_analyzed"},
-                  "description": {"type": "string", "index": "not_analyzed"},
-                  "colour": {"type": "string", "index": "not_analyzed"},
-                  "tier": {"type": "integer", "index": "not_analyzed"},
-                  }
-                 }
-        mapping_json = {"disease": props}
-        self.mapping(mapping_json, 'disease', **options)
+        props = MappingProperties("disease")
+        props.add_property("name", "string", index="not_analyzed")
+        props.add_property("code", "string", index="not_analyzed")
+        props.add_property("description", "string", index="not_analyzed")
+        props.add_property("colour", "string", index="not_analyzed")
+        props.add_property("tier", "integer", index="not_analyzed")
+
+        self.mapping(props, 'disease', **options)

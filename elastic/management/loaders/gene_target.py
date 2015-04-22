@@ -1,7 +1,11 @@
-from elastic.management.loaders.loader import DelimeterLoader
+from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
 
 
 class GeneTargetManager(DelimeterLoader):
+    tissue_types = ["Monocytes", "Macrophages_M0", "Macrophages_M1", "Macrophages_M2", "Neutrophils",
+                    "Megakaryocytes", "Endothelial_precursors", "Erythroblasts", "Foetal_thymus", "Naive_CD4",
+                    "Total_CD4_MF", "Total_CD4_Activated", "Total_CD4_NonActivated", "Naive_CD8", "Total_CD8",
+                    "Naive_B", "Total_B"]
 
     def create_load_gene_target_index(self, **options):
         ''' Index gene target data '''
@@ -10,70 +14,33 @@ class GeneTargetManager(DelimeterLoader):
         f = self.open_file_to_load('indexGTarget', **options)
         column_names = ["ensg", "name", "biotype", "strand",
                         "baitChr", "baitStart", "baitEnd", "baitID", "baitName",
-                        "oeChr", "oeStart", "oeEnd", "oeID", "oeName", "dist",
-                        "Monocytes", "Macrophages_M0", "Macrophages_M1", "Macrophages_M2", "Neutrophils",
-                        "Megakaryocytes", "Endothelial_precursors", "Erythroblasts", "Foetal_thymus", "Naive_CD4",
-                        "Total_CD4_MF", "Total_CD4_Activated", "Total_CD4_NonActivated", "Naive_CD8", "Total_CD8",
-                        "Naive_B", "Total_B"]
+                        "oeChr", "oeStart", "oeEnd", "oeID", "oeName", "dist"]
+        column_names.extend(GeneTargetManager.tissue_types)
 
         self.load(column_names, f, idx_name, 'gene_target')
 
     def _create_gene_mapping(self, **options):
         ''' Create the mapping for gene target index '''
-        props = {"properties":
-                 {"ensg": {"type": "string", "index": "not_analyzed", "boost": 4},
-                  "name": {"type": "string", "index": "not_analyzed"},
-                  "biotype": {"type": "string", "index": "not_analyzed"},
-                  "strand": {"type": "string", "index": "no"},
-                  "baitChr": {"type": "string", "index": "no"},
-                  "baitStart": {"type": "integer", "index": "not_analyzed"},
-                  "baitEnd": {"type": "integer", "index": "not_analyzed"},
-                  "baitID": {"type": "string", "index": "no"},
-                  "baitName": {"type": "string", "index": "no"},
-                  "oeChr": {"type": "string", "index": "no"},
-                  "oeStart": {"type": "integer", "index": "not_analyzed"},
-                  "oeEnd": {"type": "integer", "index": "not_analyzed"},
-                  "oeID": {"type": "string", "index": "no"},
-                  "oeName": {"type": "string", "index": "no"},
-                  "dist": {"type": "integer", "index": "not_analyzed"},
-                  "Monocytes": {"type": "float"},
-                  "Macrophages_M0": {"type": "float"},
-                  "Macrophages_M1": {"type": "float"},
-                  "Macrophages_M2": {"type": "float"},
-                  "Neutrophils": {"type": "float"},
-                  "Megakaryocytes": {"type": "float"},
-                  "Endothelial_precursors": {"type": "float"},
-                  "Erythroblasts": {"type": "float"},
-                  "Foetal_thymus": {"type": "float"},
-                  "Naive_CD4": {"type": "float"},
-                  "Total_CD4_MF": {"type": "float"},
-                  "Total_CD4_Activated": {"type": "float"},
-                  "Total_CD4_NonActivated": {"type": "float"},
-                  "Naive_CD8": {"type": "float"},
-                  "Total_CD8": {"type": "float"},
-                  "Naive_B": {"type": "float"},
-                  "Total_B": {"type": "float"}
-                  }
-                 }
-        meta = {"Monocytes": "tissue_type",
-                "Macrophages_M0": "tissue_type",
-                "Macrophages_M1": "tissue_type",
-                "Macrophages_M2": "tissue_type",
-                "Neutrophils": "tissue_type",
-                "Megakaryocytes": "tissue_type",
-                "Endothelial_precursors": "tissue_type",
-                "Erythroblasts": "tissue_type",
-                "Foetal_thymus": "tissue_type",
-                "Naive_CD4": "tissue_type",
-                "Total_CD4_MF": "tissue_type",
-                "Total_CD4_Activated": "tissue_type",
-                "Total_CD4_NonActivated": "tissue_type",
-                "Naive_CD8": "tissue_type",
-                "Total_CD8": "tissue_type",
-                "Naive_B": "tissue_type",
-                "Total_B": "tissue_type"
-                }
-        meta = {"tissue_type": meta}
-        # props["_meta"] = meta
-        mapping_json = {"gene_target": props}
-        self.mapping(mapping_json, idx_type='gene_target', meta=meta, **options)
+        props = MappingProperties("gene_target")
+        props.add_property("ensg", "string", index="not_analyzed")
+        props.add_property("name", "string", index="not_analyzed")
+        props.add_property("biotype", "string", index="not_analyzed")
+        props.add_property("strand", "string", index="no")
+        props.add_property("baitChr", "string", index="no")
+        props.add_property("baitStart", "integer", index="not_analyzed")
+        props.add_property("baitEnd", "integer", index="not_analyzed")
+        props.add_property("baitID", "string", index="no")
+        props.add_property("baitName", "string", index="no")
+        props.add_property("oeChr", "string", index="no")
+        props.add_property("oeStart", "integer", index="not_analyzed")
+        props.add_property("oeEnd", "integer", index="not_analyzed")
+        props.add_property("oeID", "string", index="no")
+        props.add_property("oeName", "string", index="no")
+        props.add_property("dist", "integer", index="not_analyzed")
+
+        meta = {"tissue_type": {}}
+        for tt in GeneTargetManager.tissue_types:
+            props.add_property(tt, "float")
+            meta["tissue_type"][tt] = "tissue_type"
+
+        self.mapping(props, idx_type='gene_target', meta=meta, **options)

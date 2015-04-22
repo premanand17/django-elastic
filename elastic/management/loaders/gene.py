@@ -1,6 +1,6 @@
 import re
 from elastic.elastic_model import Elastic
-from elastic.management.loaders.loader import Loader
+from elastic.management.loaders.loader import Loader, MappingProperties
 from elastic.management.loaders.utils import GFF
 import sys
 import json
@@ -164,20 +164,20 @@ class GeneManager(Loader):
 
     def _create_mapping(self, **options):
         ''' Create the mapping for gene names indexing '''
-        data = {"gene":
-                {"properties":
-                 {"gene_symbol": {"boost": 4, "type": "string", "analyzer": "full_name"},
-                  "biotype": {"type": "string"},
-                  "featureloc": {"properties": {"start": {"type": "integer"},
-                                                "end": {"type": "integer"},
-                                                "seqid": {"type": "string"},
-                                                "build": {"type": "string"}}},
-                  "synonyms": {"type": "string", "analyzer": "full_name"},
-                  "hgnc": {"type": "string"},
-                  "dbxrefs": {"type": "object"},
-                  "organism": {"type": "string"}
-                  }
-                 }
-                }
+        props = MappingProperties("gene")
+        props.add_property("gene_symbol", "string", analyzer="full_name")
+        props.add_property("biotype", "string")
+        props.add_property("synonyms", "string", analyzer="full_name")
+        props.add_property("hgnc", "string")
+        props.add_property("dbxrefs", "object")
+        props.add_property("organism", "string")
+
+        featureloc_props = MappingProperties("featureloc")
+        featureloc_props.add_property("start", "integer")
+        featureloc_props.add_property("end", "integer")
+        featureloc_props.add_property("seqid", "string")
+        featureloc_props.add_property("build", "string")
+        props.add_properties(featureloc_props)
+
         ''' create index and add mapping '''
-        self.mapping(data, 'gene', analyzer=self.KEYWORD_ANALYZER, **options)
+        self.mapping(props, 'gene', analyzer=self.KEYWORD_ANALYZER, **options)
