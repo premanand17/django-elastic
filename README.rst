@@ -106,7 +106,7 @@ View the repository and snapshot::
     ./manage.py show_snapshot --repo tmp_restore
     ./manage.py show_snapshot --all
 
-Now use restore to copy the data from the repository::
+Now use ``restore_snapshot`` to copy the data from the repository::
  
     ./manage.py restore_snapshot snapshot_1 --repo tmp_restore --url http://localhost:9200
 
@@ -116,7 +116,7 @@ been created::
 
     curl 'http://localhost:9200/_cat/indices?v'
 
-Remove the repository and remove the data::
+**Delete** the repository and remove the data::
 
     ./manage.py repository tmp_restore --delete
     rm -rf /tmp/snapshot_test/
