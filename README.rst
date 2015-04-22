@@ -8,7 +8,7 @@ Quick start
 -----------
 
 1. Installation
-pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
+    pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 
 2. Add "search" to your ``INSTALLED_APPS`` in ``settings.py``::
 
