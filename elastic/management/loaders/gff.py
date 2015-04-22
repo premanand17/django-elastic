@@ -16,7 +16,7 @@ class GFFManager(DelimeterLoader):
         ''' Create the mapping for gff index '''
         idx_type = self._get_index_type(**options)
         props = MappingProperties(idx_type)
-        props.add_property("seqid", "string")
+        props.add_property("seqid", "string", index="not_analyzed")
         props.add_property("source", "string")
         props.add_property("type", "string", index="not_analyzed")
         props.add_property("start", "integer", index="not_analyzed")
