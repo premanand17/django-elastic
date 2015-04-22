@@ -56,7 +56,7 @@ Note that each command takes a ``--repo`` flag and if not provided the
 Create/delete repository
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``repository`` flag is used in the ``creation`` and ``deletion`` of a
+The ``repository`` argument is used in the ``creation`` and ``deletion`` of a
 repository. To create a 'test_backup' repository::
 
     ./manage.py repository test_backup --dir /path_to_elasticsearch/snapshot/test_snapshot/
@@ -67,7 +67,7 @@ To delete the 'test_backup' repository::
 
 Create/delete snapshot
 ~~~~~~~~~~~~~~~~~~~~~~
-The ``snapshot`` flag is used is used in the ``creation`` and ``deletion`` of a snapshot.
+The ``snapshot`` argument is used is used in the ``creation`` and ``deletion`` of a snapshot.
 To create a 'snapshot_1' snapshot of the index 'disease_region_grch38'::
 
     ./manage.py snapshot snapshot_1 --indices disease_region_grch38
