@@ -48,17 +48,20 @@ management commands described below. ::
     ./manage.py repository --help
     ./manage.py restore_snapshot --help
 
+Note that each command takes a ``--repo`` and if not provided it uses the
+``REPOSITORY`` defined in the ``ELASTIC`` setting in ``settings.py``.
+
 .. _snapshot and restore module: http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html 
 
 Create/delete repository
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``repository`` flag is used in the ``creation`` and ``deletion`` of a
-repository. To create a 'test_backup' repo::
+repository. To create a 'test_backup' repository::
 
     ./manage.py repository test_backup --dir /path_to_elasticsearch/snapshot/test_snapshot/
 
-To delete the 'test_backup' repo:
+To delete the 'test_backup' repository::
 
     ./manage.py repository test_backup --delete
 
