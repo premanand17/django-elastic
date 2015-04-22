@@ -2,7 +2,6 @@ import json
 import requests
 import logging
 from elastic.elastic_settings import ElasticSettings
-from builtins import classmethod
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
