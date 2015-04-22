@@ -50,7 +50,8 @@ repositories containing snapshots of indices. ::
     ./manage.py repository --help
     ./manage.py restore_snapshot --help
 
-Note that each command takes a ``--repo`` flag and if not provided the
+Note that apart from the ``repository`` argument each command takes a ``--repo``
+flag to specify the repository name. If the ``--repo`` flag is not provided the
 ``REPOSITORY`` defined in the ``ELASTIC`` setting in ``settings.py`` is used.
 
 .. _snapshot and restore Elastic module: http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html 
