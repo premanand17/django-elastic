@@ -43,10 +43,10 @@ Snapshot and Restore
 The .. _snapshot and restore module: http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html 
 is used by the custom <strong>django-elastic</strong> management commands described below.
 
-    ./manage.py show_snapshot --help
-    ./manage.py snapshot --help
-    ./manage.py repository --help
-    ./manage.py restore_snapshot --help
+    python manage.py show_snapshot --help
+    python manage.py snapshot --help
+    pyhton manage.py repository --help
+    python manage.py restore_snapshot --help
 
 Create/delete repository
 ~~~~~~~~~~~~~~~~~~~~~~~~
