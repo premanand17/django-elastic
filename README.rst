@@ -34,7 +34,7 @@ pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 
 4. Include the search URLconf in your project urls.py like this::
 
-  url(r'^search/', include('elastic.urls', namespace="elastic")),
+    url(r'^search/', include('elastic.urls', namespace="elastic")),
 
   
  Snapshot and Restore
