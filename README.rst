@@ -72,9 +72,9 @@ Create/Delete Snapshot
 ~~~~~~~~~~~~~~~~~~~~~~
 The ``snapshot`` argument is used is used in the creation and
 deletion of a snapshot. To create a 'snapshot_1' snapshot of the
-index 'disease_region_grch38'::
+indices 'disease_region_grch38' and 'disease'::
 
-    ./manage.py snapshot snapshot_1 --indices disease_region_grch38
+    ./manage.py snapshot snapshot_1 --indices disease_region_grch38,disease
 
 To delete the 'snapshot_1' snapshot::
 
