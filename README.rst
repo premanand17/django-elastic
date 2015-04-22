@@ -60,35 +60,35 @@ Create/Delete Repository
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``repository`` argument is used in the creation and deletion of a
-repository. To create a 'test_backup' repository::
+repository. To **create** a 'test_backup' repository::
 
     ./manage.py repository test_backup --dir /path_to_backup/snapshot/test_snapshot/
 
-To delete the 'test_backup' repository::
+To **delete** the 'test_backup' repository::
 
     ./manage.py repository test_backup --delete
 
 Create/Delete Snapshot
 ~~~~~~~~~~~~~~~~~~~~~~
 The ``snapshot`` argument is used is used in the creation and
-deletion of a snapshot. To create a 'snapshot_1' snapshot of the
+deletion of a snapshot. To **create** a 'snapshot_1' snapshot of the
 indices 'disease_region_grch38' and 'disease'::
 
     ./manage.py snapshot snapshot_1 --indices disease_region_grch38,disease
 
-To delete the 'snapshot_1' snapshot::
+To **delete** the 'snapshot_1' snapshot::
 
     ./manage.py snapshot snapshot_1 --delete
 
 Restore To Another Elastic Cluster
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To copy a snapshot to an instance of Elastic on the same network, use
+To copy a snapshot to an instance of Elastic on the **same network**, use
 the ``url`` flag to point at the other cluster to copy to::
 
     ./manage.py restore_snapshot snapshot_1 --repo tmp_restore --url http://cluster_url:9200
 
 A repository can be used to copy indices to another cluster that is on 
-a different network. To do this tar and move data to the machine with 
+a **different network**. To do this tar and move data to the machine with 
 the cluster to copy the indices to. Un-tar and ensure the directory has 
 read-write permissions for everyone::
 
