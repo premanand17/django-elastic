@@ -36,7 +36,7 @@ class SnapshotTest(TestCase):
         call_command('repository', repos, delete=True)
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' deleted')
 
-    def test_create_delete(self):
+    def test_create_delete_snapshot(self):
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
         call_command('snapshot', snapshot,
                      indices=IDX['MARKER']['indexName'])
