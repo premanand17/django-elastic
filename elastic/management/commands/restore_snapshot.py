@@ -20,6 +20,11 @@ class Command(BaseCommand):
                             default=ElasticSettings.getattr('REPOSITORY'),
                             metavar=ElasticSettings.getattr('REPOSITORY'),
                             help='Repository name')
+        parser.add_argument('--indices',
+                            dest='indices',
+                            default=None,
+                            metavar="idx1,idx2",
+                            help='Indices (comma separated) to be restored from a snapshot (default all).')
 
     def handle(self, *args, **options):
-        Snapshot.restore_snapshot(options['repo'], options['snapshot'], options['url'])
+        Snapshot.restore_snapshot(options['repo'], options['snapshot'], options['url'], options['indices'])
