@@ -91,7 +91,8 @@ the ``url`` flag to point at the other cluster to copy to::
 A repository can be used to copy indices to another cluster that is on 
 a **different network**. To do this tar and move data to the machine with 
 the cluster to copy the indices to. Un-tar and ensure the directory has 
-read-write permissions for everyone::
+read-write permissions for everyone (note that for a multi-nodes cluster
+make sure the file system repository is available to all nodes)::
 
     tar cvf /tmp/snapshot_test/test_snapshot.tar  test_snapshot/
     chmod a+rwx -R test_snapshot
