@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     ''' Elastic index mapping and loading tool. '''
     help = "Use to create Elastic index mappings and load data.\n\n" \
-           "Usage: ./manage.py index_search [options]\n" \
            "Options for regions:\n" \
            " --mapRegion --build GRCh38\n" \
            " --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all) --regionType assoc\n" \
