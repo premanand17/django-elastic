@@ -2,7 +2,7 @@ import gzip
 import json
 import requests
 import re
-from elastic.elastic_model import Elastic, ElasticSettings
+from elastic.elastic_model import Search, ElasticSettings
 import logging
 
 # Get an instance of a logger
@@ -84,7 +84,7 @@ class Loader:
     def is_str(self, column_name, idx_name, idx_type):
         ''' Looks at the mapping to determine if the type is a string '''
         if not self.mapping_json:
-            self.mapping_json = Elastic(db=idx_name).get_mapping(idx_type)[idx_name]['mappings']
+            self.mapping_json = Search(idx=idx_name).get_mapping(idx_type)[idx_name]['mappings']
         try:
             map_type = self.mapping_json[idx_type]["properties"][column_name]["type"]
         except KeyError:
