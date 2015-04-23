@@ -3,16 +3,16 @@ from elastic.management.snapshot import Snapshot
 
 
 class Command(BaseCommand):
-    help = "Create or delete a repository. For example: " \
-           "./manage.py repository REPOSITORY --dir /path_to_repository/" \
-           "./manage.py repository REPOSITORY --delete"
+    help = "Create or delete a repository."
 
     def add_arguments(self, parser):
         parser.add_argument('repo',
                             type=str,
+                            metavar="REPOSITORY_NAME",
                             help='Repository name.')
         parser.add_argument('--dir',
                             dest='dir',
+                            metavar="/path_to_repository/",
                             help='Directory to store repository.')
         parser.add_argument('--delete',
                             dest='delete',

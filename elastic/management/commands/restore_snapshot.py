@@ -4,9 +4,7 @@ from elastic.elastic_settings import ElasticSettings
 
 
 class Command(BaseCommand):
-    help = "Restore a snapshot. For example: " \
-           "./manage.py restore_snapshot SNAPSHOT [--url Elastic URL, e.g http://localhost:9200]"
-    help += " [--repo " + ElasticSettings.getattr('REPOSITORY') + "]"
+    help = "Restore a snapshot."
 
     def add_arguments(self, parser):
         parser.add_argument('snapshot',
@@ -15,10 +13,12 @@ class Command(BaseCommand):
         parser.add_argument('--url',
                             dest='url',
                             default=ElasticSettings.url(),
+                            metavar="ELASTIC_URL",
                             help='Elastic URL to restore to.')
         parser.add_argument('--repo',
                             dest='repo',
                             default=ElasticSettings.getattr('REPOSITORY'),
+                            metavar=ElasticSettings.getattr('REPOSITORY'),
                             help='Repository name')
 
     def handle(self, *args, **options):
