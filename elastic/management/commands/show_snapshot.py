@@ -4,9 +4,7 @@ from elastic.elastic_settings import ElasticSettings
 
 
 class Command(BaseCommand):
-    help = "Show snapshot data. For example: " \
-           "./manage.py show_snapshot [--snapshot SNAPSHOT]"
-    help += " [--repo " + ElasticSettings.getattr('REPOSITORY') + "]"
+    help = "Show available snapshot(s)."
 
     def add_arguments(self, parser):
         parser.add_argument('--snapshot',
@@ -16,6 +14,7 @@ class Command(BaseCommand):
         parser.add_argument('--repo',
                             dest='repo',
                             default=ElasticSettings.getattr('REPOSITORY'),
+                            metavar=ElasticSettings.getattr('REPOSITORY'),
                             help='Repository name')
         parser.add_argument('--all',
                             dest='all',
