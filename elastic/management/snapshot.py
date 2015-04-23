@@ -89,9 +89,12 @@ class Snapshot():
             logger.error(resp.json()["error"])
 
     @classmethod
-    def restore_snapshot(cls, repo, snapshot, url):
+    def restore_snapshot(cls, repo, snapshot, url, indices):
         url += '/_snapshot/' + repo + '/' + snapshot + '/_restore'
-        resp = requests.post(url)
+        data = {}
+        if indices is not None:
+            data = {"indices": indices}
+        resp = requests.post(url, data=json.dumps(data))
         if resp.status_code != 200:
             logger.error("Returned status (for "+url+"): "+str(resp.status_code))
             logger.error(resp.json()["error"])
