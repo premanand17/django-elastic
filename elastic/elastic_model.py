@@ -167,7 +167,7 @@ class Query:
     @classmethod
     def terms(cls, name, arr, minimum_should_match=1):
         ''' Factory method for Terms Query '''
-        if minimum_should_match > 0:
+        if minimum_should_match != 0:
             query = {"terms": {name: arr, "minimum_should_match": minimum_should_match}}
         else:
             query = {"terms": {name: arr}}
