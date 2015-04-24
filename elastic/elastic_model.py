@@ -22,6 +22,14 @@ class Search:
         self.idx = idx
 
     @classmethod
+    def index_exists(cls, idx, url=ElasticSettings.url()):
+        url += '/' + idx
+        response = requests.get(url)
+        if "error" in response.json():
+            return False
+        return True
+
+    @classmethod
     def range_overlap_query(cls, seqid, start_range, end_range,
                             search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT'),
                             field_list=None):
@@ -196,6 +204,7 @@ class Query:
 
     @classmethod
     def is_array_query(cls, arr):
+        ''' Evaluate if array contents are Query objects. '''
         for e in arr:
             if not isinstance(e, Query):
                 raise QueryError("not a Query")
@@ -203,9 +212,10 @@ class Query:
 
     @classmethod
     def query_to_str_array(cls, arr):
-        query_arr = []
-        [query_arr.append(q.query) for q in arr]
-        return query_arr
+        ''' Return a str array from a query array. '''
+        str_arr = []
+        [str_arr.append(q.query) for q in arr]
+        return str_arr
 
 
 class FilteredQuery(Query):
