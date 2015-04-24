@@ -10,19 +10,20 @@ logger = logging.getLogger(__name__)
 class Search:
     ''' Used to run Elastic searches and return results or mappings. '''
 
-    def __init__(self, build_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
+    def __init__(self, search_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
         ''' Query the elastic server for given elastic query '''
         self.url = (ElasticSettings.url() + '/' + idx + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
-        if build_query is not None:
-            if not isinstance(build_query, ElasticQuery):
+        if search_query is not None:
+            if not isinstance(search_query, ElasticQuery):
                 raise QueryError("not an ElasticQuery")
-            self.query = build_query.query
+            self.query = search_query.query
         self.size = size
         self.idx = idx
 
     @classmethod
     def index_exists(cls, idx, url=ElasticSettings.url()):
+        ''' Check if an index exists. '''
         url += '/' + idx
         response = requests.get(url)
         if "error" in response.json():
