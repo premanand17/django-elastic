@@ -1,5 +1,5 @@
 import re
-from elastic.elastic_model import Elastic
+from elastic.elastic_model import Search
 from elastic.management.loaders.loader import Loader, MappingProperties
 from elastic.management.loaders.utils import GFF
 import sys
@@ -159,7 +159,7 @@ class GeneManager(Loader):
 
     def _call_elasticsearch(self, name, fields, indexName):
         ''' Call elasticsearch '''
-        elastic = Elastic.field_search_query(name, fields, 0, 20, indexName)
+        elastic = Search.field_search_query(name, fields, 0, 20, indexName)
         return elastic.get_result()
 
     def _create_mapping(self, **options):
