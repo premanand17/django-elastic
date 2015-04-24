@@ -98,6 +98,11 @@ class ElasticModelTest(TestCase):
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
 
+    def test_string_query_with_wildcard(self):
+        query = ElasticQuery.query_string("rs*", fields=["id"])
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
+        self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved marker (rs*)")
+
     def test_match_query(self):
         ''' Test building and running a match query. '''
         query = ElasticQuery.query_match("id", "rs2476601")
