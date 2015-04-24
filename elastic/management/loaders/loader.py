@@ -2,7 +2,7 @@ import gzip
 import json
 import requests
 import re
-from elastic.elastic_model import Elastic, ElasticSettings
+from elastic.elastic_model import Search, ElasticSettings
 import logging
 
 # Get an instance of a logger
@@ -21,8 +21,11 @@ class Loader:
           }
          }
 
-    def mapping(self, mapping_json, idx_type, meta=None, analyzer=None, **options):
+    def mapping(self, mapping, idx_type, meta=None, analyzer=None, **options):
         ''' Put the mapping to the Elastic server '''
+        if not isinstance(mapping, MappingProperties):
+            raise LoaderError("not a MappingProperties")
+
         idx_name = self.get_index_name(**options)
         url = ElasticSettings.url() + '/' + idx_name
         resp = requests.get(url)
@@ -35,6 +38,7 @@ class Loader:
             else:
                 requests.put(url)
 
+        mapping_json = mapping.mapping_properties
         if meta is not None:
             mapping_json[idx_type]["_meta"] = meta
 
@@ -80,7 +84,7 @@ class Loader:
     def is_str(self, column_name, idx_name, idx_type):
         ''' Looks at the mapping to determine if the type is a string '''
         if not self.mapping_json:
-            self.mapping_json = Elastic(db=idx_name).get_mapping(idx_type)[idx_name]['mappings']
+            self.mapping_json = Search(idx=idx_name).get_mapping(idx_type)[idx_name]['mappings']
         try:
             map_type = self.mapping_json[idx_type]["properties"][column_name]["type"]
         except KeyError:
@@ -91,12 +95,15 @@ class Loader:
 
 
 class MappingProperties():
+    ''' Used to create the mapping properties for an index. '''
 
     def __init__(self, idx_type):
+        ''' For a given index type create the mapping properties. '''
         self.idx_type = idx_type
         self.mapping_properties = {self.idx_type: {"properties": {}}}
 
     def add_property(self, name, map_type, index=None, analyzer=None):
+        ''' Add a property to the mapping. '''
         self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
         if index is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
@@ -104,6 +111,7 @@ class MappingProperties():
             self.mapping_properties[self.idx_type]["properties"][name].update({"analyzer": analyzer})
 
     def add_properties(self, mapping_properties):
+        ''' Add a nested set of properties to the mapping. '''
         if not isinstance(mapping_properties, MappingProperties):
             raise LoaderError("not a MappingProperties")
         self.mapping_properties[self.idx_type]["properties"].update(mapping_properties.mapping_properties)

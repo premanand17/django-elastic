@@ -2,29 +2,28 @@ import json
 import requests
 import logging
 from elastic.elastic_settings import ElasticSettings
-from builtins import classmethod
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
-class Elastic:
+class Search:
     ''' Used to run Elastic searches and return results or mappings. '''
 
-    def __init__(self, build_query=None, search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
+    def __init__(self, build_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
         ''' Query the elastic server for given elastic query '''
-        self.url = (ElasticSettings.url() + '/' + db + '/_search?size=' + str(size) +
+        self.url = (ElasticSettings.url() + '/' + idx + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
         if build_query is not None:
             if not isinstance(build_query, ElasticQuery):
                 raise QueryError("not an ElasticQuery")
             self.query = build_query.query
         self.size = size
-        self.db = db
+        self.idx = idx
 
     @classmethod
     def range_overlap_query(cls, seqid, start_range, end_range,
-                            search_from=0, size=20, db=ElasticSettings.idx('DEFAULT'),
+                            search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT'),
                             field_list=None):
         ''' Constructs a range overlap query '''
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range),
@@ -33,18 +32,18 @@ class Elastic:
         or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range))
         or_filter.extend(query_bool)
         query = ElasticQuery.filtered(Query.term("seqid", seqid), or_filter, field_list)
-        return cls(query, search_from, size, db)
+        return cls(query, search_from, size, idx)
 
     @classmethod
     def field_search_query(cls, query_term, fields=None,
-                           search_from=0, size=20, db=ElasticSettings.idx('DEFAULT')):
+                           search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
         ''' Constructs a field elastic query '''
-        query = ElasticQuery.query_string(query_term, fields)
-        return cls(query, search_from, size, db)
+        query = ElasticQuery.query_string(query_term, fields=fields)
+        return cls(query, search_from, size, idx)
 
     def get_mapping(self, mapping_type=None):
         ''' Return the mappings for an index. '''
-        self.mapping_url = (ElasticSettings.url() + '/' + self.db + '/_mapping')
+        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
         response = requests.get(self.mapping_url)
@@ -54,8 +53,11 @@ class Elastic:
 
     def get_count(self):
         ''' Return the elastic count for a query result '''
-        url = ElasticSettings.url() + '/' + self.db + '/_count?'
-        response = requests.post(url, data=json.dumps(self.query))
+        url = ElasticSettings.url() + '/' + self.idx + '/_count?'
+        data = {}
+        if hasattr(self, 'query'):
+            data = json.dumps(self.query)
+        response = requests.post(url, data=data)
         return response.json()
 
     def get_json_response(self):
@@ -71,7 +73,7 @@ class Elastic:
         json_response = self.get_json_response()
         context = {"query": self.query}
         c_dbs = {}
-        dbs = self.db.split(",")
+        dbs = self.idx.split(",")
         for this_db in dbs:
             stype = "Gene"
             if "snp" in this_db:
@@ -80,7 +82,7 @@ class Elastic:
                 stype = "Region"
             c_dbs[this_db] = stype
         context["dbs"] = c_dbs
-        context["db"] = self.db
+        context["db"] = self.idx
 
         content = []
         if(len(json_response['hits']['hits']) >= 1):
@@ -130,9 +132,9 @@ class ElasticQuery:
         return cls(query, sources)
 
     @classmethod
-    def query_string(cls, query_term, fields=None, sources=None):
+    def query_string(cls, query_term, sources=None, **string_opts):
         ''' Factory method for creating elastic Query String Query '''
-        query = Query.string(query_term, fields)
+        query = Query.query_string(query_term, **string_opts)
         return cls(query, sources)
 
     @classmethod
@@ -147,20 +149,32 @@ class Query:
     def __init__(self, query):
         self.query = query
 
+    STRING_OPTS = ["fields", "default_field", "default_operator",
+                   "analyzer", "allow_leading_wildcard", "lowercase_expanded_terms",
+                   "enable_position_increments", "fuzzy_max_expansions", "fuzzy_prefix_length",
+                   "phrase_slop", "boost", "analyze_wildcard", "auto_generate_phrase_queries",
+                   "max_determinized_states", "minimum_should_match", "lenient", "time_zone"]
+
     @classmethod
     def match_all(cls):
         ''' Factory method for Match All Query '''
         return cls({"match_all": {}})
 
     @classmethod
-    def term(cls, name, value):
+    def term(cls, name, value, boost=None):
         ''' Factory method for Term Query '''
-        return cls({"term": {name: value}})
+        if boost is None:
+            return cls({"term": {name: value}})
+        return cls({"term": {name: {"value": value, "boost": boost}}})
 
     @classmethod
     def terms(cls, name, arr, minimum_should_match=1):
         ''' Factory method for Terms Query '''
-        return cls({"terms": {name: arr, "minimum_should_match": minimum_should_match}})
+        if minimum_should_match != 0:
+            query = {"terms": {name: arr, "minimum_should_match": minimum_should_match}}
+        else:
+            query = {"terms": {name: arr}}
+        return cls(query)
 
     @classmethod
     def match(cls, match_id, match_str):
@@ -168,13 +182,16 @@ class Query:
         return cls({"match": {match_id: match_str}})
 
     @classmethod
-    def string(cls, query_term, fields=None):
+    def query_string(cls, query_term, **kwargs):
         ''' Factory method for String Query.
         Simple wildcards can be used with the fields supplied
         (e.g. "fields" : ["city.*"].) '''
         query = {"query_string": {"query": query_term}}
-        if fields is not None:
-            query["query_string"]["fields"] = fields
+
+        for key, value in kwargs.items():
+            if key not in Query.STRING_OPTS:
+                raise QueryError("option "+key+" unrecognised as a String Query option")
+            query["query_string"][key] = value
         return cls(query)
 
     @classmethod
@@ -272,6 +289,13 @@ class Filter:
             self.filter["filter"][filter_name].extend(filter_arr)
         else:
             self.filter["filter"][filter_name] = filter_arr
+
+
+class TermsFilter(Filter):
+
+    @classmethod
+    def get_terms_filter(cls, name, arr):
+        return cls(Query.terms(name, arr, minimum_should_match=0))
 
 
 class OrFilter(Filter):
