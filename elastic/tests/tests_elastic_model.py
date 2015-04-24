@@ -146,7 +146,6 @@ class ElasticModelTest(TestCase):
 
     def test_count_with_query(self):
         ''' Test count the number of documents returned by a query. '''
-        query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
-        query = ElasticQuery.bool(query_bool)
+        query = ElasticQuery(Query.term("id", "rs373328635"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
