@@ -7,6 +7,8 @@ from elastic.management.loaders.gene import GeneManager
 from elastic.management.loaders.disease import DiseaseManager
 from elastic.management.loaders.gene_target import GeneTargetManager
 from elastic.management.loaders.gff import GFFManager
+from elastic.management.loaders.alias import AliasManager
+from elastic.management.loaders.criteria import CriteriaManager
 
 
 # Get an instance of a logger
@@ -92,6 +94,14 @@ class Command(BaseCommand):
         make_option('--indexType',
                     dest='indexType',
                     help='Index type'),
+        ) + (
+        make_option('--indexAlias',
+                    dest='indexAlias',
+                    help='Load aliases'),
+        ) + (
+        make_option('--indexCriteria',
+                    dest='indexCriteria',
+                    help='Create and Load Criterias'),
         )
 
     def handle(self, *args, **options):
@@ -125,5 +135,14 @@ class Command(BaseCommand):
         elif options['indexGFF']:
             gff = GFFManager()
             gff.create_load_gff_index(**options)
+
+        elif options['indexAlias']:
+            alias = AliasManager()
+            alias.create_alias(**options)
+
+        elif options['indexCriteria']:
+            criteria = CriteriaManager()
+            criteria.create_criteria(**options)
+
         else:
             print(help)
