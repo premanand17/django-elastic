@@ -83,7 +83,7 @@ class ElasticModelTest(TestCase):
         ''' Test filtered query with a term filter. '''
         query = ElasticQuery.filtered(Query.term("seqid", 1), Filter(Query.term("id", "rs373328635")))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker")
 
     def test_terms_filtered_query(self):
         ''' Test filtered query with a terms filter. '''
@@ -117,16 +117,30 @@ class ElasticModelTest(TestCase):
 
         query = ElasticQuery(Query.term("seqid", "1", boost=3.0))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved marker (rs2476601)")
+        self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved markers  on chr1")
 
     def test_terms_query(self):
         ''' Test building and running a match query. '''
         query = ElasticQuery(Query.terms("id", ["rs2476601", "rs373328635"]))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 2, "Elastic string query retrieved marker (rs2476601)")
+        self.assertTrue(elastic.get_result()['total'] == 2,
+                        "Elastic string query retrieved markers (rs2476601, rs373328635)")
 
     def test_bool_query(self):
+        ''' Test a bool query. '''
         query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
         query = ElasticQuery.bool(query_bool)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs373328635)")
+
+    def test_count(self):
+        ''' Test count the number of documents in an index. '''
+        elastic = Search(idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_count()['count'] > 1, "Elastic count documents in an index")
+
+    def test_count_with_query(self):
+        ''' Test count the number of documents returned by a query. '''
+        query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
+        query = ElasticQuery.bool(query_bool)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
