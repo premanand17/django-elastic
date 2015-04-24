@@ -27,6 +27,12 @@ def tearDownModule():
                                         'ELASTIC_URL': ElasticSettings.url()}})
 class ElasticModelTest(TestCase):
 
+    def test_idx_exists(self):
+        ''' Test that index_exists() method. '''
+        self.assertTrue(Search.index_exists(idx=ElasticSettings.idx('DEFAULT')),
+                        "Index exists")
+        self.assertFalse(Search.index_exists("xyz123"))
+
     def test_mapping(self):
         ''' Test retrieving the mapping for an index. '''
         elastic = Search(idx=ElasticSettings.idx('DEFAULT'))
