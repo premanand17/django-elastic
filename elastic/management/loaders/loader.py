@@ -220,7 +220,7 @@ class JSONLoader(Loader):
 
 
 class LoaderError(Exception):
-    ''' Query error  '''
+    ''' Loader error  '''
     def __init__(self, value):
         self.value = value
 
