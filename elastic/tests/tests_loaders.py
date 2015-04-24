@@ -40,8 +40,9 @@ class SnapshotTest(TestCase):
 
     def test_create_restore_delete_snapshot(self):
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
-        call_command('snapshot', snapshot,
-                     indices=IDX['MARKER']['indexName'])
+
+        # create a snapshot
+        call_command('snapshot', snapshot, indices=IDX['MARKER']['indexName'])
         self.assertTrue(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
                         "Created snapshot "+snapshot)
 
