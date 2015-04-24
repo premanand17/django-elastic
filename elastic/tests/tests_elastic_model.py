@@ -127,7 +127,20 @@ class ElasticModelTest(TestCase):
                         "Elastic string query retrieved markers (rs2476601, rs373328635)")
 
     def test_bool_query(self):
+        ''' Test a bool query. '''
         query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
         query = ElasticQuery.bool(query_bool)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs373328635)")
+
+    def test_count(self):
+        ''' Test count the number of documents in an index. '''
+        elastic = Search(idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_count()['count'] > 1, "Elastic count documents in an index")
+
+    def test_count_with_query(self):
+        ''' Test count the number of documents returned by a query. '''
+        query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
+        query = ElasticQuery.bool(query_bool)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")

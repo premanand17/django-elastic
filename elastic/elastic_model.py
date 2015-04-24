@@ -54,7 +54,10 @@ class Search:
     def get_count(self):
         ''' Return the elastic count for a query result '''
         url = ElasticSettings.url() + '/' + self.idx + '/_count?'
-        response = requests.post(url, data=json.dumps(self.query))
+        data = {}
+        if hasattr(self, 'query'):
+            data = json.dumps(self.query)
+        response = requests.post(url, data=data)
         return response.json()
 
     def get_json_response(self):
