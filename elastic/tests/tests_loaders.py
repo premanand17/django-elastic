@@ -6,6 +6,7 @@ import time
 from elastic.management.loaders.utils import GFF, GFFError
 from elastic.elastic_settings import ElasticSettings
 from elastic.management.snapshot import Snapshot
+from elastic.elastic_model import Search
 
 
 def setUpModule():
@@ -27,6 +28,7 @@ class SnapshotTest(TestCase):
 
     def test_show(self, snapshot=None):
         call_command('show_snapshot')
+        call_command('show_snapshot', all=True)
 
     def test_create_delete_repository(self):
         repos = 'test_backup'
@@ -36,12 +38,21 @@ class SnapshotTest(TestCase):
         call_command('repository', repos, delete=True)
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' deleted')
 
-    def test_create_delete_snapshot(self):
+    def test_create_restore_delete_snapshot(self):
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
         call_command('snapshot', snapshot,
                      indices=IDX['MARKER']['indexName'])
         self.assertTrue(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
                         "Created snapshot "+snapshot)
+
+        # delete index
+        requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
+        self.assertFalse(Search.index_exists(IDX['MARKER']['indexName']), "Removed index")
+        # restore from snapshot
+        call_command('restore_snapshot', snapshot)
+        self.assertTrue(Search.index_exists(IDX['MARKER']['indexName']), "Restored index exists")
+
+        # remove snapshot
         call_command('snapshot', snapshot, delete=True)
         self.assertFalse(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
                          "Deleted snapshot "+snapshot)
