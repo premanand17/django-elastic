@@ -28,14 +28,14 @@ class MarkerManager(DelimeterLoader):
 class RsMerge(DelimeterLoader):
 
     def create_load_snp_merge_index(self, **options):
-        ''' Index VCF dbSNP data '''
+        ''' Index rs number merge dbSNP data '''
         idx_name = self.get_index_name(**options)
         map_props = self._create_rs_merge_mapping(**options)
         f = self.open_file_to_load('indexSNPMerge', **options)
         self.load(map_props.get_column_names(), f, idx_name, 'rs_merge', chunk=10000)
 
     def _create_rs_merge_mapping(self, **options):
-        ''' Create the mapping for snp index '''
+        ''' Create the mapping for rs index '''
         props = MappingProperties('rs_merge')
         props.add_property("rshigh", "integer", index="not_analyzed")
         props.add_property("rslow", "integer", index="not_analyzed")
