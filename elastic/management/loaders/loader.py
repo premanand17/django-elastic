@@ -101,20 +101,27 @@ class MappingProperties():
         ''' For a given index type create the mapping properties. '''
         self.idx_type = idx_type
         self.mapping_properties = {self.idx_type: {"properties": {}}}
+        self.column_names = []
 
-    def add_property(self, name, map_type, index=None, analyzer=None):
+    def add_property(self, name, map_type, index=None, analyzer=None, property_format=None):
         ''' Add a property to the mapping. '''
         self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
         if index is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
         if analyzer is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"analyzer": analyzer})
+        if format is not None:
+            self.mapping_properties[self.idx_type]["properties"][name].update({"format": property_format})
+        self.column_names.append(name)
 
     def add_properties(self, mapping_properties):
         ''' Add a nested set of properties to the mapping. '''
         if not isinstance(mapping_properties, MappingProperties):
             raise LoaderError("not a MappingProperties")
         self.mapping_properties[self.idx_type]["properties"].update(mapping_properties.mapping_properties)
+
+    def get_column_names(self):
+        return self.column_names
 
 
 class DelimeterLoader(Loader):
@@ -128,7 +135,7 @@ class DelimeterLoader(Loader):
 
         try:
             for line in file_handle:
-                line = line.rstrip().decode("utf-8")
+                line = line.decode("utf-8")
                 current_line = line
                 if(current_line.startswith("#")):
                     continue
@@ -143,6 +150,8 @@ class DelimeterLoader(Loader):
                 doc_data = {}
                 attrs = {}
                 for idx, p in enumerate(parts):
+                    p = p.strip()
+
                     if (is_GFF or is_GTF) and idx == len(parts)-1:
                         if is_GTF:
                             attrs = self._getAttributes(p, key_value_delim=' ')
