@@ -38,8 +38,8 @@ class Search:
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range),
                                          RangeQuery("end", gte=end_range)])
         or_filter = OrFilter(RangeQuery("start", gte=start_range, lte=end_range))
-        or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range))
-        or_filter.extend(query_bool)
+        or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range)) \
+                 .extend(query_bool)
         query = ElasticQuery.filtered(Query.term("seqid", seqid), or_filter, field_list)
         return cls(query, search_from, size, idx)
 
