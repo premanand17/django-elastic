@@ -27,6 +27,12 @@ def tearDownModule():
                                         'ELASTIC_URL': ElasticSettings.url()}})
 class ElasticModelTest(TestCase):
 
+    def test_idx_exists(self):
+        ''' Test that index_exists() method. '''
+        self.assertTrue(Search.index_exists(idx=ElasticSettings.idx('DEFAULT')),
+                        "Index exists")
+        self.assertFalse(Search.index_exists("xyz123"))
+
     def test_mapping(self):
         ''' Test retrieving the mapping for an index. '''
         elastic = Search(idx=ElasticSettings.idx('DEFAULT'))
@@ -46,11 +52,48 @@ class ElasticModelTest(TestCase):
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
         query_bool = BoolQuery()
-        query_bool.must([Query.term("id", "rs373328635")])
-        query_bool.must_not([Query.term("seqid", 2)])
-        query_bool.should(RangeQuery("start", gte=10054))
-        query_bool.should([RangeQuery("start", gte=10050)])
+        query_bool.must([Query.term("id", "rs373328635")]) \
+                  .must_not([Query.term("seqid", 2)]) \
+                  .should(RangeQuery("start", gte=10054)) \
+                  .should([RangeQuery("start", gte=10050)])
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"])
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+
+    def test_bool_filtered_query2(self):
+        ''' Test building and running a filtered boolean query. '''
+        query_bool = BoolQuery()
+        query_bool.should(RangeQuery("start", lte=20000)) \
+                  .should(Query.term("seqid", 2)) \
+                  .must(Query.term("seqid", 1))
+        query_string = Query.query_string("rs373328635", fields=["id", "seqid"])
+        query = ElasticQuery.filtered_bool(query_string, query_bool, sources=["id", "seqid", "start"])
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+
+    def test_bool_filtered_query3(self):
+        ''' Test building and running a filtered boolean query. Note:
+        ElasticQuery used to wrap query_string in a query object. '''
+        query_bool = BoolQuery()
+        query_bool.should(RangeQuery("start", lte=20000)) \
+                  .should(Query.term("seqid", 2)) \
+                  .must(ElasticQuery.query_string("rs373328635", fields=["id", "seqid"])) \
+                  .must(Query.term("seqid", 1))
+
+        query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+
+    def test_bool_filtered_query4(self):
+        ''' Test building and running a filtered boolean query.
+        Note: ElasticQuery used to wrap match in a query object. '''
+        query_bool = BoolQuery()
+        query_bool.should(RangeQuery("start", lte=20000)) \
+                  .should(Query.term("seqid", 2)) \
+                  .must(ElasticQuery.query_match("id", "rs373328635")) \
+                  .must(Query.term("seqid", 1))
+
+        query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
 
@@ -59,7 +102,8 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=1),
                                          RangeQuery("end", gte=100000)])
         or_filter = OrFilter(RangeQuery("start", gte=1, lte=100000))
-        or_filter.extend(query_bool)
+        or_filter.extend(query_bool) \
+                 .extend(ElasticQuery.query_string("rs*", fields=["id", "seqid"]))
         query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
@@ -68,6 +112,8 @@ class ElasticModelTest(TestCase):
         ''' Test building and running a filtered query. '''
         query_bool = BoolQuery(must_arr=[RangeQuery("start", gte=1)])
         and_filter = AndFilter(query_bool)
+        and_filter.extend(RangeQuery("start", gte=1)) \
+                  .extend(Query.term("seqid", 1))
         query = ElasticQuery.filtered(Query.term("seqid", 1), and_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
@@ -128,7 +174,12 @@ class ElasticModelTest(TestCase):
 
     def test_bool_query(self):
         ''' Test a bool query. '''
-        query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
+        query_bool = BoolQuery()
+        query_bool.must(Query.term("id", "rs373328635")) \
+                  .must(RangeQuery("start", gt=1000)) \
+                  .must_not(Query.match("seqid", "2")) \
+                  .should(Query.match("seqid", "3")) \
+                  .should(Query.match("seqid", "1"))
         query = ElasticQuery.bool(query_bool)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs373328635)")
@@ -140,7 +191,6 @@ class ElasticModelTest(TestCase):
 
     def test_count_with_query(self):
         ''' Test count the number of documents returned by a query. '''
-        query_bool = BoolQuery(must_arr=Query.term("id", "rs373328635"))
-        query = ElasticQuery.bool(query_bool)
+        query = ElasticQuery(Query.term("id", "rs373328635"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
