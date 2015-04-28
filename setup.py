@@ -10,7 +10,7 @@ ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='elastic',
-    version='0.1a1',
+    version='0.0.1',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
