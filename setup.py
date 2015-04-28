@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
-    name='elastic',
+    name='django-elastic',
     version='0.1a1',
     packages=find_packages(),
     include_package_data=True,
