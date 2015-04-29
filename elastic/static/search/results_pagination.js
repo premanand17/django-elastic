@@ -151,8 +151,8 @@
         			}else if(hit.rscurrent){ 	// historical marker IDs 
         				$('#results').append(
         						'<ul class="list-group">' +
-        						'<li class="list-group-item"><a href="/marker/rs'+hit.rscurrent+'">rs'+hit.rscurrent +'</a></li>'+
-        						'<li class="list-group-item">Merged from: rs' + hit.rshigh + ' into rs' + hit.rslow + ' (dbSNP' + hit.build_id + ')' + 
+        						'<li class="list-group-item"><a href="/marker/'+hit.rscurrent+'">'+hit.rscurrent +'</a></li>'+
+        						'<li class="list-group-item">Merged from: ' + hit.rshigh + ' into ' + hit.rslow + ' (dbSNP' + hit.build_id + ')' + 
         				'</ul>');
         			}else if(hit.hgnc){
         				$('#results').append(
