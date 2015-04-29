@@ -1,5 +1,5 @@
 ======
-Search
+Elastic
 ======
 
 Search is a Django app to run Elastic search queries.
