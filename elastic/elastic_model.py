@@ -81,31 +81,29 @@ class Search:
         ''' Return the elastic context result '''
         json_response = self.get_json_response()
         context = {"query": self.query}
-        c_dbs = {}
+        db_types = {}
         dbs = self.idx.split(",")
         for this_db in dbs:
             stype = "Gene"
             if "snp" in this_db:
                 stype = "Marker"
-            if "region" in this_db:
+            elif "region" in this_db:
                 stype = "Region"
-            c_dbs[this_db] = stype
-        context["dbs"] = c_dbs
+            db_types[this_db] = stype
+        context["dbs"] = db_types
         context["db"] = self.idx
 
         content = []
-        if(len(json_response['hits']['hits']) >= 1):
-            for hit in json_response['hits']['hits']:
-                hit['_source']['idx_type'] = hit['_type']
-                hit['_source']['idx_id'] = hit['_id']
-                content.append(hit['_source'])
+        for hit in json_response['hits']['hits']:
+            hit['_source']['idx_type'] = hit['_type']
+            hit['_source']['idx_id'] = hit['_id']
+            if 'highlight' in hit:
+                hit['_source']['highlight'] = hit['highlight']
+            content.append(hit['_source'])
 
         context["data"] = content
         context["total"] = json_response['hits']['total']
-        if(int(json_response['hits']['total']) < self.size):
-            context["size"] = json_response['hits']['total']
-        else:
-            context["size"] = self.size
+        context["size"] = self.size
         return context
 
 
