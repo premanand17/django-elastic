@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from optparse import make_option
 import logging
-from elastic.management.loaders.marker import MarkerManager
+from elastic.management.loaders.marker import MarkerManager, RsMerge
 from elastic.management.loaders.region import RegionManager
 from elastic.management.loaders.gene import GeneManager
 from elastic.management.loaders.disease import DiseaseManager
@@ -21,6 +21,7 @@ class Command(BaseCommand):
            " --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all) --regionType assoc\n" \
            "Options for markers:\n" \
            " --indexName [index name] --indexSNP All.vcf\n" \
+           " --indexName [index name] --indexSNPMerge RsMergeArch.bcp.gz\n" \
            "Options for genes:\n" \
            " --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
            " --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
@@ -33,6 +34,10 @@ class Command(BaseCommand):
         make_option('--indexSNP',
                     dest='indexSNP',
                     help='VCF file (from dbSNP) to index'),
+        ) + (
+        make_option('--indexSNPMerge',
+                    dest='indexSNPMerge',
+                    help='RS Merge (from dbSNP)'),
         ) + (
         make_option('--indexGene',
                     dest='indexGene',
@@ -98,6 +103,9 @@ class Command(BaseCommand):
         if options['indexSNP']:
             marker = MarkerManager()
             marker.create_load_snp_index(**options)
+        elif options['indexSNPMerge']:
+            marker_merge = RsMerge()
+            marker_merge.create_load_snp_merge_index(**options)
 
         elif options['mapRegion']:
             region = RegionManager()

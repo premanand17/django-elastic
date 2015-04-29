@@ -3,7 +3,7 @@ from django.core.management import call_command
 from elastic.tests.settings_idx import IDX
 import requests
 from elastic.elastic_model import Search, BoolQuery, Query, ElasticQuery, \
-    RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter
+    RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter, Highlight
 from elastic.elastic_settings import ElasticSettings
 import time
 
@@ -99,12 +99,13 @@ class ElasticModelTest(TestCase):
 
     def test_or_filtered_query(self):
         ''' Test building and running a filtered query. '''
+        highlight = Highlight(["id", "seqid"])
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=1),
                                          RangeQuery("end", gte=100000)])
         or_filter = OrFilter(RangeQuery("start", gte=1, lte=100000))
         or_filter.extend(query_bool) \
                  .extend(ElasticQuery.query_string("rs*", fields=["id", "seqid"]))
-        query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter)
+        query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
 
@@ -167,7 +168,8 @@ class ElasticModelTest(TestCase):
 
     def test_terms_query(self):
         ''' Test building and running a match query. '''
-        query = ElasticQuery(Query.terms("id", ["rs2476601", "rs373328635"]))
+        highlight = Highlight(["id"])
+        query = ElasticQuery(Query.terms("id", ["rs2476601", "rs373328635"]), highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 2,
                         "Elastic string query retrieved markers (rs2476601, rs373328635)")
@@ -175,14 +177,21 @@ class ElasticModelTest(TestCase):
     def test_bool_query(self):
         ''' Test a bool query. '''
         query_bool = BoolQuery()
+        highlight = Highlight(["id", "seqid"])
         query_bool.must(Query.term("id", "rs373328635")) \
                   .must(RangeQuery("start", gt=1000)) \
                   .must_not(Query.match("seqid", "2")) \
                   .should(Query.match("seqid", "3")) \
                   .should(Query.match("seqid", "1"))
-        query = ElasticQuery.bool(query_bool)
+        query = ElasticQuery.bool(query_bool, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs373328635)")
+
+    def test_string_query_with_wildcard_and_highlight(self):
+        highlight = Highlight("id", pre_tags="<strong>", post_tags="</strong>")
+        query = ElasticQuery.query_string("rs*", fields=["id"], highlight=highlight)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
+        self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved marker (rs*)")
 
     def test_count(self):
         ''' Test count the number of documents in an index. '''
