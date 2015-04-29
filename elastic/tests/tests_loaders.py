@@ -25,6 +25,7 @@ def tearDownModule():
 
 
 class SnapshotTest(TestCase):
+    ''' Test elastic snapshot and restore. '''
 
     def test_show(self, snapshot=None):
         call_command('show_snapshot')
@@ -61,17 +62,16 @@ class SnapshotTest(TestCase):
 
 class ElasticLoadersTest(TestCase):
 
-    def test_disease_loader(self):
-        ''' Test disease loader '''
-        index_name = IDX['DISEASE']['indexName']
-        self._check_index(index_name, 'disease', 1)
-
-    def test_marker_loader(self):
-        ''' Test disease loader '''
-        index_name = IDX['MARKER']['indexName']
-        self._check_index(index_name, 'marker')
+    def test_idx_loader(self):
+        ''' Test loader has created and populated indices.  '''
+        for key in IDX:
+            idx = IDX[key]['indexName']
+            self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
+            ndocs = Search(idx=idx).get_count()['count']
+            self.assertTrue(ndocs > 1, "Elastic count documents in " + idx + ": " + str(ndocs))
 
     def test_utils(self):
+        ''' Test gff utils. '''
         line = "chr22\tt1dbase\tvariant\t37191071\t37191071\t.\t+\t.\tName=rs229533;region_id=36"
         gff = GFF(line)
         attrs = gff.getAttributes()
@@ -84,26 +84,3 @@ class ElasticLoadersTest(TestCase):
         # check for gff errors
         line = "chr22\tt1dbase\tvariant\t37191071\t37191071\t.\t+\t."
         self.assertRaises(GFFError, GFF, line=line)
-
-    def _check_index(self, index_name, index_type, count=None):
-        self._check(ElasticSettings.url() + '/' + index_name)
-        response = self._check(ElasticSettings.url() + '/' + index_name +
-                               '/' + index_type + '/_count')
-        if count is not None:
-            self.assertGreaterEqual(response.json()['count'], count,
-                                    "Index count "+str(response.json()['count']))
-
-    def _check(self, url):
-        try:
-            response = requests.get(url)
-            self.assertEqual(response.status_code, 200, "Index " +
-                             url + " exists")
-            return response
-        except requests.exceptions.Timeout:
-            self.assertTrue(False, 'timeout exception')
-        except requests.exceptions.TooManyRedirects:
-            self.assertTrue(False, 'too many redirects exception')
-        except requests.exceptions.ConnectionError:
-            self.assertTrue(False, 'request connection exception')
-        except requests.exceptions.RequestException:
-            self.assertTrue(False, 'request exception')
