@@ -13,14 +13,14 @@ class MarkerManager(DelimeterLoader):
     def _create_snp_mapping(self, **options):
         ''' Create the mapping for snp index '''
         props = MappingProperties('marker')
-        props.add_property("seqid", "string", index="not_analyzed")
-        props.add_property("start", "integer", index="not_analyzed")
-        props.add_property("id", "string", index="not_analyzed")
-        props.add_property("ref", "string", index="no")
-        props.add_property("alt", "string", index="no")
-        props.add_property("qual", "string", index="no")
-        props.add_property("filter", "string", index="no")
-        props.add_property("info", "string", index="no")
+        props.add_property("seqid", "string", index="not_analyzed") \
+             .add_property("start", "integer", index="not_analyzed") \
+             .add_property("id", "string", index="not_analyzed") \
+             .add_property("ref", "string", index="no") \
+             .add_property("alt", "string", index="no") \
+             .add_property("qual", "string", index="no") \
+             .add_property("filter", "string", index="no") \
+             .add_property("info", "string", index="no")
         self.mapping(props, 'marker', **options)
         return props
 
@@ -37,15 +37,15 @@ class RsMerge(DelimeterLoader):
     def _create_rs_merge_mapping(self, **options):
         ''' Create the mapping for rs index '''
         props = MappingProperties('rs_merge')
-        props.add_property("rshigh", "string", index="not_analyzed")
-        props.add_property("rslow", "string", index="not_analyzed")
-        props.add_property("build_id", "integer", index="no")
-        props.add_property("orien", "integer", index="no")
-        props.add_property("create_time", "date", index="no", property_format="yyyy-MM-dd HH:mm:ss.SSS")
-        props.add_property("last_updated_time", "date", index="no", property_format="yyyy-MM-dd HH:mm:ss.SSS")
-        props.add_property("rscurrent", "string", index="not_analyzed")
-        props.add_property("orien2current", "string", index="no")
-        props.add_property("notes", "string", index="no")
+        props.add_property("rshigh", "string", index="not_analyzed") \
+             .add_property("rslow", "string", index="not_analyzed") \
+             .add_property("build_id", "integer", index="no") \
+             .add_property("orien", "integer", index="no") \
+             .add_property("create_time", "date", index="no", property_format="yyyy-MM-dd HH:mm:ss.SSS") \
+             .add_property("last_updated_time", "date", index="no", property_format="yyyy-MM-dd HH:mm:ss.SSS") \
+             .add_property("rscurrent", "string", index="not_analyzed") \
+             .add_property("orien2current", "string", index="no") \
+             .add_property("notes", "string", index="no")
         self.mapping(props, 'rs_merge', **options)
         return props
 

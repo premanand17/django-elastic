@@ -113,12 +113,14 @@ class MappingProperties():
         if format is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"format": property_format})
         self.column_names.append(name)
+        return self
 
     def add_properties(self, mapping_properties):
         ''' Add a nested set of properties to the mapping. '''
         if not isinstance(mapping_properties, MappingProperties):
             raise LoaderError("not a MappingProperties")
         self.mapping_properties[self.idx_type]["properties"].update(mapping_properties.mapping_properties)
+        return self
 
     def get_column_names(self):
         return self.column_names
