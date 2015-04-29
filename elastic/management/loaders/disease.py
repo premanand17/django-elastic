@@ -39,10 +39,9 @@ class DiseaseManager(Loader):
     def _create_disease_mapping(self, **options):
         ''' Create the mapping for disease indexing '''
         props = MappingProperties("disease")
-        props.add_property("name", "string", index="not_analyzed")
-        props.add_property("code", "string", index="not_analyzed")
-        props.add_property("description", "string", index="not_analyzed")
-        props.add_property("colour", "string", index="not_analyzed")
-        props.add_property("tier", "integer", index="not_analyzed")
-
+        props.add_property("name", "string", index="not_analyzed") \
+             .add_property("code", "string", index="not_analyzed") \
+             .add_property("description", "string", index="not_analyzed") \
+             .add_property("colour", "string", index="not_analyzed") \
+             .add_property("tier", "integer", index="not_analyzed")
         self.mapping(props, 'disease', **options)
