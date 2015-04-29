@@ -147,28 +147,7 @@ class DelimeterLoader(Loader):
                 idx_id = str(auto_num)
                 json_data += '{"index": {"_id": "%s"}}\n' % idx_id
 
-                doc_data = {}
-                attrs = {}
-                for idx, p in enumerate(parts):
-                    p = p.strip()
-
-                    if (is_GFF or is_GTF) and idx == len(parts)-1:
-                        if is_GTF:
-                            attrs = self._getAttributes(p, key_value_delim=' ')
-                        else:
-                            attrs = self._getAttributes(p)
-                        doc_data[column_names[idx]] = attrs
-                        continue
-
-                    if self.is_str(column_names[idx], idx_name, idx_type):
-                        doc_data[column_names[idx]] = p
-                    elif p.isdigit():
-                        doc_data[column_names[idx]] = int(p)
-                    elif self._isfloat(p):
-                        doc_data[column_names[idx]] = float(p)
-                    else:
-                        doc_data[column_names[idx]] = p
-
+                doc_data = self.parse_line(parts, column_names, idx_name, idx_type, is_GFF, is_GTF)
                 json_data += json.dumps(doc_data) + '\n'
 
                 line_num += 1
@@ -181,6 +160,31 @@ class DelimeterLoader(Loader):
         finally:
             self.bulk_load(idx_name, idx_type, json_data)
             logger.info('No. documents loaded: '+str(auto_num-1))
+
+    def parse_line(self, parts, column_names, idx_name, idx_type, is_GFF, is_GTF):
+        ''' Parse the parts that make up the line. '''
+        doc_data = {}
+        for idx, p in enumerate(parts):
+            p = p.strip()
+
+            if (is_GFF or is_GTF) and idx == len(parts)-1:
+                attrs = {}
+                if is_GTF:
+                    attrs = self._getAttributes(p, key_value_delim=' ')
+                else:
+                    attrs = self._getAttributes(p)
+                doc_data[column_names[idx]] = attrs
+                continue
+
+            if self.is_str(column_names[idx], idx_name, idx_type):
+                doc_data[column_names[idx]] = p
+            elif p.isdigit():
+                doc_data[column_names[idx]] = int(p)
+            elif self._isfloat(p):
+                doc_data[column_names[idx]] = float(p)
+            else:
+                doc_data[column_names[idx]] = p
+        return doc_data
 
     def _getAttributes(self, attrs, key_value_delim='='):
         ''' Parse the attributes column '''
