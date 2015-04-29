@@ -140,8 +140,7 @@
         		$('#'+overviewId).html('Showing '+hits.length+' of '+total+' hits');
 
         		for(var i=0; i<hits.length; i++) {
-        			var hit = hits[i]._source;
-        		        			
+        			var hit = hits[i]._source; 			
         			if(hit.id){
         				$('#results').append(
         						'<ul class="list-group">' +
@@ -149,20 +148,25 @@
         						'<li class="list-group-item">Chromosome: '+hit.seqid+'; Position: '+hit.start+'; '+
 					                        hit.ref+'/'+hit.alt+'</li>'+
         				'</ul>');
-        				}else if(hit.hgnc){
+        			}else if(hit.rscurrent){ 	// historical marker IDs 
+        				$('#results').append(
+        						'<ul class="list-group">' +
+        						'<li class="list-group-item"><a href="/marker/'+hit.rscurrent+'">'+hit.rscurrent +'</a></li>'+
+        						'<li class="list-group-item">Merged from: ' + hit.rshigh + ' into ' + hit.rslow + ' (dbSNP' + hit.build_id + ')' + 
+        				'</ul>');
+        			}else if(hit.hgnc){
         				$('#results').append(
         						'<ul class="list-group">' +
         						'<li class="list-group-item"><a href="/gene/'+hit.gene_symbol+'">'+hit.gene_symbol+'</a></li>'+
         						'<li class="list-group-item">HGNC: '+hit.hgnc+'</li>'+
         				'</ul>');
-        				}else if(hit.type == 'region'){
+        			}else if(hit.type == 'region'){
         				$('#results').append(
         						'<ul class="list-group">' +
         						'<li class="list-group-item"><a href="/region/'+hit.attr.region_id+'">'+hit.attr.Name +'</a></li>'+
         						'<li class="list-group-item">Location: <a href="/search/' + hit.seqid + ':' + hit.start + '-' + hit.end + '">' +  hit.seqid + ':' + hit.start + '-' + hit.end + '</a>' + 
-        						
         				'</ul>');
-        				}
+        			}
         		}
         	}
         });

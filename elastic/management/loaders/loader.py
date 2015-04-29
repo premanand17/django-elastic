@@ -101,20 +101,27 @@ class MappingProperties():
         ''' For a given index type create the mapping properties. '''
         self.idx_type = idx_type
         self.mapping_properties = {self.idx_type: {"properties": {}}}
+        self.column_names = []
 
-    def add_property(self, name, map_type, index=None, analyzer=None):
+    def add_property(self, name, map_type, index=None, analyzer=None, property_format=None):
         ''' Add a property to the mapping. '''
         self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
         if index is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
         if analyzer is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"analyzer": analyzer})
+        if format is not None:
+            self.mapping_properties[self.idx_type]["properties"][name].update({"format": property_format})
+        self.column_names.append(name)
 
     def add_properties(self, mapping_properties):
         ''' Add a nested set of properties to the mapping. '''
         if not isinstance(mapping_properties, MappingProperties):
             raise LoaderError("not a MappingProperties")
         self.mapping_properties[self.idx_type]["properties"].update(mapping_properties.mapping_properties)
+
+    def get_column_names(self):
+        return self.column_names
 
 
 class DelimeterLoader(Loader):
@@ -128,7 +135,7 @@ class DelimeterLoader(Loader):
 
         try:
             for line in file_handle:
-                line = line.rstrip().decode("utf-8")
+                line = line.decode("utf-8")
                 current_line = line
                 if(current_line.startswith("#")):
                     continue
@@ -140,26 +147,7 @@ class DelimeterLoader(Loader):
                 idx_id = str(auto_num)
                 json_data += '{"index": {"_id": "%s"}}\n' % idx_id
 
-                doc_data = {}
-                attrs = {}
-                for idx, p in enumerate(parts):
-                    if (is_GFF or is_GTF) and idx == len(parts)-1:
-                        if is_GTF:
-                            attrs = self._getAttributes(p, key_value_delim=' ')
-                        else:
-                            attrs = self._getAttributes(p)
-                        doc_data[column_names[idx]] = attrs
-                        continue
-
-                    if self.is_str(column_names[idx], idx_name, idx_type):
-                        doc_data[column_names[idx]] = p
-                    elif p.isdigit():
-                        doc_data[column_names[idx]] = int(p)
-                    elif self._isfloat(p):
-                        doc_data[column_names[idx]] = float(p)
-                    else:
-                        doc_data[column_names[idx]] = p
-
+                doc_data = self.parse_line(parts, column_names, idx_name, idx_type, is_GFF, is_GTF)
                 json_data += json.dumps(doc_data) + '\n'
 
                 line_num += 1
@@ -172,6 +160,31 @@ class DelimeterLoader(Loader):
         finally:
             self.bulk_load(idx_name, idx_type, json_data)
             logger.info('No. documents loaded: '+str(auto_num-1))
+
+    def parse_line(self, parts, column_names, idx_name, idx_type, is_GFF, is_GTF):
+        ''' Parse the parts that make up the line. '''
+        doc_data = {}
+        for idx, p in enumerate(parts):
+            p = p.strip()
+
+            if (is_GFF or is_GTF) and idx == len(parts)-1:
+                attrs = {}
+                if is_GTF:
+                    attrs = self._getAttributes(p, key_value_delim=' ')
+                else:
+                    attrs = self._getAttributes(p)
+                doc_data[column_names[idx]] = attrs
+                continue
+
+            if self.is_str(column_names[idx], idx_name, idx_type):
+                doc_data[column_names[idx]] = p
+            elif p.isdigit():
+                doc_data[column_names[idx]] = int(p)
+            elif self._isfloat(p):
+                doc_data[column_names[idx]] = float(p)
+            else:
+                doc_data[column_names[idx]] = p
+        return doc_data
 
     def _getAttributes(self, attrs, key_value_delim='='):
         ''' Parse the attributes column '''
