@@ -8,7 +8,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 fields = ["gene_symbol", "hgnc", "synonyms", "id",
-          "dbxrefs.*", "attr.*", "featureloc.seqid"]
+          "dbxrefs.*", "attr.*", "featureloc.seqid",
+          "rscurrent", "rslow", "rshigh"]
 
 
 def search(request, query, search_idx=ElasticSettings.indices_str()):
