@@ -99,12 +99,13 @@ class ElasticModelTest(TestCase):
 
     def test_or_filtered_query(self):
         ''' Test building and running a filtered query. '''
+        highlight = Highlight(["id", "seqid"])
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=1),
                                          RangeQuery("end", gte=100000)])
         or_filter = OrFilter(RangeQuery("start", gte=1, lte=100000))
         or_filter.extend(query_bool) \
                  .extend(ElasticQuery.query_string("rs*", fields=["id", "seqid"]))
-        query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter)
+        query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
 
