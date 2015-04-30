@@ -67,7 +67,14 @@ class ElasticLoadersTest(TestCase):
         for key in IDX:
             idx = IDX[key]['indexName']
             self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
-            ndocs = Search(idx=idx).get_count()['count']
+
+            # check the index has documents, allow for the indexing to complete if necessary
+            ndocs = 0
+            for _ in range(3):
+                ndocs = Search(idx=idx).get_count()['count']
+                if ndocs > 0:
+                    break
+                time.sleep(1)
             self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))
 
     def test_utils(self):
