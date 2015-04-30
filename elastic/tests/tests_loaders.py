@@ -77,6 +77,15 @@ class ElasticLoadersTest(TestCase):
                 time.sleep(1)
             self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))
 
+    def test_mapping(self):
+        ''' Test mapping used in GFF loader. '''
+        idx = IDX['GFF_GENERIC']['indexName']
+        mapping_json = Search(idx=idx).get_mapping()
+        self.assertFalse('error' in mapping_json, 'No error returned from mapping request.')
+        self.assertTrue('mappings' in mapping_json[idx], 'Found mappings.')
+        seqid = mapping_json[idx]['mappings']['gff']['properties']['seqid']
+        self.assertTrue('not_analyzed' == seqid['index'], 'seqid in GFF is not_analyzed')
+
     def test_utils(self):
         ''' Test gff utils. '''
         line = "chr22\tt1dbase\tvariant\t37191071\t37191071\t.\t+\t.\tName=rs229533;region_id=36"
