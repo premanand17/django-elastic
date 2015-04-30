@@ -68,7 +68,7 @@ class ElasticLoadersTest(TestCase):
             idx = IDX[key]['indexName']
             self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
             ndocs = Search(idx=idx).get_count()['count']
-            self.assertTrue(ndocs > 1, "Elastic count documents in " + idx + ": " + str(ndocs))
+            self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))
 
     def test_utils(self):
         ''' Test gff utils. '''
