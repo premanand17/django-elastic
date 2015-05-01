@@ -6,6 +6,7 @@ from tastypie import fields
 from tastypie.bundle import Bundle
 from elastic.elastic_model import Search, AndFilter, Query, ElasticQuery
 from tastypie.constants import ALL
+from django.db.models.constants import LOOKUP_SEP
 
 
 class GffObject(object):
@@ -26,8 +27,7 @@ class GffObject(object):
 
 
 class GFFResource(Resource):
-    # Just like a Django ``Form`` or ``Model``, we're defining all the
-    # fields we're going to handle with the API here.
+    # define the fields
     seqid = fields.CharField(attribute='seqid')
     source = fields.CharField(attribute='source')
     type = fields.CharField(attribute='type')
@@ -38,16 +38,16 @@ class GFFResource(Resource):
     attr = fields.DictField(attribute='attr')
 
     class Meta:
-        resource_name = 'gff'
+        resource_name = 'grch37_75_genes'
         object_class = GffObject
         filtering = {
             'attr': ALL,
             'seqid': ALL,
         }
 
-    # Specific to this resource, just to get the needed Riak bits.
+    # Specific to this resource
     def _client(self, q=None):
-        return Search(search_query=q, idx="grch37_75_genes", size=20000000)
+        return Search(search_query=q, idx=self._meta.resource_name, size=20000000)
 
     def _bucket(self):
         client = self._client()
@@ -109,13 +109,21 @@ class GFFResource(Resource):
             filters = {}
 
         and_filter = None
-        for name, value in filters.items():
-            if name not in self._meta.filtering:
+        for filter_expr, value in filters.items():
+            filter_bits = filter_expr.split(LOOKUP_SEP)
+            field_name = filter_bits.pop(0)
+
+            if field_name not in self._meta.filtering:
                 continue
-            q = Query.term(name, value)
+
+            if len(filter_bits):
+                filter_type = filter_bits.pop()
+                field_name = field_name + "." + filter_type
+
+            q = Query.match(field_name, value).query_wrap()
             if and_filter is None:
                 and_filter = AndFilter(q)
             else:
                 and_filter.extend(q)
-            print(name)
+
         return and_filter
