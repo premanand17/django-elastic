@@ -30,14 +30,23 @@ class SnapshotTest(TestCase):
     def test_show(self, snapshot=None):
         call_command('show_snapshot')
         call_command('show_snapshot', all=True)
+        call_command('show_snapshot', snapshot='xxx')
 
     def test_create_delete_repository(self):
         repos = 'test_backup'
+        repo_dir = "/tmp/test_snapshot/"
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' not yet created')
-        call_command('repository', repos, dir="/tmp/test_snapshot/")
+        call_command('repository', repos, dir=repo_dir)
         self.assertTrue(Snapshot.exists(repos, ''), 'Repository '+repos+' created')
+
+        self.assertFalse(Snapshot.create_repository(repos, repo_dir),
+                         'Repository already exists.')
+        self.assertFalse(Snapshot.create_repository(repos+"X", repo_dir+"/xxx/xxxx"),
+                         'Directory to store repository not found.')
+
         call_command('repository', repos, delete=True)
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' deleted')
+        self.assertFalse(Snapshot.delete_repository(repos), 'Repository '+repos+' deleted')
 
     def test_create_restore_delete_snapshot(self):
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
@@ -54,6 +63,17 @@ class SnapshotTest(TestCase):
         call_command('restore_snapshot', snapshot)
         self.assertTrue(Search.index_exists(IDX['MARKER']['indexName']), "Restored index exists")
 
+        # remove snapshot
+        call_command('snapshot', snapshot, delete=True)
+        self.assertFalse(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
+                         "Deleted snapshot "+snapshot)
+
+    def test_create_snapshot(self):
+        snapshot = 'test_'+ElasticSettings.getattr('TEST')
+        call_command('snapshot', snapshot, indices=IDX['MARKER']['indexName'])
+        # snapshot already exist so return false
+        self.assertFalse(Snapshot.create_snapshot(ElasticSettings.getattr('REPOSITORY'),
+                                                  snapshot, IDX['MARKER']['indexName']))
         # remove snapshot
         call_command('snapshot', snapshot, delete=True)
         self.assertFalse(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
@@ -76,6 +96,15 @@ class ElasticLoadersTest(TestCase):
                     break
                 time.sleep(1)
             self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))
+
+    def test_mapping(self):
+        ''' Test mapping used in GFF loader. '''
+        idx = IDX['GFF_GENERIC']['indexName']
+        mapping_json = Search(idx=idx).get_mapping()
+        self.assertFalse('error' in mapping_json, 'No error returned from mapping request.')
+        self.assertTrue('mappings' in mapping_json[idx], 'Found mappings.')
+        seqid = mapping_json[idx]['mappings']['gff']['properties']['seqid']
+        self.assertTrue('not_analyzed' == seqid['index'], 'seqid in GFF is not_analyzed')
 
     def test_utils(self):
         ''' Test gff utils. '''
