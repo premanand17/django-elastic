@@ -77,7 +77,7 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery()
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
-                  .must(ElasticQuery.query_string("rs373328635", fields=["id", "seqid"])) \
+                  .must(Query.query_string("rs373328635", fields=["id", "seqid"]).query_wrap()) \
                   .must(Query.term("seqid", 1))
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
@@ -90,7 +90,7 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery()
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
-                  .must(ElasticQuery.query_match("id", "rs373328635")) \
+                  .must(Query.match("id", "rs373328635").query_wrap()) \
                   .must(Query.term("seqid", 1))
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
@@ -104,7 +104,7 @@ class ElasticModelTest(TestCase):
                                          RangeQuery("end", gte=100000)])
         or_filter = OrFilter(RangeQuery("start", gte=1, lte=100000))
         or_filter.extend(query_bool) \
-                 .extend(ElasticQuery.query_string("rs*", fields=["id", "seqid"]))
+                 .extend(Query.query_string("rs*", fields=["id", "seqid"]).query_wrap())
         query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")

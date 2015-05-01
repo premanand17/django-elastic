@@ -107,6 +107,54 @@ class Search:
         return context
 
 
+class ElasticQuery():
+    ''' Utility to assist in constructing Elastic queries. '''
+
+    def __init__(self, query, sources=None, highlight=None):
+        ''' Query the elastic server for given elastic query. '''
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
+        self.query = {"query": query.query}
+        if sources is not None:
+            self.query["_source"] = sources
+        if highlight is not None:
+            if not isinstance(highlight, Highlight):
+                raise QueryError("not a Highlight")
+            self.query.update(highlight.highlight)
+
+    @classmethod
+    def bool(cls, query_bool, sources=None, highlight=None):
+        ''' Factory method for creating elastic Bool Query. '''
+        if not isinstance(query_bool, BoolQuery):
+            raise QueryError("not a BoolQuery")
+        return cls(query_bool, sources, highlight)
+
+    @classmethod
+    def filtered_bool(cls, query_match, query_bool, sources=None, highlight=None):
+        ''' Factory method for creating elastic filtered query with Bool filter. '''
+        if not isinstance(query_bool, BoolQuery):
+            raise QueryError("not a BoolQuery")
+        return ElasticQuery.filtered(query_match, Filter(query_bool), sources, highlight)
+
+    @classmethod
+    def filtered(cls, query_match, query_filter, sources=None, highlight=None):
+        ''' Factory method for creating elastic Filtered Query. '''
+        query = FilteredQuery(query_match, query_filter)
+        return cls(query, sources, highlight)
+
+    @classmethod
+    def query_string(cls, query_term, sources=None, highlight=None, **string_opts):
+        ''' Factory method for creating elastic Query String Query '''
+        query = Query.query_string(query_term, **string_opts)
+        return cls(query, sources, highlight)
+
+    @classmethod
+    def query_match(cls, match_id, match_str, sources=None, highlight=None):
+        ''' Factory method for creating elastic Match Query. '''
+        query = Query.match(match_id, match_str)
+        return cls(query, sources, highlight)
+
+
 class Query:
     ''' http://www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-queries.html '''
     def __init__(self, query):
@@ -117,6 +165,12 @@ class Query:
                    "enable_position_increments", "fuzzy_max_expansions", "fuzzy_prefix_length",
                    "phrase_slop", "boost", "analyze_wildcard", "auto_generate_phrase_queries",
                    "max_determinized_states", "minimum_should_match", "lenient", "time_zone"]
+
+    def query_wrap(self):
+        query_wrap = {}
+        query_wrap["query"] = self.query
+        self.query = query_wrap
+        return self
 
     @classmethod
     def match_all(cls):
@@ -171,54 +225,6 @@ class Query:
         str_arr = []
         [str_arr.append(q.query) for q in arr]
         return str_arr
-
-
-class ElasticQuery(Query):
-    ''' Utility to assist in constructing Elastic queries. '''
-
-    def __init__(self, query, sources=None, highlight=None):
-        ''' Query the elastic server for given elastic query. '''
-        if not isinstance(query, Query):
-            raise QueryError("not a Query")
-        self.query = {"query": query.query}
-        if sources is not None:
-            self.query["_source"] = sources
-        if highlight is not None:
-            if not isinstance(highlight, Highlight):
-                raise QueryError("not a Highlight")
-            self.query.update(highlight.highlight)
-
-    @classmethod
-    def bool(cls, query_bool, sources=None, highlight=None):
-        ''' Factory method for creating elastic Bool Query. '''
-        if not isinstance(query_bool, BoolQuery):
-            raise QueryError("not a BoolQuery")
-        return cls(query_bool, sources, highlight)
-
-    @classmethod
-    def filtered_bool(cls, query_match, query_bool, sources=None, highlight=None):
-        ''' Factory method for creating elastic filtered query with Bool filter. '''
-        if not isinstance(query_bool, BoolQuery):
-            raise QueryError("not a BoolQuery")
-        return ElasticQuery.filtered(query_match, Filter(query_bool), sources, highlight)
-
-    @classmethod
-    def filtered(cls, query_match, query_filter, sources=None, highlight=None):
-        ''' Factory method for creating elastic Filtered Query. '''
-        query = FilteredQuery(query_match, query_filter)
-        return cls(query, sources, highlight)
-
-    @classmethod
-    def query_string(cls, query_term, sources=None, highlight=None, **string_opts):
-        ''' Factory method for creating elastic Query String Query '''
-        query = Query.query_string(query_term, **string_opts)
-        return cls(query, sources, highlight)
-
-    @classmethod
-    def query_match(cls, match_id, match_str, sources=None, highlight=None):
-        ''' Factory method for creating elastic Match Query. '''
-        query = Query.match(match_id, match_str)
-        return cls(query, sources, highlight)
 
 
 class FilteredQuery(Query):
