@@ -25,18 +25,28 @@ def tearDownModule():
 
 
 class SnapshotTest(TestCase):
+    ''' Test elastic snapshot and restore. '''
 
     def test_show(self, snapshot=None):
         call_command('show_snapshot')
         call_command('show_snapshot', all=True)
+        call_command('show_snapshot', snapshot='xxx')
 
     def test_create_delete_repository(self):
         repos = 'test_backup'
+        repo_dir = "/tmp/test_snapshot/"
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' not yet created')
-        call_command('repository', repos, dir="/tmp/test_snapshot/")
+        call_command('repository', repos, dir=repo_dir)
         self.assertTrue(Snapshot.exists(repos, ''), 'Repository '+repos+' created')
+
+        self.assertFalse(Snapshot.create_repository(repos, repo_dir),
+                         'Repository already exists.')
+        self.assertFalse(Snapshot.create_repository(repos+"X", repo_dir+"/xxx/xxxx"),
+                         'Directory to store repository not found.')
+
         call_command('repository', repos, delete=True)
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' deleted')
+        self.assertFalse(Snapshot.delete_repository(repos), 'Repository '+repos+' deleted')
 
     def test_create_restore_delete_snapshot(self):
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
@@ -58,20 +68,46 @@ class SnapshotTest(TestCase):
         self.assertFalse(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
                          "Deleted snapshot "+snapshot)
 
+    def test_create_snapshot(self):
+        snapshot = 'test_'+ElasticSettings.getattr('TEST')
+        call_command('snapshot', snapshot, indices=IDX['MARKER']['indexName'])
+        # snapshot already exist so return false
+        self.assertFalse(Snapshot.create_snapshot(ElasticSettings.getattr('REPOSITORY'),
+                                                  snapshot, IDX['MARKER']['indexName']))
+        # remove snapshot
+        call_command('snapshot', snapshot, delete=True)
+        self.assertFalse(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
+                         "Deleted snapshot "+snapshot)
+
 
 class ElasticLoadersTest(TestCase):
 
-    def test_disease_loader(self):
-        ''' Test disease loader '''
-        index_name = IDX['DISEASE']['indexName']
-        self._check_index(index_name, 'disease', 1)
+    def test_idx_loader(self):
+        ''' Test loader has created and populated indices.  '''
+        for key in IDX:
+            idx = IDX[key]['indexName']
+            self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
 
-    def test_marker_loader(self):
-        ''' Test disease loader '''
-        index_name = IDX['MARKER']['indexName']
-        self._check_index(index_name, 'marker')
+            # check the index has documents, allow for the indexing to complete if necessary
+            ndocs = 0
+            for _ in range(3):
+                ndocs = Search(idx=idx).get_count()['count']
+                if ndocs > 0:
+                    break
+                time.sleep(1)
+            self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))
+
+    def test_mapping(self):
+        ''' Test mapping used in GFF loader. '''
+        idx = IDX['GFF_GENERIC']['indexName']
+        mapping_json = Search(idx=idx).get_mapping()
+        self.assertFalse('error' in mapping_json, 'No error returned from mapping request.')
+        self.assertTrue('mappings' in mapping_json[idx], 'Found mappings.')
+        seqid = mapping_json[idx]['mappings']['gff']['properties']['seqid']
+        self.assertTrue('not_analyzed' == seqid['index'], 'seqid in GFF is not_analyzed')
 
     def test_utils(self):
+        ''' Test gff utils. '''
         line = "chr22\tt1dbase\tvariant\t37191071\t37191071\t.\t+\t.\tName=rs229533;region_id=36"
         gff = GFF(line)
         attrs = gff.getAttributes()
@@ -84,26 +120,3 @@ class ElasticLoadersTest(TestCase):
         # check for gff errors
         line = "chr22\tt1dbase\tvariant\t37191071\t37191071\t.\t+\t."
         self.assertRaises(GFFError, GFF, line=line)
-
-    def _check_index(self, index_name, index_type, count=None):
-        self._check(ElasticSettings.url() + '/' + index_name)
-        response = self._check(ElasticSettings.url() + '/' + index_name +
-                               '/' + index_type + '/_count')
-        if count is not None:
-            self.assertGreaterEqual(response.json()['count'], count,
-                                    "Index count "+str(response.json()['count']))
-
-    def _check(self, url):
-        try:
-            response = requests.get(url)
-            self.assertEqual(response.status_code, 200, "Index " +
-                             url + " exists")
-            return response
-        except requests.exceptions.Timeout:
-            self.assertTrue(False, 'timeout exception')
-        except requests.exceptions.TooManyRedirects:
-            self.assertTrue(False, 'too many redirects exception')
-        except requests.exceptions.ConnectionError:
-            self.assertTrue(False, 'request connection exception')
-        except requests.exceptions.RequestException:
-            self.assertTrue(False, 'request exception')
