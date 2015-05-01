@@ -1,6 +1,3 @@
-# We need a generic object to shove data in/get data from.
-# Riak generally just tosses around dictionaries, so we'll lightly
-# wrap that.
 from tastypie.resources import Resource
 from tastypie import fields
 from tastypie.bundle import Bundle
@@ -9,7 +6,8 @@ from tastypie.constants import ALL
 from django.db.models.constants import LOOKUP_SEP
 
 
-class GffObject(object):
+class ElasticObject(object):
+    ''' Generic object to hold Elastic dictionaries. '''
     def __init__(self, initial=None):
         self.__dict__['_data'] = {}
 
@@ -39,55 +37,42 @@ class GFFResource(Resource):
 
     class Meta:
         resource_name = 'grch37_75_genes'
-        object_class = GffObject
+        object_class = ElasticObject
         filtering = {
             'attr': ALL,
             'seqid': ALL,
         }
 
-    # Specific to this resource
     def _client(self, q=None):
+        ''' Get the Elastic client. '''
         return Search(search_query=q, idx=self._meta.resource_name, size=20000000)
 
-    def _bucket(self):
-        client = self._client()
-        # Note that we're hard-coding the bucket to use. Fine for
-        # example purposes, but you'll want to abstract this.
-#         return client.bucket('messages')
-        return client
-
-    # The following methods will need overriding regardless of your
-    # data source.
+    # overriding the following methods
     def detail_uri_kwargs(self, bundle_or_obj):
         kwargs = {}
         if isinstance(bundle_or_obj, Bundle):
             kwargs['pk'] = bundle_or_obj.obj.uuid
         else:
             kwargs['pk'] = bundle_or_obj.uuid
-
         return kwargs
 
     def get_object_list(self, request):
         ''' Gets the result list. '''
-        print("XXXXX get_object_list")
-
         if self.search_filters is not None:
             q = ElasticQuery.filtered(Query.match_all(), self.search_filters)
         else:
             q = ElasticQuery(Query.match_all())
 
-        query = self._client(q).get_json_response()
+        json_results = self._client(q).get_json_response()
         results = []
 
-        for result in query['hits']['hits']:
-            new_obj = GffObject(initial=result['_source'])
+        for result in json_results['hits']['hits']:
+            new_obj = ElasticObject(initial=result['_source'])
             new_obj.uuid = result['_id']
             results.append(new_obj)
         return results
 
     def obj_get_list(self, bundle, **kwargs):
-        # Filtering disabled for brevity...
-        print("XXXXXxxx obj_get_list")
         filters = {}
         if hasattr(bundle.request, 'GET'):
             # Grab a mutable copy.
@@ -99,10 +84,12 @@ class GFFResource(Resource):
         return self.get_object_list(bundle.request)
 
     def obj_get(self, bundle, **kwargs):
-        print("XXXXX obj_get")
-        bucket = self._bucket()
-        gff = bucket.get(kwargs['pk'])
-        return GffObject(initial=gff.get_data())
+        ''' Used to get by Elastic _uid. '''
+        q = ElasticQuery(Query.ids(kwargs['pk']))
+        result = self._client(q).get_json_response()['hits']['hits'][0]
+        new_obj = ElasticObject(initial=result['_source'])
+        new_obj.uuid = result['_id']
+        return new_obj
 
     def build_filters(self, filters=None):
         if filters is None:
@@ -120,7 +107,7 @@ class GFFResource(Resource):
                 filter_type = filter_bits.pop()
                 field_name = field_name + "." + filter_type
 
-            q = Query.match(field_name, value).query_wrap()
+            q = Query.query_string(value, fields=[field_name]).query_wrap()
             if and_filter is None:
                 and_filter = AndFilter(q)
             else:
