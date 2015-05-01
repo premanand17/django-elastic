@@ -178,6 +178,16 @@ class Query:
         return cls({"match_all": {}})
 
     @classmethod
+    def ids(cls, ids, types=None):
+        ''' Factory method for Ids Query '''
+        if not isinstance(ids, list):
+            ids = [ids]
+        if types is None:
+            return cls({"ids": {"values": ids}})
+        else:
+            return cls({"ids": {"values": ids, "type": types}})
+
+    @classmethod
     def term(cls, name, value, boost=None):
         ''' Factory method for Term Query '''
         if boost is None:
