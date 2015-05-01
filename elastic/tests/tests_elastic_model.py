@@ -193,6 +193,12 @@ class ElasticModelTest(TestCase):
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
         self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved marker (rs*)")
 
+    def test_query_ids(self):
+        ''' Test by query ids. '''
+        query = ElasticQuery(Query.ids(['1', '2']))
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
+        self.assertTrue(elastic.get_result()['total'] == 2, "Elastic string query retrieved marker (rs*)")
+
     def test_count(self):
         ''' Test count the number of documents in an index. '''
         elastic = Search(idx=ElasticSettings.idx('DEFAULT'))
