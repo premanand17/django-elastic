@@ -2,8 +2,9 @@ from tastypie.resources import Resource
 from tastypie import fields
 from tastypie.bundle import Bundle
 from elastic.elastic_model import Search, AndFilter, Query, ElasticQuery
-from tastypie.constants import ALL
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from django.db.models.constants import LOOKUP_SEP
+from tastypie.exceptions import InvalidFilterError
 
 
 class ElasticObject(object):
@@ -39,7 +40,7 @@ class GFFResource(Resource):
         resource_name = 'grch37_75_genes'
         object_class = ElasticObject
         filtering = {
-            'attr': ALL,
+            'attr': ['gene_name', 'gene_id'],
             'seqid': ALL,
         }
 
@@ -99,12 +100,16 @@ class GFFResource(Resource):
         for filter_expr, value in filters.items():
             filter_bits = filter_expr.split(LOOKUP_SEP)
             field_name = filter_bits.pop(0)
+            filter_type = 'exact'
 
             if field_name not in self._meta.filtering:
                 continue
-
             if len(filter_bits):
                 filter_type = filter_bits.pop()
+
+            self.check_filtering(field_name, filter_type)
+
+            if filter_type != 'exact':
                 field_name = field_name + "." + filter_type
 
             q = Query.query_string(value, fields=[field_name]).query_wrap()
@@ -114,3 +119,26 @@ class GFFResource(Resource):
                 and_filter.extend(q)
 
         return and_filter
+
+    def check_filtering(self, field_name, filter_type='exact'):
+        """
+        Base on tastypie.resources.BaseModelResource.check_filtering().
+        Given a field name and an optional filter type determine if a field
+        can be filtered on.
+        If a filter does not meet the needed conditions, it should raise an
+        ``InvalidFilterError``.
+        If the filter meets the conditions, a list of attribute names (not
+        field names) will be returned.
+        """
+        if field_name not in self._meta.filtering:
+            raise InvalidFilterError("The '%s' field does not allow filtering." % field_name)
+
+        # Check to see if it's an allowed lookup type.
+        if not self._meta.filtering[field_name] in (ALL, ALL_WITH_RELATIONS):
+            # Must be an explicit whitelist.
+            if filter_type not in self._meta.filtering[field_name]:
+                raise InvalidFilterError("'%s' is not an allowed filter on the '%s' field." % (filter_type, field_name))
+
+        if self.fields[field_name].attribute is None:
+            raise InvalidFilterError("The '%s' field has no 'attribute' for searching with." % field_name)
+        return [self.fields[field_name].attribute]
