@@ -1,17 +1,18 @@
+from tastypie import fields
 from tastypie.constants import ALL
 from elastic.tastypie.resources import BaseGFFResource, ElasticObject,\
     ElasticResource
-from tastypie import fields
+from elastic.elastic_settings import ElasticSettings
 
 
 class GeneResource(BaseGFFResource):
 
     class Meta:
-        resource_name = 'grch37_75_genes'
+        resource_name = ElasticSettings.idx('GFF_GENES')
         object_class = ElasticObject
         max_limit = 100000
         filtering = {
-            'attr': ['gene_name', 'gene_id'],
+            'attr': ['gene_name', 'gene_id', 'Name'],
             'seqid': ALL,
         }
 
@@ -41,7 +42,7 @@ class MarkerResource(ElasticResource):
     info = fields.CharField(attribute='info')
 
     class Meta:
-        resource_name = 'dbsnp142'
+        resource_name = ElasticSettings.idx('MARKER')
         object_class = ElasticObject
         max_limit = 100000
         filtering = {
