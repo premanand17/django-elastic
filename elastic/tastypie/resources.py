@@ -1,10 +1,10 @@
-from tastypie.resources import Resource
 from tastypie import fields
+from tastypie.resources import Resource
+from elastic.elastic_model import Search, ElasticQuery, Query, AndFilter
 from tastypie.bundle import Bundle
-from elastic.elastic_model import Search, AndFilter, Query, ElasticQuery
-from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from django.db.models.constants import LOOKUP_SEP
 from tastypie.exceptions import InvalidFilterError
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 
 class ElasticObject(object):
@@ -25,28 +25,15 @@ class ElasticObject(object):
         return self._data
 
 
-class GFFResource(Resource):
-    # define the fields
-    seqid = fields.CharField(attribute='seqid')
-    source = fields.CharField(attribute='source')
-    type = fields.CharField(attribute='type')
-    start = fields.IntegerField(attribute='start')
-    end = fields.IntegerField(attribute='end')
-    score = fields.CharField(attribute='score')
-    phase = fields.CharField(attribute='phase')
-    attr = fields.DictField(attribute='attr')
-
-    class Meta:
-        resource_name = 'grch37_75_genes'
-        object_class = ElasticObject
-        filtering = {
-            'attr': ['gene_name', 'gene_id'],
-            'seqid': ALL,
-        }
+class ElasticResource(Resource):
 
     def _client(self, q=None):
         ''' Get the Elastic client. '''
-        return Search(search_query=q, idx=self._meta.resource_name, size=20000000)
+        if self._meta.max_limit is None:
+            max_limit = 2000000
+        else:
+            max_limit = self._meta.max_limit
+        return Search(search_query=q, idx=self._meta.resource_name, size=max_limit)
 
     # overriding the following methods
     def detail_uri_kwargs(self, bundle_or_obj):
@@ -91,6 +78,21 @@ class GFFResource(Resource):
         new_obj = ElasticObject(initial=result['_source'])
         new_obj.uuid = result['_id']
         return new_obj
+
+    def obj_create(self, bundle, **kwargs):
+        pass
+
+    def obj_update(self, bundle, **kwargs):
+        pass
+
+    def obj_delete_list(self, bundle, **kwargs):
+        pass
+
+    def obj_delete(self, bundle, **kwargs):
+        pass
+
+    def rollback(self, bundles):
+        pass
 
     def build_filters(self, filters=None):
         if filters is None:
@@ -142,3 +144,15 @@ class GFFResource(Resource):
         if self.fields[field_name].attribute is None:
             raise InvalidFilterError("The '%s' field has no 'attribute' for searching with." % field_name)
         return [self.fields[field_name].attribute]
+
+
+class BaseGFFResource(ElasticResource):
+    # define the fields
+    seqid = fields.CharField(attribute='seqid')
+    source = fields.CharField(attribute='source')
+    type = fields.CharField(attribute='type')
+    start = fields.IntegerField(attribute='start')
+    end = fields.IntegerField(attribute='end')
+    score = fields.CharField(attribute='score')
+    phase = fields.CharField(attribute='phase')
+    attr = fields.DictField(attribute='attr')
