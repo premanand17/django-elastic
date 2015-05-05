@@ -28,5 +28,5 @@ urlpatterns = [
                url(r'^(?P<src>\w+):(?P<start>[\w]+)-(?P<stop>[\w]+)/db/(?P<search_idx>[\w,]+)/(?P<ajax>[\w]+)',
                    views.ajax_range_overlap_search, name='filtered_range_search'),
 
-               url(r'^api/', include(api.urls)),
+               url(r'^api/', include(api.urls), name='elastic'),
                ]
