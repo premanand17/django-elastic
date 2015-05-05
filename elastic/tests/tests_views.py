@@ -7,7 +7,9 @@ import json
 from elastic.elastic_settings import ElasticSettings
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
+                                                'DEFAULT': IDX['MARKER']['indexName'],
+                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
                                         'ELASTIC_URL': ElasticSettings.url()}})
 def setUpModule():
     ''' Load test indices (marker) '''
@@ -15,14 +17,18 @@ def setUpModule():
     time.sleep(1)
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
+                                                'DEFAULT': IDX['MARKER']['indexName'],
+                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
                                         'ELASTIC_URL': ElasticSettings.url()}})
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER_IDX': IDX['MARKER']['indexName']},
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
+                                                'DEFAULT': IDX['MARKER']['indexName'],
+                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
                                         'ELASTIC_URL': ElasticSettings.url()}})
 class ElasticViewsTest(TestCase):
 
@@ -43,7 +49,7 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP elastic '''
-        resp = self.client.get('/search/rs2476601/')
+        resp = self.client.get('/search/rs2476601/db/'+ElasticSettings.idx(name='MARKER'))
         self.assertEqual(resp.status_code, 200)
 #         print(resp.context)
         self.assertTrue('data' in resp.context)
@@ -52,7 +58,7 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_wildcard(self):
         ''' Test a wild card elastic '''
-        resp = self.client.get('/search/rs3*/')
+        resp = self.client.get('/search/rs3*/db/'+ElasticSettings.idx(name='MARKER'))
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
 
@@ -65,18 +71,18 @@ class ElasticViewsTest(TestCase):
         self._check_ajax('/search/1%3A1-2880054/db/')
 
     def _check_ajax(self, url_path):
-        resp = self.client.get(url_path+ElasticSettings.idx(name='MARKER_IDX')+'/count')
+        resp = self.client.get(url_path+ElasticSettings.idx(name='MARKER')+'/count')
         self.assertEqual(resp.status_code, 200)
         json_string = str(resp.content, encoding='utf8')
         data = json.loads(json_string)
         self.assertTrue('count' in data)
         data = {'from': 20, 'size': 10}
-        resp = self.client.post(url_path+ElasticSettings.idx(name='MARKER_IDX')+'/show', data)
+        resp = self.client.post(url_path+ElasticSettings.idx(name='MARKER')+'/show', data)
         self.assertEqual(resp.status_code, 200)
 
     def test_range(self):
         ''' Test a range query '''
-        resp = self.client.get('/search/1:10019-113834947/db/'+ElasticSettings.idx(name='MARKER_IDX'))
+        resp = self.client.get('/search/1:10019-113834947/db/'+ElasticSettings.idx(name='MARKER'))
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
         for snp in resp.context['data']:
@@ -91,53 +97,3 @@ class ElasticViewsTest(TestCase):
         self.assertTrue(snp['seqid'])
 
         self.assertTrue(isinstance(snp['start'], int))
-
-# NEED region test data
-#     def test_region_index(self):
-#         ''' Test Region Index '''
-#         index_name = ElasticSettings.getattr(name='REGION_IDX')
-#         try:
-#             # Test if region index exists
-#             resp = requests.head(ElasticSettings.url() + '/' + index_name)
-#             self.assertEqual(resp.status_code, 200, "Region Index " + index_name + "exists")
-#             # Test if type region exists
-#             index_type = 'region'
-#             resp = requests.head(ElasticSettings.url() +
-#                                  '/' + index_name +
-#                                  '/' + index_type)
-#             self.assertEqual(resp.status_code, 200, "Region Index: " +
-#                              index_name + " and Region Index Type: " +
-#                              index_type + " exists")
-#         except requests.exceptions.Timeout:
-#             self.assertTrue(False, 'timeout exception')
-#         except requests.exceptions.TooManyRedirects:
-#             self.assertTrue(False, 'too many redirects exception')
-#         except requests.exceptions.ConnectionError:
-#             self.assertTrue(False, 'request connection exception')
-#         except requests.exceptions.RequestException:
-#             self.assertTrue(False, 'request exception')
-#
-#     def test_region_search(self):
-#         ''' Test a single Region elastic '''
-#         resp = self.client.get('/elastic/22q12.2/')
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTrue('data' in resp.context)
-#         region = resp.context['data'][0]
-#         self._RegionTest(region)
-#
-#     def test_region_wildcard(self):
-#         ''' Test a wild card elastic '''
-#         resp = self.client.get('/elastic/22q12*/')
-#         self.assertEqual(resp.status_code, 200)
-#         self.assertTrue('data' in resp.context)
-#
-#         for region in resp.context['data']:
-#             self._RegionTest(region)
-#
-#     def _RegionTest(self, region):
-#         ''' Test the elements of a Region result '''
-#         self.assertTrue(region['seqid'])
-#         self.assertTrue(region['type'])
-#         self.assertTrue(region['source'])
-#         self.assertTrue(region['start'])
-#         self.assertTrue(region['end'])

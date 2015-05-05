@@ -10,7 +10,9 @@ import time
 import requests
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
+                                                'DEFAULT': IDX['MARKER']['indexName'],
+                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
                                         'ELASTIC_URL': ElasticSettings.url()}})
 def setUpModule():
     ''' Load test indices (marker) '''
@@ -19,7 +21,9 @@ def setUpModule():
     time.sleep(2)
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
+                                                'DEFAULT': IDX['MARKER']['indexName'],
+                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
                                         'ELASTIC_URL': ElasticSettings.url()}})
 def tearDownModule():
     ''' Remove test indices '''
@@ -28,6 +32,7 @@ def tearDownModule():
 
 
 @override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
+                                                'DEFAULT': IDX['MARKER']['indexName'],
                                                 'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
                                         'ELASTIC_URL': ElasticSettings.url()}})
 class TastypieResourceTest(ResourceTestCase):
@@ -62,7 +67,9 @@ class TastypieResourceTest(ResourceTestCase):
         self.assertKeys(self.deserialize(resp), keys)
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
+@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
+                                                'DEFAULT': IDX['MARKER']['indexName'],
+                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
                                         'ELASTIC_URL': ElasticSettings.url()}})
 class ElasticModelTest(TestCase):
 
