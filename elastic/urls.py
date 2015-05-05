@@ -1,5 +1,14 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from elastic import views
+from tastypie.api import Api
+from elastic.tastypie.api import GeneResource, GwasBarrettResource,\
+    MarkerResource
+
+# register tastypie api
+api = Api(api_name='dev')
+api.register(GeneResource())
+api.register(GwasBarrettResource())
+api.register(MarkerResource())
 
 urlpatterns = [
                # range overlap queries @IgnorePep8
@@ -18,4 +27,6 @@ urlpatterns = [
                    views.ajax_search, name='count'),
                url(r'^(?P<src>\w+):(?P<start>[\w]+)-(?P<stop>[\w]+)/db/(?P<search_idx>[\w,]+)/(?P<ajax>[\w]+)',
                    views.ajax_range_overlap_search, name='filtered_range_search'),
+
+               url(r'^api/', include(api.urls)),
                ]
