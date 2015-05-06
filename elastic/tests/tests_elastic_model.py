@@ -1,30 +1,65 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from elastic.tests.settings_idx import IDX
-import requests
+from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
 from elastic.elastic_model import Search, BoolQuery, Query, ElasticQuery, \
     RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter, Highlight
 from elastic.elastic_settings import ElasticSettings
+from tastypie.test import ResourceTestCase
+from django.core.urlresolvers import reverse
 import time
+import requests
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
+    call_command('index_search', **IDX['GFF_GENERIC'])
     time.sleep(2)
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
+    requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'DEFAULT': IDX['MARKER']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
+class TastypieResourceTest(ResourceTestCase):
+    ''' Test Tastypie interface to Elastic indices. '''
+
+    def setUp(self):
+        super(TastypieResourceTest, self).setUp()
+
+    def test_list(self):
+        url = reverse('api_dispatch_list',
+                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
+        resp = self.api_client.get(url, format='json')
+        self.assertValidJSONResponse(resp)
+        self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
+
+    def test_list_with_parameters(self):
+        url = reverse('api_dispatch_list',
+                      kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
+        resp = self.api_client.get(url, format='json', data={'attr__Name': 'rs2664170'})
+        print(self.deserialize(resp))
+        self.assertValidJSONResponse(resp)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 1, 'Retrieved stored markers')
+
+        resp = self.api_client.get(url, format='json', data={'attr__xxx': 'rs2664170'})
+        self.assertKeys(self.deserialize(resp), ['error'])
+
+    def test_detail(self):
+        url = reverse('api_dispatch_detail',
+                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test', 'pk': '1'})
+        resp = self.api_client.get(url, format='json')
+        self.assertValidJSONResponse(resp)
+        keys = ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info', 'resource_uri']
+        self.assertKeys(self.deserialize(resp), keys)
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
 class ElasticModelTest(TestCase):
 
     def test_idx_exists(self):
@@ -77,7 +112,7 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery()
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
-                  .must(ElasticQuery.query_string("rs373328635", fields=["id", "seqid"])) \
+                  .must(Query.query_string("rs373328635", fields=["id", "seqid"]).query_wrap()) \
                   .must(Query.term("seqid", 1))
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
@@ -90,7 +125,7 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery()
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
-                  .must(ElasticQuery.query_match("id", "rs373328635")) \
+                  .must(Query.match("id", "rs373328635").query_wrap()) \
                   .must(Query.term("seqid", 1))
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
@@ -104,7 +139,7 @@ class ElasticModelTest(TestCase):
                                          RangeQuery("end", gte=100000)])
         or_filter = OrFilter(RangeQuery("start", gte=1, lte=100000))
         or_filter.extend(query_bool) \
-                 .extend(ElasticQuery.query_string("rs*", fields=["id", "seqid"]))
+                 .extend(Query.query_string("rs*", fields=["id", "seqid"]).query_wrap())
         query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
@@ -192,6 +227,12 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery.query_string("rs*", fields=["id"], highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
         self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved marker (rs*)")
+
+    def test_query_ids(self):
+        ''' Test by query ids. '''
+        query = ElasticQuery(Query.ids(['1', '2']))
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
+        self.assertTrue(elastic.get_result()['total'] == 2, "Elastic string query retrieved marker (rs*)")
 
     def test_count(self):
         ''' Test count the number of documents in an index. '''
