@@ -26,12 +26,12 @@ class GeneTargetManager(DelimeterLoader):
              .add_property("name", "string", index="not_analyzed") \
              .add_property("biotype", "string", index="not_analyzed") \
              .add_property("strand", "string", index="no") \
-             .add_property("baitChr", "string", index="no") \
+             .add_property("baitChr", "string", index="not_analyzed") \
              .add_property("baitStart", "integer", index="not_analyzed") \
              .add_property("baitEnd", "integer", index="not_analyzed") \
              .add_property("baitID", "string", index="no") \
              .add_property("baitName", "string", index="no") \
-             .add_property("oeChr", "string", index="no") \
+             .add_property("oeChr", "string", index="not_analyzed") \
              .add_property("oeStart", "integer", index="not_analyzed") \
              .add_property("oeEnd", "integer", index="not_analyzed") \
              .add_property("oeID", "string", index="no") \
