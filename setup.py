@@ -12,6 +12,7 @@ setup(
     name='elastic',
     version='0.0.1',
     packages=find_packages(),
+    package_data={'elastic': ['tests/data/*'], },
     include_package_data=True,
     zip_safe=False,
     url='http://github.com/D-I-L/django-elastic',
