@@ -1,6 +1,6 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from elastic.tests.settings_idx import IDX
+from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
 from elastic.elastic_model import Search, BoolQuery, Query, ElasticQuery, \
     RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter, Highlight
 from elastic.elastic_settings import ElasticSettings
@@ -10,10 +10,7 @@ import time
 import requests
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
-                                                'DEFAULT': IDX['MARKER']['indexName'],
-                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
@@ -21,35 +18,29 @@ def setUpModule():
     time.sleep(2)
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
-                                                'DEFAULT': IDX['MARKER']['indexName'],
-                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
     requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
-                                                'DEFAULT': IDX['MARKER']['indexName'],
-                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
 class TastypieResourceTest(ResourceTestCase):
 
     def setUp(self):
         super(TastypieResourceTest, self).setUp()
 
     def test_list(self):
-        url = reverse('elastic:api_dispatch_list',
-                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'dev'})
+        url = reverse('api_dispatch_list',
+                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
         resp = self.api_client.get(url, format='json')
         self.assertValidJSONResponse(resp)
         self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
 
     def test_list_with_parameters(self):
-        url = reverse('elastic:api_dispatch_list',
-                      kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'dev'})
+        url = reverse('api_dispatch_list',
+                      kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
         resp = self.api_client.get(url, format='json', data={'attr__Name': 'rs2664170'})
         print(self.deserialize(resp))
         self.assertValidJSONResponse(resp)
@@ -59,18 +50,15 @@ class TastypieResourceTest(ResourceTestCase):
         self.assertKeys(self.deserialize(resp), ['error'])
 
     def test_detail(self):
-        url = reverse('elastic:api_dispatch_detail',
-                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'dev', 'pk': '1'})
+        url = reverse('api_dispatch_detail',
+                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test', 'pk': '1'})
         resp = self.api_client.get(url, format='json')
         self.assertValidJSONResponse(resp)
         keys = ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info', 'resource_uri']
         self.assertKeys(self.deserialize(resp), keys)
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
-                                                'DEFAULT': IDX['MARKER']['indexName'],
-                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
 class ElasticModelTest(TestCase):
 
     def test_idx_exists(self):
