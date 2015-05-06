@@ -27,6 +27,7 @@ def tearDownModule():
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
 class TastypieResourceTest(ResourceTestCase):
+    ''' Test Tastypie interface to Elastic indices. '''
 
     def setUp(self):
         super(TastypieResourceTest, self).setUp()
