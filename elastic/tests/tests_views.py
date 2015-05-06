@@ -1,35 +1,26 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from elastic.tests.settings_idx import IDX
+from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS2
 import requests
 import time
 import json
 from elastic.elastic_settings import ElasticSettings
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
-                                                'DEFAULT': IDX['MARKER']['indexName'],
-                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS2)
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     time.sleep(1)
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
-                                                'DEFAULT': IDX['MARKER']['indexName'],
-                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS2)
 def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
 
 
-@override_settings(ELASTIC={'default': {'IDX': {'MARKER': IDX['MARKER']['indexName'],
-                                                'DEFAULT': IDX['MARKER']['indexName'],
-                                                'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
-                                        'ELASTIC_URL': ElasticSettings.url()}})
+@override_settings(ELASTIC=OVERRIDE_SETTINGS2)
 class ElasticViewsTest(TestCase):
 
     def test_server(self):
@@ -49,7 +40,7 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP elastic '''
-        resp = self.client.get('/search/rs2476601/db/'+ElasticSettings.idx(name='MARKER'))
+        resp = self.client.get('/search/rs2476601/')
         self.assertEqual(resp.status_code, 200)
 #         print(resp.context)
         self.assertTrue('data' in resp.context)
@@ -58,7 +49,7 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_wildcard(self):
         ''' Test a wild card elastic '''
-        resp = self.client.get('/search/rs3*/db/'+ElasticSettings.idx(name='MARKER'))
+        resp = self.client.get('/search/rs3*/')
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
 
