@@ -27,7 +27,10 @@ def tearDownModule():
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
 class TastypieResourceTest(ResourceTestCase):
-    ''' Test Tastypie interface to Elastic indices. '''
+    ''' Test Tastypie interface to Elastic indices.
+    Note: Overriding the ROOT_URLCONF to set up test Tastypie api that
+    connects to the test indices set up for the module.
+    '''
 
     def setUp(self):
         super(TastypieResourceTest, self).setUp()
@@ -131,6 +134,19 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+
+    def test_bool_nested_filter(self):
+        ''' Test combined Bool filter '''
+        query_bool_nest = BoolQuery()
+        query_bool_nest.must(Query.match("id", "rs373328635").query_wrap()) \
+                       .must(Query.term("seqid", 1))
+
+        query_bool = BoolQuery()
+        query_bool.should(query_bool_nest) \
+                  .should(Query.term("seqid", 2))
+        query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] >= 1, "Nested bool filter query")
 
     def test_or_filtered_query(self):
         ''' Test building and running a filtered query. '''
