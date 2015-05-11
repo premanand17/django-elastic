@@ -11,7 +11,8 @@ class CriteriaManager(JSONLoader):
         idx_type = self.get_index_type(**options)
         print('idx name ' + idx_name)
         print('idx type ' + idx_type)
-        mart_project = 'immunobase'
+        #mart_project = 'immunobase'
+        mart_project = 't1dbase'
         mart_url = 'https://mart.' + mart_project + '.org/biomart/martservice?'
         mart_object = self.get_object_type(**options)
         mart_dataset = mart_project + '_criteria_' + mart_object
@@ -27,7 +28,7 @@ class CriteriaManager(JSONLoader):
         idx_type = self.get_index_type(**options)
         # props = MappingProperties(idx_type)
         props = self.get_properties(**options)
-        self.mapping(props.mapping_properties, idx_type=idx_type, meta=None, analyzer=self.KEYWORD_ANALYZER, **options)
+        self.mapping(props, idx_type=idx_type, meta=None, analyzer=self.KEYWORD_ANALYZER, **options)
         # mapping_json = {idx_type: props}
         # self.mapping(mapping_json, idx_type=idx_type, analyzer=self.KEYWORD_ANALYZER, **options)
 
@@ -89,13 +90,13 @@ class CriteriaManager(JSONLoader):
 
     def get_organism_enabled(self):
         # hard code for now, later fetch it from db
-        org = ['Hs']
-        # org = ['Hs', 'Mm', 'Rn']
+        # org = ['Hs']
+        org = ['Hs', 'Mm', 'Rn']
         return sorted(org)
 
     def get_diseases_enabled(self):
-        disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'OD']
-        # disease = ['T1D']
+        # disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'OD']
+        disease = ['T1D']
         return sorted(disease)
 
     def get_dis_orgs(self):
@@ -105,8 +106,6 @@ class CriteriaManager(JSONLoader):
         for dis in dis_enabled:
             for org in orgs_enabled:
                 dis_orgs.append(dis + '_' + org)
-        # dis_orgs = ['AS_Hs', 'ATD_Hs', 'CEL_Hs', 'CRO_Hs', 'JIA_Hs', 'MS_Hs', 'PBC_Hs', 'PSO_Hs', 'RA_Hs', 'SLE_Hs',
-        #            'T1D_Hs', 'UC_Hs', 'OD_Hs']
         return sorted(dis_orgs)
 
     def get_object_type(self, **options):

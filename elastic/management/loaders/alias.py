@@ -44,11 +44,11 @@ class AliasManager(DelimeterLoader):
         ''' Create the mapping for alias indexing '''
         props = MappingProperties(idx_alias_type)
         props.add_property("internal_id", "string", index="not_analyzed")
-        props.add_property("alias", "string", analyzer="full_name")
+        props.add_property("alias", "string", analyzer="full_name", index_options="offsets")
         props.add_property("preferred_name", "string", analyzer="full_name")
         props.add_property("type", "string", analyzer="standard")
         print(props.mapping_properties)
-        self.mapping(props.mapping_properties, idx_type=idx_alias_type, meta=None, analyzer=self.KEYWORD_ANALYZER,
+        self.mapping(props, idx_type=idx_alias_type, meta=None, analyzer=self.KEYWORD_ANALYZER,
                      **options)
 
     def get_index_alias_type(self, **options):
@@ -77,7 +77,7 @@ class AliasManager(DelimeterLoader):
         return sorted(org)
 
     def get_diseases_enabled(self):
-        disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'OD']
+        disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'OD', 'AA', 'IBD', 'NAR', 'PSC', 'SJO', 'SSC', 'VIT']
         # disease = ['T1D']
         return sorted(disease)
 
