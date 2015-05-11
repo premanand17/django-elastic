@@ -40,27 +40,28 @@ class Snapshot():
         url = ElasticSettings.url() + '/_snapshot/' + repo
         if Snapshot.exists(repo, ''):
             logger.error("Repository "+repo+" already exists!")
-            return
+            return False
         parent = os.path.abspath(os.path.join(location, ".."))
 
         if not os.path.isdir(parent):
             logger.error("Check directory exists: "+parent)
-            return
+            return False
         data = {"type": "fs",
                 "settings": {"location": location}
                 }
         resp = requests.put(url, data=json.dumps(data))
         if resp.status_code != 200:
-            logger.error("Returned status (for "+url+"): "+str(resp.status_code))
-            logger.error(resp.json()["error"])
+            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + resp.json()["error"])
+        return True
 
     @classmethod
     def delete_repository(cls, repo):
         url = ElasticSettings.url() + '/_snapshot/' + repo
         resp = requests.delete(url)
         if resp.status_code != 200:
-            logger.error("Returned status (for "+url+"): "+str(resp.status_code))
-            logger.error(resp.json()["error"])
+            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + resp.json()["error"])
+            return False
+        return True
 
     @classmethod
     def create_snapshot(cls, repo, snapshot, indices):
@@ -70,23 +71,22 @@ class Snapshot():
         resp = requests.get(url)
         if resp.status_code == 200:
             logger.error("Snapshot "+snapshot+" already exists!")
-            return
+            return False
 
         data = {}
         if indices is not None:
             data = {"indices": indices}
         resp = requests.put(url, data=json.dumps(data))
         if resp.status_code != 200:
-            logger.error("Snapshot "+snapshot+" create error!")
-            logger.error(resp.json()["error"])
+            logger.error("Snapshot "+snapshot+" create error! :: " + resp.json()["error"])
+        return True
 
     @classmethod
     def delete_snapshot(cls, repo, snapshot):
         url = ElasticSettings.url() + '/_snapshot/' + repo + '/' + snapshot
         resp = requests.delete(url)
         if resp.status_code != 200:
-            logger.error("Returned status (for "+url+"): "+str(resp.status_code))
-            logger.error(resp.json()["error"])
+            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + resp.json()["error"])
 
     @classmethod
     def restore_snapshot(cls, repo, snapshot, url, indices):
@@ -96,5 +96,4 @@ class Snapshot():
             data = {"indices": indices}
         resp = requests.post(url, data=json.dumps(data))
         if resp.status_code != 200:
-            logger.error("Returned status (for "+url+"): "+str(resp.status_code))
-            logger.error(resp.json()["error"])
+            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + resp.json()["error"])

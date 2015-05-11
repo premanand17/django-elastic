@@ -10,16 +10,25 @@ logger = logging.getLogger(__name__)
 class Search:
     ''' Used to run Elastic searches and return results or mappings. '''
 
-    def __init__(self, build_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
+    def __init__(self, search_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
         ''' Query the elastic server for given elastic query '''
         self.url = (ElasticSettings.url() + '/' + idx + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
-        if build_query is not None:
-            if not isinstance(build_query, ElasticQuery):
+        if search_query is not None:
+            if not isinstance(search_query, ElasticQuery):
                 raise QueryError("not an ElasticQuery")
-            self.query = build_query.query
+            self.query = search_query.query
         self.size = size
         self.idx = idx
+
+    @classmethod
+    def index_exists(cls, idx, url=ElasticSettings.url()):
+        ''' Check if an index exists. '''
+        url += '/' + idx
+        response = requests.get(url)
+        if "error" in response.json():
+            return False
+        return True
 
     @classmethod
     def range_overlap_query(cls, seqid, start_range, end_range,
@@ -29,8 +38,8 @@ class Search:
         query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range),
                                          RangeQuery("end", gte=end_range)])
         or_filter = OrFilter(RangeQuery("start", gte=start_range, lte=end_range))
-        or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range))
-        or_filter.extend(query_bool)
+        or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range)) \
+                 .extend(query_bool)
         query = ElasticQuery.filtered(Query.term("seqid", seqid), or_filter, field_list)
         return cls(query, search_from, size, idx)
 
@@ -72,76 +81,78 @@ class Search:
         ''' Return the elastic context result '''
         json_response = self.get_json_response()
         context = {"query": self.query}
-        c_dbs = {}
+        db_types = {}
         dbs = self.idx.split(",")
         for this_db in dbs:
             stype = "Gene"
             if "snp" in this_db:
                 stype = "Marker"
-            if "region" in this_db:
+            elif "region" in this_db:
                 stype = "Region"
-            c_dbs[this_db] = stype
-        context["dbs"] = c_dbs
+            db_types[this_db] = stype
+        context["dbs"] = db_types
         context["db"] = self.idx
 
         content = []
-        if(len(json_response['hits']['hits']) >= 1):
-            for hit in json_response['hits']['hits']:
-                hit['_source']['idx_type'] = hit['_type']
-                hit['_source']['idx_id'] = hit['_id']
-                content.append(hit['_source'])
+        for hit in json_response['hits']['hits']:
+            hit['_source']['idx_type'] = hit['_type']
+            hit['_source']['idx_id'] = hit['_id']
+            if 'highlight' in hit:
+                hit['_source']['highlight'] = hit['highlight']
+            content.append(hit['_source'])
 
         context["data"] = content
         context["total"] = json_response['hits']['total']
-        if(int(json_response['hits']['total']) < self.size):
-            context["size"] = json_response['hits']['total']
-        else:
-            context["size"] = self.size
+        context["size"] = self.size
         return context
 
 
-class ElasticQuery:
+class ElasticQuery():
     ''' Utility to assist in constructing Elastic queries. '''
 
-    def __init__(self, query, sources=None):
+    def __init__(self, query, sources=None, highlight=None):
         ''' Query the elastic server for given elastic query. '''
         if not isinstance(query, Query):
             raise QueryError("not a Query")
         self.query = {"query": query.query}
         if sources is not None:
             self.query["_source"] = sources
+        if highlight is not None:
+            if not isinstance(highlight, Highlight):
+                raise QueryError("not a Highlight")
+            self.query.update(highlight.highlight)
 
     @classmethod
-    def bool(cls, query_bool):
+    def bool(cls, query_bool, sources=None, highlight=None):
         ''' Factory method for creating elastic Bool Query. '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
-        return cls(query_bool)
+        return cls(query_bool, sources, highlight)
 
     @classmethod
-    def filtered_bool(cls, query_match, query_bool, sources=None):
+    def filtered_bool(cls, query_match, query_bool, sources=None, highlight=None):
         ''' Factory method for creating elastic filtered query with Bool filter. '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
-        return ElasticQuery.filtered(query_match, Filter(query_bool), sources)
+        return ElasticQuery.filtered(query_match, Filter(query_bool), sources, highlight)
 
     @classmethod
-    def filtered(cls, query_match, query_filter, sources=None):
+    def filtered(cls, query_match, query_filter, sources=None, highlight=None):
         ''' Factory method for creating elastic Filtered Query. '''
         query = FilteredQuery(query_match, query_filter)
-        return cls(query, sources)
+        return cls(query, sources, highlight)
 
     @classmethod
-    def query_string(cls, query_term, sources=None, **string_opts):
+    def query_string(cls, query_term, sources=None, highlight=None, **string_opts):
         ''' Factory method for creating elastic Query String Query '''
         query = Query.query_string(query_term, **string_opts)
-        return cls(query, sources)
+        return cls(query, sources, highlight)
 
     @classmethod
-    def query_match(cls, match_id, match_str, sources=None):
+    def query_match(cls, match_id, match_str, sources=None, highlight=None):
         ''' Factory method for creating elastic Match Query. '''
         query = Query.match(match_id, match_str)
-        return cls(query, sources)
+        return cls(query, sources, highlight)
 
 
 class Query:
@@ -155,10 +166,26 @@ class Query:
                    "phrase_slop", "boost", "analyze_wildcard", "auto_generate_phrase_queries",
                    "max_determinized_states", "minimum_should_match", "lenient", "time_zone"]
 
+    def query_wrap(self):
+        query_wrap = {}
+        query_wrap["query"] = self.query
+        self.query = query_wrap
+        return self
+
     @classmethod
     def match_all(cls):
         ''' Factory method for Match All Query '''
         return cls({"match_all": {}})
+
+    @classmethod
+    def ids(cls, ids, types=None):
+        ''' Factory method for Ids Query '''
+        if not isinstance(ids, list):
+            ids = [ids]
+        if types is None:
+            return cls({"ids": {"values": ids}})
+        else:
+            return cls({"ids": {"values": ids, "type": types}})
 
     @classmethod
     def term(cls, name, value, boost=None):
@@ -196,6 +223,7 @@ class Query:
 
     @classmethod
     def is_array_query(cls, arr):
+        ''' Evaluate if array contents are Query objects. '''
         for e in arr:
             if not isinstance(e, Query):
                 raise QueryError("not a Query")
@@ -203,9 +231,10 @@ class Query:
 
     @classmethod
     def query_to_str_array(cls, arr):
-        query_arr = []
-        [query_arr.append(q.query) for q in arr]
-        return query_arr
+        ''' Return a str array from a query array. '''
+        str_arr = []
+        [str_arr.append(q.query) for q in arr]
+        return str_arr
 
 
 class FilteredQuery(Query):
@@ -234,13 +263,13 @@ class BoolQuery(Query):
             self.should(should_arr)
 
     def must(self, must_arr):
-        self._update("must", must_arr)
+        return self._update("must", must_arr)
 
     def must_not(self, must_not_arr):
-        self._update("must_not", must_not_arr)
+        return self._update("must_not", must_not_arr)
 
     def should(self, should_arr):
-        self._update("should", should_arr)
+        return self._update("should", should_arr)
 
     def _update(self, name, qarr):
         if not isinstance(qarr, list):
@@ -252,6 +281,7 @@ class BoolQuery(Query):
             self.query["bool"][name].extend(arr)
         else:
             self.query["bool"][name] = arr
+        return self
 
 
 class RangeQuery(Query):
@@ -289,6 +319,7 @@ class Filter:
             self.filter["filter"][filter_name].extend(filter_arr)
         else:
             self.filter["filter"][filter_name] = filter_arr
+        return self
 
 
 class TermsFilter(Filter):
@@ -308,7 +339,7 @@ class OrFilter(Filter):
         self.filter = {"filter": {"or": arr}}
 
     def extend(self, arr):
-        Filter.extend(self, "or", arr)
+        return Filter.extend(self, "or", arr)
 
 
 class AndFilter(Filter):
@@ -321,7 +352,7 @@ class AndFilter(Filter):
         self.filter = {"filter": {"and": arr}}
 
     def extend(self, arr):
-        Filter.extend(self, "and", arr)
+        return Filter.extend(self, "and", arr)
 
 
 class NotFilter(Filter):
@@ -330,6 +361,25 @@ class NotFilter(Filter):
         if not isinstance(query, Query):
             raise QueryError("not a Query")
         self.filter = {"filter": {"not": query.query}}
+
+
+class Highlight():
+    def __init__(self, fields, pre_tags=None, post_tags=None):
+        ''' Highlight one or more fields in the search results. '''
+        if not isinstance(fields, list):
+            fields = [fields]
+        self.highlight = {"highlight": {"fields": {}}}
+        for field in fields:
+            self.highlight["highlight"]["fields"][field] = {}
+
+        if pre_tags is not None:
+            if not isinstance(pre_tags, list):
+                pre_tags = [pre_tags]
+            self.highlight["highlight"].update({"pre_tags": pre_tags})
+        if post_tags is not None:
+            if not isinstance(post_tags, list):
+                post_tags = [post_tags]
+            self.highlight["highlight"].update({"post_tags": post_tags})
 
 
 class QueryError(Exception):

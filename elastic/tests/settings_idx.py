@@ -13,6 +13,8 @@ IDX = {'GENE': {'indexName': 'test__gene_'+SEARCH_SUFFIX,
                    'indexDisease': SEARCH_TEST_DATA_PATH+'disease.list.gz'},
        'MARKER': {'indexName': 'test__snp_'+SEARCH_SUFFIX,
                   'indexSNP': SEARCH_TEST_DATA_PATH+'dbsnp142_test.vcf.gz'},
+       'MARKER_RS_HISTORY': {'indexName': 'test__snp_merge_'+SEARCH_SUFFIX,
+                             'indexSNPMerge': SEARCH_TEST_DATA_PATH+'rs_merge_test.gz'},
        'GFF_GENERIC': {'indexName': 'test__gff_'+SEARCH_SUFFIX, 'indexType': 'gff',
                        'indexGFF': SEARCH_TEST_DATA_PATH+'test.gff.gz'},
        'GTF_GENERIC': {'indexName': 'test__gtf_'+SEARCH_SUFFIX, 'indexType': 'gtf',
@@ -26,3 +28,16 @@ IDX = {'GENE': {'indexName': 'test__gene_'+SEARCH_SUFFIX,
 IDX_UPDATE = {'GENE_UPDATE': {'indexName': 'test__gene_'+SEARCH_SUFFIX, 'build': 'GRCh38',
                               'indexGeneGFF': SEARCH_TEST_DATA_PATH+'genespan.gff.gz'},
               }
+
+OVERRIDE_SETTINGS = \
+    {'default': {'IDX':
+                 {'MARKER': IDX['MARKER']['indexName'],
+                  'DEFAULT': IDX['MARKER']['indexName'],
+                  'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
+                 'ELASTIC_URL': ElasticSettings.url()}}
+
+OVERRIDE_SETTINGS2 = \
+    {'default': {'IDX':
+                 {'MARKER': IDX['MARKER']['indexName'],
+                  'DEFAULT': IDX['MARKER']['indexName']},
+                 'ELASTIC_URL': ElasticSettings.url()}}

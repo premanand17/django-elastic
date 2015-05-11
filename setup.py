@@ -10,14 +10,15 @@ ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='elastic',
-    version='0.1a1',
+    version='0.0.1',
     packages=find_packages(),
+    package_data={'elastic': ['tests/data/*'], },
     include_package_data=True,
     zip_safe=False,
     url='http://github.com/D-I-L/django-elastic',
     description='A Django app to run and view Elastic elastic queries.',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
-    install_requires=["requests>=2.6.0", "Django>=1.8"],
+    install_requires=["requests>=2.7.0", "Django>=1.8.1"],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',

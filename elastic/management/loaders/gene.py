@@ -165,18 +165,18 @@ class GeneManager(Loader):
     def _create_mapping(self, **options):
         ''' Create the mapping for gene names indexing '''
         props = MappingProperties("gene")
-        props.add_property("gene_symbol", "string", analyzer="full_name")
-        props.add_property("biotype", "string")
-        props.add_property("synonyms", "string", analyzer="full_name")
-        props.add_property("hgnc", "string")
-        props.add_property("dbxrefs", "object")
-        props.add_property("organism", "string")
+        props.add_property("gene_symbol", "string", analyzer="full_name") \
+             .add_property("biotype", "string") \
+             .add_property("synonyms", "string", analyzer="full_name") \
+             .add_property("hgnc", "string") \
+             .add_property("dbxrefs", "object") \
+             .add_property("organism", "string")
 
         featureloc_props = MappingProperties("featureloc")
-        featureloc_props.add_property("start", "integer")
-        featureloc_props.add_property("end", "integer")
-        featureloc_props.add_property("seqid", "string")
-        featureloc_props.add_property("build", "string")
+        featureloc_props.add_property("start", "integer") \
+                        .add_property("end", "integer") \
+                        .add_property("seqid", "string") \
+                        .add_property("build", "string")
         props.add_properties(featureloc_props)
 
         ''' create index and add mapping '''
