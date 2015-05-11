@@ -28,7 +28,9 @@ class Command(BaseCommand):
            "Options for diseases:\n" \
            " --indexName [index name] --indexDisease disease.list\n" \
            "Options for GFF/GTF:\n" \
-           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]"
+           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]" \
+           "Options for BED:\n" \
+           " --indexName [index name] --indexType [bed] --indexBED file.bed"
 
     option_list = BaseCommand.option_list + (
         make_option('--indexSNP',
@@ -92,6 +94,10 @@ class Command(BaseCommand):
                     dest='isGTF',
                     help='GTF file type',
                     action="store_true"),
+        ) + (
+        make_option('--indexBED',
+                    dest='indexBED',
+                    help='Load BED file'),
         ) + (
         make_option('--indexType',
                     dest='indexType',
