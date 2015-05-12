@@ -110,7 +110,7 @@ class MappingProperties():
             self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
         if analyzer is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"analyzer": analyzer})
-        if format is not None:
+        if property_format is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"format": property_format})
         self.column_names.append(name)
         return self
