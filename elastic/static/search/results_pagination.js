@@ -54,7 +54,7 @@
 	       	dataType: "json",
 	       	type: "GET",
 	       	success: function(json){
-	       	$('#'+db+' span').replaceWith("<span class='badge'>"+
+	       	$('#'+db+' span').replaceWith(" <span class='badge alert-danger'>"+
 	       				json.count+"</span>");
 	       		
 	       		var path_name = window.location.pathname; 
