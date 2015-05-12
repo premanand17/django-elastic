@@ -77,22 +77,11 @@ class Search:
             logger.warn("Error: elastic response 200:" + self.url)
         return response.json()
 
-    def get_result(self):
-        ''' Return the elastic context result '''
+    def get_result(self, add_idx_types=False):
+        ''' Return the elastic context result. Note: django template does not
+        like underscores in the context indexes (e.g. _type). '''
         json_response = self.get_json_response()
         context = {"query": self.query}
-        db_types = {}
-        dbs = self.idx.split(",")
-        for this_db in dbs:
-            stype = "Gene"
-            if "snp" in this_db:
-                stype = "Marker"
-            elif "region" in this_db:
-                stype = "Region"
-            db_types[this_db] = stype
-        context["dbs"] = db_types
-        context["db"] = self.idx
-
         content = []
         for hit in json_response['hits']['hits']:
             hit['_source']['idx_type'] = hit['_type']
@@ -104,7 +93,28 @@ class Search:
         context["data"] = content
         context["total"] = json_response['hits']['total']
         context["size"] = self.size
+        if add_idx_types:
+            self._add_idx_types(context)
         return context
+
+    def _add_idx_types(self, context):
+        ''' Adding index types to the context.  '''
+        idx_types = {}
+        idxs = self.idx.split(",")
+        for this_idx in idxs:
+            if this_idx == ElasticSettings.idx('MARKER'):
+                stype = {'type': 'Marker',
+                         'categories': ['synonymous', 'non-synonymous'],
+                         'search': ['in LD of selected']}
+            elif this_idx == ElasticSettings.idx('REGION'):
+                stype = {'type': 'Region'}
+            elif this_idx == ElasticSettings.idx('GENE'):
+                stype = {'type': 'Gene', 'categories': ['protein coding', 'non-coding', 'pseudogene']}
+            else:
+                stype = {'type': 'Other'}
+            idx_types[this_idx] = stype
+        context["idxs"] = idx_types
+        context["db"] = self.idx
 
 
 class ElasticQuery():
