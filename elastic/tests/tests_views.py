@@ -40,7 +40,7 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP elastic '''
-        resp = self.client.get('/search/rs2476601/')
+        resp = self.client.get('/search/rs2476601/db/'+ElasticSettings.idx('MARKER'))
         self.assertEqual(resp.status_code, 200)
 #         print(resp.context)
         self.assertTrue('data' in resp.context)
@@ -49,7 +49,7 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_wildcard(self):
         ''' Test a wild card elastic '''
-        resp = self.client.get('/search/rs3*/')
+        resp = self.client.get('/search/rs3*/db/'+ElasticSettings.idx('MARKER'))
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
 
