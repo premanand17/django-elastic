@@ -24,7 +24,7 @@ class Search:
     @classmethod
     def index_exists(cls, idx, url=ElasticSettings.url()):
         ''' Check if an index exists. '''
-        url += '/' + idx
+        url += '/' + idx + '/_mapping'
         response = requests.get(url)
         if "error" in response.json():
             return False
