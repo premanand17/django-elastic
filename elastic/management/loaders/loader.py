@@ -93,6 +93,11 @@ class Loader:
             return True
         return False
 
+    def get_index_type(self, default_type, **options):
+        if options['indexType']:
+            return options['indexType'].lower()
+        return default_type
+
 
 class MappingProperties():
     ''' Used to create the mapping properties for an index. '''
@@ -110,7 +115,7 @@ class MappingProperties():
             self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
         if analyzer is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"analyzer": analyzer})
-        if format is not None:
+        if property_format is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"format": property_format})
         self.column_names.append(name)
         return self
@@ -138,10 +143,9 @@ class DelimeterLoader(Loader):
         try:
             for line in file_handle:
                 line = line.decode("utf-8")
-                current_line = line
-                if(current_line.startswith("#")):
+                if(line.startswith("#")):
                     continue
-                parts = re.split(delim, current_line)
+                parts = re.split(delim, line)
                 if len(parts) != len(column_names):
                     logger.warn("WARNING: unexpected number of columns: ["+str(line_num+1)+'] '+line)
                     continue
@@ -170,7 +174,6 @@ class DelimeterLoader(Loader):
             p = p.strip()
 
             if (is_GFF or is_GTF) and idx == len(parts)-1:
-                attrs = {}
                 if is_GTF:
                     attrs = self._getAttributes(p, key_value_delim=' ')
                 else:

@@ -6,13 +6,14 @@ class MarkerManager(DelimeterLoader):
     def create_load_snp_index(self, **options):
         ''' Index VCF dbSNP data '''
         idx_name = self.get_index_name(**options)
-        map_props = self._create_snp_mapping(**options)
+        idx_type = self.get_index_type('marker', **options)
+        map_props = self._create_snp_mapping(idx_type, **options)
         f = self.open_file_to_load('indexSNP', **options)
-        self.load(map_props.get_column_names(), f, idx_name, 'marker', chunk=20000)
+        self.load(map_props.get_column_names(), f, idx_name, idx_type, chunk=20000)
 
-    def _create_snp_mapping(self, **options):
+    def _create_snp_mapping(self, idx_type, **options):
         ''' Create the mapping for snp index '''
-        props = MappingProperties('marker')
+        props = MappingProperties(idx_type)
         props.add_property("seqid", "string", index="not_analyzed") \
              .add_property("start", "integer", index="not_analyzed") \
              .add_property("id", "string", index="not_analyzed") \
@@ -21,7 +22,7 @@ class MarkerManager(DelimeterLoader):
              .add_property("qual", "string", index="no") \
              .add_property("filter", "string", index="no") \
              .add_property("info", "string", index="no")
-        self.mapping(props, 'marker', **options)
+        self.mapping(props, idx_type, **options)
         return props
 
 
@@ -30,13 +31,14 @@ class RsMerge(DelimeterLoader):
     def create_load_snp_merge_index(self, **options):
         ''' Index rs number merge dbSNP data '''
         idx_name = self.get_index_name(**options)
-        map_props = self._create_rs_merge_mapping(**options)
+        idx_type = self.get_index_type('rs_merge', **options)
+        map_props = self._create_rs_merge_mapping(idx_type, **options)
         f = self.open_file_to_load('indexSNPMerge', **options)
-        self.load(map_props.get_column_names(), f, idx_name, 'rs_merge', chunk=10000)
+        self.load(map_props.get_column_names(), f, idx_name, idx_type, chunk=10000)
 
-    def _create_rs_merge_mapping(self, **options):
+    def _create_rs_merge_mapping(self, idx_type, **options):
         ''' Create the mapping for rs index '''
-        props = MappingProperties('rs_merge')
+        props = MappingProperties(idx_type)
         props.add_property("rshigh", "string", index="not_analyzed") \
              .add_property("rslow", "string", index="not_analyzed") \
              .add_property("build_id", "integer", index="no") \
@@ -46,7 +48,7 @@ class RsMerge(DelimeterLoader):
              .add_property("rscurrent", "string", index="not_analyzed") \
              .add_property("orien2current", "string", index="no") \
              .add_property("notes", "string", index="no")
-        self.mapping(props, 'rs_merge', **options)
+        self.mapping(props, idx_type, **options)
         return props
 
     def parse_line(self, parts, column_names, idx_name, idx_type, is_GFF, is_GTF):

@@ -32,7 +32,14 @@ class ElasticSettings:
 
     @classmethod
     def indices_str(cls, cluster='default'):
-        ''' Get a comma separated list of indices (assumes names contain _IDX) '''
+        ''' Get a comma separated list of indices '''
         attrs = cls.attrs(cluster).get('IDX')
-        s = set([v for v in attrs.values()])
+        s = set()
+        for v in attrs.values():
+            # if mapping type included then remove
+            pos = v.find('/')
+            if pos > 0:
+                v = v[:-(len(v)-pos)]
+            s.add(v)
+
         return ','.join(str(e) for e in s)

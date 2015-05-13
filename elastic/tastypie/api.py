@@ -3,6 +3,7 @@ from tastypie.constants import ALL
 from elastic.tastypie.resources import BaseGFFResource, ElasticObject,\
     ElasticResource
 from elastic.elastic_settings import ElasticSettings
+from tastypie.authorization import ReadOnlyAuthorization
 
 
 class GeneResource(BaseGFFResource):
@@ -10,6 +11,7 @@ class GeneResource(BaseGFFResource):
     class Meta:
         resource_name = ElasticSettings.idx('GFF_GENES')
         object_class = ElasticObject
+        authorization = ReadOnlyAuthorization()
         max_limit = 100000
         filtering = {
             'attr': ['gene_name', 'gene_id', 'Name'],
@@ -22,6 +24,7 @@ class GwasBarrettResource(BaseGFFResource):
     class Meta:
         resource_name = 'gb2_hg19_gwas_t1d_barrett_4_17_0'
         object_class = ElasticObject
+        authorization = ReadOnlyAuthorization()
         max_limit = 100000
         filtering = {
             'attr': ['gene_name', 'gene_id'],
@@ -44,6 +47,7 @@ class MarkerResource(ElasticResource):
     class Meta:
         resource_name = ElasticSettings.idx('MARKER')
         object_class = ElasticObject
+        authorization = ReadOnlyAuthorization()
         max_limit = 100000
         filtering = {
             'id': ALL,

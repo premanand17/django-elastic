@@ -54,7 +54,7 @@
 	       	dataType: "json",
 	       	type: "GET",
 	       	success: function(json){
-	       	$('#'+db+' span').replaceWith("<span class='badge'>"+
+	       	$('#'+db+' span').replaceWith(" <span class='badge alert-danger'>"+
 	       				json.count+"</span>");
 	       		
 	       		var path_name = window.location.pathname; 
@@ -142,34 +142,32 @@
         		for(var i=0; i<hits.length; i++) {
         			var hit = hits[i]._source; 			
         			if(hit.id){
-        				$('#results').append(
-        						'<ul class="list-group">' +
-        						'<li class="list-group-item"><a href="/marker/'+hit.id+'">'+hit.id+'</a></li>'+
-        						'<li class="list-group-item">Chromosome: '+hit.seqid+'; Position: '+hit.start+'; '+
-					                        hit.ref+'/'+hit.alt+'</li>'+
-        				'</ul>');
-        			}else if(hit.rscurrent){ 	// historical marker IDs 
-        				$('#results').append(
-        						'<ul class="list-group">' +
-        						'<li class="list-group-item"><a href="/marker/'+hit.rscurrent+'">'+hit.rscurrent +'</a></li>'+
-        						'<li class="list-group-item">Merged from: ' + hit.rshigh + ' into ' + hit.rslow + ' (dbSNP' + hit.build_id + ')' + 
-        				'</ul>');
+        				var summary = 'Chromosome: '+hit.seqid+'; Position: '+hit.start+'; '+ hit.ref+'/'+hit.alt;
+        				addHit('marker', hit.id, hit.id, summary);
+        			}else if(hit.rscurrent){ 	// historical marker IDs
+        				var summary = 'Merged from: ' + hit.rshigh + ' into ' + hit.rslow + ' (dbSNP' + hit.build_id + ')';
+        				addHit('marker', hit.rscurrent, hit.rscurrent, summary);
         			}else if(hit.hgnc){
-        				$('#results').append(
-        						'<ul class="list-group">' +
-        						'<li class="list-group-item"><a href="/gene/'+hit.gene_symbol+'">'+hit.gene_symbol+'</a></li>'+
-        						'<li class="list-group-item">HGNC: '+hit.hgnc+'</li>'+
-        				'</ul>');
+        				var summary = 'HGNC: '+hit.hgnc;
+        				addHit('gene', hit.gene_symbol, hit.gene_symbol, summary);
         			}else if(hit.type == 'region'){
-        				$('#results').append(
-        						'<ul class="list-group">' +
-        						'<li class="list-group-item"><a href="/region/'+hit.attr.region_id+'">'+hit.attr.Name +'</a></li>'+
-        						'<li class="list-group-item">Location: <a href="/search/' + hit.seqid + ':' + hit.start + '-' + hit.end + '">' +  hit.seqid + ':' + hit.start + '-' + hit.end + '</a>' + 
-        				'</ul>');
+        				var summary = 'Location: <a href="/search/' + hit.seqid + ':' + hit.start + '-' + hit.end + '">' +
+        				               hit.seqid + ':' + hit.start + '-' + hit.end + '</a>' 
+        				addHit('region', hit.attr.region_id, hit.attr.Name, summary);
         			}
         		}
         	}
         });
+	}
+	
+	addHit = function(type, id, name, summary) {
+		$('#results').append(
+				'<ul class="list-group">' +
+				'<li class="list-group-item">'+
+					'<input name="'+type+'" type="checkbox" value='+id+'">' +
+					' <a href="/'+type+'/'+id+'">'+ name +'</a></li>'+
+				'<li class="list-group-item">' + summary + '</a>' + 
+		'</ul>');
 	}
 	
 	getCookie = function(name) {
