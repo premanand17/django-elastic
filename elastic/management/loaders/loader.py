@@ -93,6 +93,11 @@ class Loader:
             return True
         return False
 
+    def get_index_type(self, default_type, **options):
+        if options['indexType']:
+            return options['indexType'].lower()
+        return default_type
+
 
 class MappingProperties():
     ''' Used to create the mapping properties for an index. '''
