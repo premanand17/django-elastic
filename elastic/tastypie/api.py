@@ -17,7 +17,7 @@ class GeneResource(BaseGFFResource):
             'attr': ['gene_name', 'gene_id', 'Name'],
             'seqid': ALL,
         }
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'post']
 
 
 class GwasBarrettResource(BaseGFFResource):
@@ -31,7 +31,7 @@ class GwasBarrettResource(BaseGFFResource):
             'attr': ['gene_name', 'gene_id'],
             'seqid': ALL,
         }
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'post']
 
 
 class MarkerResource(ElasticResource):
@@ -55,4 +55,4 @@ class MarkerResource(ElasticResource):
             'id': ALL,
             'seqid': ALL,
         }
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'post']
