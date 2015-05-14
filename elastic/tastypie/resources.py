@@ -46,7 +46,7 @@ class ElasticResource(Resource):
 
     def get_object_list(self, request):
         ''' Gets the result list. '''
-        if self.search_filters is not None:
+        if hasattr(self, 'search_filters') and self.search_filters is not None:
             q = ElasticQuery.filtered(Query.match_all(), self.search_filters)
         else:
             q = ElasticQuery(Query.match_all())
