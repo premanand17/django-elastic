@@ -148,11 +148,12 @@ class ElasticResource(Resource):
 
 class BaseGFFResource(ElasticResource):
     # define the fields
-    seqid = fields.CharField(attribute='seqid')
-    source = fields.CharField(attribute='source')
-    type = fields.CharField(attribute='type')
-    start = fields.IntegerField(attribute='start')
-    end = fields.IntegerField(attribute='end')
-    score = fields.CharField(attribute='score')
-    phase = fields.CharField(attribute='phase')
-    attr = fields.DictField(attribute='attr')
+    seqid = fields.CharField(attribute='seqid', help_text='Sequence identifier')
+    source = fields.CharField(attribute='source', help_text='Software/algorithm that generated the feature')
+    type = fields.CharField(attribute='type', help_text='Type of feature')
+    start = fields.IntegerField(attribute='start', help_text='Start coordinate of the feature')
+    end = fields.IntegerField(attribute='end', help_text='End coordinate of the feature')
+    score = fields.CharField(attribute='score', help_text='Score of the feature')
+    strand = fields.CharField(attribute='strand', help_text='Strand of the feature')
+    phase = fields.CharField(attribute='phase', help_text='Where feature begins with reference to reading frame')
+    attr = fields.DictField(attribute='attr', help_text='List of feature attributes')
