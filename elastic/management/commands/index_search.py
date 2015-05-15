@@ -1,3 +1,4 @@
+''' Used to define Elastic mapping and index data. '''
 from django.core.management.base import BaseCommand
 from optparse import make_option
 import logging
