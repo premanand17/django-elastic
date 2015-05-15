@@ -463,7 +463,7 @@ class RangeQuery(Query):
 
 class Filter:
     ''' Used to build various filters, see
-    U{Elastic Filter docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filters.html>} '''
+    U{Elastic filter docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filters.html>} '''
     def __init__(self, query):
         ''' Filter based on a Query object.
         @type  query: L{Query}
@@ -541,7 +541,9 @@ class NotFilter(Filter):
 
 
 class Highlight():
-    ''' Used in highlighting search result fields. '''
+    ''' Used in highlighting search result fields, see
+    U{Elastic highlighting docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}.
+    '''
     def __init__(self, fields, pre_tags=None, post_tags=None):
         ''' Highlight one or more fields in the search results. '''
         if not isinstance(fields, list):
