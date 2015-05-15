@@ -3,7 +3,6 @@ from django.core.management.base import BaseCommand
 from optparse import make_option
 import logging
 from elastic.management.loaders.marker import MarkerManager, RsMerge
-from elastic.management.loaders.region import RegionManager
 from elastic.management.loaders.gene import GeneManager
 from elastic.management.loaders.disease import DiseaseManager
 from elastic.management.loaders.gene_target import GeneTargetManager
@@ -17,9 +16,6 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     ''' Elastic index mapping and loading tool. '''
     help = "Use to create Elastic index mappings and load data.\n\n" \
-           "Options for regions:\n" \
-           " --mapRegion --build GRCh38\n" \
-           " --indexRegion region.gff --build GRCh38 --disease t1d|ms|cro|all (default: all) --regionType assoc\n" \
            "Options for markers:\n" \
            " --indexName [index name] --indexSNP All.vcf\n" \
            " --indexName [index name] --indexSNPMerge RsMergeArch.bcp.gz\n" \
@@ -55,19 +51,6 @@ class Command(BaseCommand):
         make_option('--indexName',
                     dest='indexName',
                     help='Index name'),
-        ) + (
-        make_option('--mapRegion',
-                    dest='mapRegion',
-                    action="store_true",
-                    help='Create a region index mapping'),
-        ) + (
-        make_option('--indexRegion',
-                    dest='indexRegion',
-                    help='GFF file to index (e.g. celiac_regions.gff'),
-        ) + (
-        make_option('--regionType',
-                    dest='regionType',
-                    help='region type (eg: assoc, ortho, linkage, qtl'),
         ) + (
         make_option('--build',
                     dest='build',
@@ -107,13 +90,6 @@ class Command(BaseCommand):
         elif options['indexSNPMerge']:
             marker_merge = RsMerge()
             marker_merge.create_load_snp_merge_index(**options)
-
-        elif options['mapRegion']:
-            region = RegionManager()
-            region.create_region_index(**options)
-        elif options['indexRegion']:
-            region = RegionManager()
-            region.create_load_region_index(**options)
 
         elif options['indexGene']:
             gene = GeneManager()
