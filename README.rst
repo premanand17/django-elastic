@@ -40,11 +40,11 @@ Quick start
 Building Elastic Queries
 ------------------------
 
-The classes in ``elastic_model`` module are used to build Elastic queries.
+The classes in the ``elastic_model`` module are used to build Elastic queries.
 A query can be used to retrieve search hits, get a count of the hits or
 to get the index mapping. The query may also be a filter or be combined
 with a filter component. This plugin attempts to provide flexibility in
-the generation of queries but also providing shortcuts to common query
+the generation of queries but also provides shortcuts to common query
 structures.
 
 An ``ElasticQuery`` object is used to build an instance of ``Search``.
@@ -52,10 +52,10 @@ Search.get_json_response() then runs the search request and returns
 the elastic JSON results. Alternatively Search.get_result()
 can be used to return a processed form of the results without
 leading underscores (e.g. _type) which Django template does not like.
-Search.get_count() will use the Elastic count API to return the number
+Search.get_count() uses the Elastic count API to return the number
 of hits for a query.
 
-Example query::
+Example of a filtered boolean query::
 
     query_bool = BoolQuery() 
     query_bool.must_not([Query.term("seqid", 2)]) \ 
@@ -72,7 +72,7 @@ classes that provide shortcuts to building common types of queries/filters.
 When creating a new query the first port of call would therefore be
 the factory methods in ``ElasticQuery``. If this does not provide the
 exact components needed for the query then look into building it
-from the Query and Filter parent and child classes.
+from the ``Query`` and ``Filter`` parent and child classes.
   
 Snapshot and Restore
 --------------------
