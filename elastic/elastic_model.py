@@ -158,7 +158,7 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: L{Highlight}
         @keyword highlight: Define the highlighting of results (default: None).
-        @rtype L{ElasticQuery}
+        @return L{ElasticQuery}
         '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
@@ -178,7 +178,7 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
-        @rtype L{ElasticQuery}
+        @return L{ElasticQuery}
         '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
@@ -198,7 +198,7 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
-        @rtype L{ElasticQuery}
+        @return L{ElasticQuery}
         '''
 
         query = FilteredQuery(query_match, query_filter)
@@ -206,20 +206,48 @@ class ElasticQuery():
 
     @classmethod
     def query_string(cls, query_term, sources=None, highlight=None, **string_opts):
-        ''' Factory method for creating elastic Query String Query '''
+        ''' Factory method for creating elastic Query String Query.
+
+        @type  query_term: string
+        @param query_term: The string to use in the query.
+        @type  sources: array of result fields
+        @keyword sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @keyword highlight: Define the highlighting of results (default: None).
+        @return L{ElasticQuery}
+        '''
         query = Query.query_string(query_term, **string_opts)
         return cls(query, sources, highlight)
 
     @classmethod
     def query_match(cls, match_id, match_str, sources=None, highlight=None):
-        ''' Factory method for creating elastic Match Query. '''
+        ''' Factory method for creating elastic Match Query.
+
+        @type  match_id: string
+        @param match_id: The match id.
+        @type  match_str: string
+        @param match_str: The string value to match.
+        @type  sources: array of result fields
+        @keyword sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @keyword highlight: Define the highlighting of results (default: None).
+        @return L{ElasticQuery}
+        '''
         query = Query.match(match_id, match_str)
         return cls(query, sources, highlight)
 
 
 class Query:
-    ''' See U{Elastic query docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-queries.html>} '''
+    ''' Used to build various queries, see
+    U{Elastic query docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-queries.html>} '''
+
     def __init__(self, query):
+        '''
+        @type  query: dictionary
+        @param query: The query in JSON format.
+        '''
+        if not isinstance(query, dict):
+            raise QueryError("query is not a dictionary")
         self.query = query
 
     ''' String Query options '''
@@ -230,6 +258,11 @@ class Query:
                    "max_determinized_states", "minimum_should_match", "lenient", "time_zone"]
 
     def query_wrap(self):
+        ''' Wrap the query in a query parent. This is needed for some queries within
+        a filter (I{e.g.} Query Match, Query String)
+
+        @return L{QUery}
+        '''
         query_wrap = {}
         query_wrap["query"] = self.query
         self.query = query_wrap
