@@ -58,7 +58,8 @@ Example query::
     query_bool.must_not([Query.term("seqid", 2)]) \ 
               .should(RangeQuery("start", gte=10054)) \ 
               .should(Query.term("id", "rs373328635")) 
-    query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"]) 
+    query = ElasticQuery.filtered_bool(Query.match_all(),
+                                       query_bool, sources=["id", "seqid"]) 
     search = Search(query, idx=ElasticSettings.idx('DEFAULT'))
     results = search.get_json_response()
 
