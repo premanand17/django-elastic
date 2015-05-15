@@ -1,3 +1,12 @@
+'''
+Module to build Elastic queries and filters to run searches. An
+L{ElasticQuery} is used to build a L{Search} object and
+L{Search.get_json_response()} runs the search request.
+
+An L{ElasticQuery} object can be build from a L{Query} and
+L{Filter} objects and build in factory methods within these
+provide shortcuts to common types of queries/filters.
+'''
 import json
 import requests
 import logging
