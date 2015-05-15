@@ -28,7 +28,8 @@ class Search:
     ''' Used to run Elastic searches and return results or mappings. '''
 
     def __init__(self, search_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
-        ''' Query the elastic server for given elastic query
+        ''' Set up parameters to use in the search. L{ElasticQuery} is used to
+        define a search query.
         @type  search_query: L{ElasticQuery}
         @keyword search_query: The elastic query to search (default: None).
         @type  search_from: integer
