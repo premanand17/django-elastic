@@ -178,7 +178,7 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
-        @return L{ElasticQuery}
+        @return: L{ElasticQuery}
         '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
@@ -198,7 +198,7 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
-        @return L{ElasticQuery}
+        @return: L{ElasticQuery}
         '''
 
         query = FilteredQuery(query_match, query_filter)
@@ -214,7 +214,7 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
-        @return L{ElasticQuery}
+        @return: L{ElasticQuery}
         '''
         query = Query.query_string(query_term, **string_opts)
         return cls(query, sources, highlight)
@@ -231,7 +231,7 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
-        @return L{ElasticQuery}
+        @return: L{ElasticQuery}
         '''
         query = Query.match(match_id, match_str)
         return cls(query, sources, highlight)
@@ -260,8 +260,7 @@ class Query:
     def query_wrap(self):
         ''' Wrap the query in a query parent. This is needed for some queries within
         a filter (I{e.g.} Query Match, Query String)
-
-        @return L{QUery}
+        @return: L{QUery}
         '''
         query_wrap = {}
         query_wrap["query"] = self.query
@@ -270,12 +269,21 @@ class Query:
 
     @classmethod
     def match_all(cls):
-        ''' Factory method for Match All Query '''
+        ''' Factory method for Match All Query
+        @return: L{QUery}
+        '''
         return cls({"match_all": {}})
 
     @classmethod
     def ids(cls, ids, types=None):
-        ''' Factory method for Ids Query '''
+        ''' Factory method for Ids Query
+
+        @type  ids: array
+        @param ids: The Ids values.
+        @type  types: string or array
+        @keyword types: Optionally provide a type of array of types (default: None).
+        @return: L{QUery}
+        '''
         if not isinstance(ids, list):
             ids = [ids]
         if types is None:
@@ -285,14 +293,33 @@ class Query:
 
     @classmethod
     def term(cls, name, value, boost=None):
-        ''' Factory method for Term Query '''
+        ''' Factory method for Term Query
+
+        @type  name: name
+        @param name: The name of the term.
+        @type  value: value
+        @param value: The value of the term.
+        @type  boost: float
+        @keyword boost: boost term query (default: None).
+        @return: L{QUery}
+        '''
         if boost is None:
             return cls({"term": {name: value}})
         return cls({"term": {name: {"value": value, "boost": boost}}})
 
     @classmethod
     def terms(cls, name, arr, minimum_should_match=1):
-        ''' Factory method for Terms Query '''
+        ''' Factory method for Terms Query
+
+        @type  name: name
+        @param name: The name of the field.
+        @type  arr: array
+        @param arr: The terms to match.
+        @type  minimum_should_match: integer, percentage
+        @keyword minimum_should_match:
+        U{minimum_should_match<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-minimum-should-match.html>}
+        @return: L{QUery}
+        '''
         if minimum_should_match != 0:
             query = {"terms": {name: arr, "minimum_should_match": minimum_should_match}}
         else:
