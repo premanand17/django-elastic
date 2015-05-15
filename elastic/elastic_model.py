@@ -122,8 +122,8 @@ class ElasticQuery():
     used in L{Search<elastic_model.Search>}.
 
     I{Advanced options:}
-    Sources can be defined to set the fields that operations return (see U{_source filtering
-    <www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-source-filtering.html>).
+    Sources can be defined to set the fields that operations return (see
+    U{_source filtering<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-source-filtering.html>}).
     Also
     U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}
     can be defined for one or more fields in search results.  '''
