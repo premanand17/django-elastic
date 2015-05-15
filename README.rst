@@ -40,9 +40,12 @@ Quick start
 Building Elastic Queries
 ------------------------
 
-The classes in ``elastic_model`` module are used to build Elastic queries
-and filters to run queries and retrieve search hits, a count of the hits and
-the index mapping.
+The classes in ``elastic_model`` module are used to build Elastic queries.
+A query can be used to retrieve search hits, get a count of the hits or
+to get the index mapping. The query may also be a filter or be combined
+with a filter component. This plugin attempts to provide flexibility in
+the generation of queries but also providing shortcuts to common query
+structures.
 
 An ``ElasticQuery`` object is used to build an instance of ``Search``.
 Search.get_json_response() then runs the search request and returns
