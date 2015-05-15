@@ -1,3 +1,4 @@
+''' Loader for gene data. '''
 import re
 from elastic.elastic_model import Search
 from elastic.management.loaders.loader import Loader, MappingProperties

@@ -1,3 +1,4 @@
+''' Generic loader for GFF and GTF file types. '''
 from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
 
 
