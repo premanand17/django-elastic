@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class Search:
-    ''' Used to run Elastic searches and return hits, hit count or the mapping. '''
+    ''' Used to run Elastic queries and return search hits, hit count or the mapping. '''
 
     def __init__(self, search_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
         ''' Set up parameters to use in the search. L{ElasticQuery} is used to
