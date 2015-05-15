@@ -118,12 +118,12 @@ class Search:
 
 
 class ElasticQuery():
-    ''' Takes a query to be used to construct Elastic query which can be
+    ''' Takes a Query to be used to construct Elastic query which can be
     used in L{Search<elastic_model.Search>}.
 
     I{Advanced options:}
     Sources can be defined to set the fields that operations return (see
-    U{_source filtering<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-source-filtering.html>}).
+    U{source filtering<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-source-filtering.html>}).
     Also
     U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}
     can be defined for one or more fields in search results.  '''
@@ -133,10 +133,8 @@ class ElasticQuery():
 
         @type  query: Query
         @param query: The query to build the ElasticQuery from.
-
         @type  sources: array of result fields
         @param sources: The _source filtering to be used (default: None).
-
         @type  highlight: Highlight
         @param highlight: Define the highlighting of results (default: None).
 
@@ -153,14 +151,31 @@ class ElasticQuery():
 
     @classmethod
     def bool(cls, query_bool, sources=None, highlight=None):
-        ''' Factory method for creating elastic Bool Query. '''
+        ''' Factory method for creating elastic Bool Query.
+
+        @type  query_bool: BoolQuery
+        @param query_bool: The bool query to build the ElasticQuery from.
+        @type  sources: array of result fields
+        @param sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @param highlight: Define the highlighting of results (default: None).
+        '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
         return cls(query_bool, sources, highlight)
 
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None, highlight=None):
-        ''' Factory method for creating elastic filtered query with Bool filter. '''
+        ''' Factory method for creating elastic filtered query
+        (L{FilteredQuery<elastic_model.FilteredQuery>}) with Bool filter.
+
+        @type  query_bool: BoolQuery
+        @param query_bool: The bool query to build the ElasticQuery from.
+        @type  sources: array of result fields
+        @param sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @param highlight: Define the highlighting of results (default: None).
+        '''
         if not isinstance(query_bool, BoolQuery):
             raise QueryError("not a BoolQuery")
         return ElasticQuery.filtered(query_match, Filter(query_bool), sources, highlight)
@@ -185,10 +200,11 @@ class ElasticQuery():
 
 
 class Query:
-    ''' http://www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-queries.html '''
+    ''' See U{Elastic query docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-queries.html>} '''
     def __init__(self, query):
         self.query = query
 
+    ''' String Query options '''
     STRING_OPTS = ["fields", "default_field", "default_operator",
                    "analyzer", "allow_leading_wildcard", "lowercase_expanded_terms",
                    "enable_position_increments", "fuzzy_max_expansions", "fuzzy_prefix_length",
@@ -330,7 +346,7 @@ class RangeQuery(Query):
 
 
 class Filter:
-    ''' http://www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-filters.html '''
+    ''' See U{Elastic Filter docs<www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-filters.html>} '''
     def __init__(self, query):
         ''' Filter based on the Query object passed in the constructor '''
         if not isinstance(query, Query):
