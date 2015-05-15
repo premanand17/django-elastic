@@ -52,7 +52,7 @@ For example there is a generic GFF file loader::
 
 To write custom loaders there are example loaders in the management.loaders
 package. These inherit from the management.loaders.loader.Loader class and
-can be run by extending the management.commands.index_search.py.
+can be run by extending management.commands.index_search.py.
     
 Building Elastic Queries
 ------------------------
