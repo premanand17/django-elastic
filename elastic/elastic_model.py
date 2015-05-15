@@ -118,10 +118,26 @@ class Search:
 
 
 class ElasticQuery():
-    ''' Utility to assist in constructing Elastic queries. '''
+    ''' Takes a query to be used to construct Elastic queries.
+
+    I{Advanced options:} Sources can be defined to set the fields that
+    operations return (see _source filtering in Elastic docs). Also
+    U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}
+    can be defined for one or more fields in search results.  '''
 
     def __init__(self, query, sources=None, highlight=None):
-        ''' Query the elastic server for given elastic query. '''
+        ''' Query the elastic server for given elastic query.
+
+        @type  query: Query.
+        @param query: The query to build the ElasticQuery from.
+
+        @type  sources: array of result fields.
+        @param query: The _source filtering to be used (default: None).
+
+        @type  highlight: Highlight.
+        @param query: Define the highlighting of results (default: None).
+
+        '''
         if not isinstance(query, Query):
             raise QueryError("not a Query")
         self.query = {"query": query.query}
