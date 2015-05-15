@@ -1,3 +1,5 @@
+''' Tests for command line interface for managing Elastic repositories,
+defining mappings for indices and loading/indexing data. '''
 from django.test import TestCase
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, IDX_UPDATE

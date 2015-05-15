@@ -1,3 +1,4 @@
+''' Parent loaders to handle mapping and bulk loading. '''
 import gzip
 import json
 import requests

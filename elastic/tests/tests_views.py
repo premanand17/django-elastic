@@ -1,3 +1,4 @@
+''' Test for view. '''
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS2

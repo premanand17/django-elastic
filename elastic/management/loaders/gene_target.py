@@ -1,3 +1,4 @@
+''' Loader for gene target data. '''
 from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
 
 
