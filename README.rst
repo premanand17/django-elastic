@@ -37,6 +37,23 @@ Quick start
 
     url(r'^search/', include('elastic.urls', namespace="elastic")),
 
+Create Mapping and Loading Data into Elastic
+--------------------------------------------
+
+The plugin comes with some in-built loaders. These can be listed using the
+Django command line management tool::
+
+    ./manage.py index_search --help
+    
+For example there is a generic GFF file loader::
+
+    ./manage.py index_search --indexName [index name] --indexType [gff] \
+                             --indexGFF file.gff [--isGTF]
+
+To write custom loaders there are example loaders in the management.loaders
+package. These inherit from the management.loaders.loader.Loader class and
+can be run by extending the management.commands.index_search.py.
+    
 Building Elastic Queries
 ------------------------
 
