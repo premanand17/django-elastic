@@ -1,3 +1,6 @@
+''' Generic resources (L{ElasticResource} and L{BaseGFFResource}) to
+inherit from when setting up an index as a resource to provide a TastyPie RESTful
+interface. '''
 from tastypie import fields
 from tastypie.resources import Resource
 from elastic.elastic_model import Search, ElasticQuery, Query, AndFilter
@@ -26,6 +29,7 @@ class ElasticObject(object):
 
 
 class ElasticResource(Resource):
+    ''' Override methods to define an Elastic index as a TastyPie resource.'''
 
     def _client(self, q=None):
         ''' Get the Elastic client. '''
@@ -124,7 +128,7 @@ class ElasticResource(Resource):
 
     def check_filtering(self, field_name, filter_type='exact'):
         """
-        Base on tastypie.resources.BaseModelResource.check_filtering().
+        Based on tastypie.resources.BaseModelResource.check_filtering().
         Given a field name and an optional filter type determine if a field
         can be filtered on.
         If a filter does not meet the needed conditions, it should raise an
@@ -147,6 +151,7 @@ class ElasticResource(Resource):
 
 
 class BaseGFFResource(ElasticResource):
+    ''' Generic GFF resource. '''
     # define the fields
     seqid = fields.CharField(attribute='seqid', help_text='Sequence identifier')
     source = fields.CharField(attribute='source', help_text='Software/algorithm that generated the feature')
