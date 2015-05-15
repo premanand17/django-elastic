@@ -5,12 +5,12 @@ An L{ElasticQuery} is used to build a L{Search} object.
 L{Search.get_json_response()} runs the search request and returns
 the elastic JSON results. Alternatively L{Search.get_result()}
 can be used to return a processed form of the results without
-leading underscores (U{e.g.} _type) which django template does not like.
+leading underscores (I{e.g.} _type) which django template does not like.
 
 An L{ElasticQuery} object can be built from L{Query} and L{Filter}
 objects. There are factory methods within L{ElasticQuery} and L{Query}
-classes that provide shortcuts to common types of queries/filters.
-When building a new query the first port of call would therefore be
+classes that provide shortcuts to building common types of queries/filters.
+When creating a new query the first port of call would therefore be
 the factory methods in L{ElasticQuery}. If this does not provide the
 exact components needed for the query then look into building it
 from the L{Query} and L{Filter} parent and child classes.
@@ -452,7 +452,8 @@ class RangeQuery(Query):
 
 
 class Filter:
-    ''' See U{Elastic Filter docs<www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-filters.html>} '''
+    ''' Used to build various filters, see
+    U{Elastic Filter docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filters.html>} '''
     def __init__(self, query):
         ''' Filter based on a Query object.
         @type  query: L{Query}
