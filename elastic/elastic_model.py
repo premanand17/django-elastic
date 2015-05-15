@@ -239,7 +239,7 @@ class ElasticQuery():
 
 class Query:
     ''' Used to build various queries, see
-    U{Elastic query docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-queries.html>} '''
+    U{Elastic query docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-queries.html>}. '''
 
     def __init__(self, query):
         '''
@@ -259,8 +259,8 @@ class Query:
 
     def query_wrap(self):
         ''' Wrap the query in a query parent. This is needed for some queries within
-        a filter (I{e.g.} Query Match, Query String)
-        @return: L{QUery}
+        a filter (I{e.g.} Query Match, Query String).
+        @return: L{Query}
         '''
         query_wrap = {}
         query_wrap["query"] = self.query
@@ -276,13 +276,12 @@ class Query:
 
     @classmethod
     def ids(cls, ids, types=None):
-        ''' Factory method for Ids Query
-
+        ''' Factory method for Ids Query.
         @type  ids: array
         @param ids: The Ids values.
         @type  types: string or array
         @keyword types: Optionally provide a type of array of types (default: None).
-        @return: L{QUery}
+        @return: L{Query}
         '''
         if not isinstance(ids, list):
             ids = [ids]
@@ -293,15 +292,14 @@ class Query:
 
     @classmethod
     def term(cls, name, value, boost=None):
-        ''' Factory method for Term Query
-
+        ''' Factory method for Term Query.
         @type  name: name
         @param name: The name of the term.
         @type  value: value
         @param value: The value of the term.
         @type  boost: float
         @keyword boost: boost term query (default: None).
-        @return: L{QUery}
+        @return: L{Query}
         '''
         if boost is None:
             return cls({"term": {name: value}})
@@ -309,8 +307,7 @@ class Query:
 
     @classmethod
     def terms(cls, name, arr, minimum_should_match=1):
-        ''' Factory method for Terms Query
-
+        ''' Factory method for Terms Query.
         @type  name: name
         @param name: The name of the field.
         @type  arr: array
@@ -318,7 +315,7 @@ class Query:
         @type  minimum_should_match: integer, percentage
         @keyword minimum_should_match:
         U{minimum_should_match<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-minimum-should-match.html>}
-        @return: L{QUery}
+        @return: L{Query}
         '''
         if minimum_should_match != 0:
             query = {"terms": {name: arr, "minimum_should_match": minimum_should_match}}
@@ -328,14 +325,28 @@ class Query:
 
     @classmethod
     def match(cls, match_id, match_str):
-        ''' Factory method for Basic match query '''
+        ''' Factory method for Basic match query.
+        @type  match_id: string
+        @param match_id: The match id.
+        @type  match_str: string
+        @param match_str: The string value to match.
+        @return: L{Query}
+        '''
         return cls({"match": {match_id: match_str}})
 
     @classmethod
     def query_string(cls, query_term, **kwargs):
-        ''' Factory method for String Query.
+        ''' Factory method for
+        U{Query String Query<www.elastic.co/guide/en/elasticsearch/reference/1.3/query-dsl-query-string-query.html>}.
         Simple wildcards can be used with the fields supplied
-        (e.g. "fields" : ["city.*"].) '''
+        (e.g. "fields" : ["city.*"]).
+
+        @type  query_term: string
+        @param query_term: The query string.
+        @type  kwargs: L{STRING_OPTS}
+        @keyword kwargs: Optional parameters for Query String Query.
+        @return: L{Query}
+        '''
         query = {"query_string": {"query": query_term}}
 
         for key, value in kwargs.items():
@@ -345,7 +356,7 @@ class Query:
         return cls(query)
 
     @classmethod
-    def is_array_query(cls, arr):
+    def _is_array_query(cls, arr):
         ''' Evaluate if array contents are Query objects. '''
         for e in arr:
             if not isinstance(e, Query):
@@ -353,7 +364,7 @@ class Query:
         return True
 
     @classmethod
-    def query_to_str_array(cls, arr):
+    def _query_to_str_array(cls, arr):
         ''' Return a str array from a query array. '''
         str_arr = []
         [str_arr.append(q.query) for q in arr]
@@ -398,8 +409,8 @@ class BoolQuery(Query):
         if not isinstance(qarr, list):
             qarr = [qarr]
 
-        Query.is_array_query(qarr)
-        arr = Query.query_to_str_array(qarr)
+        Query._is_array_query(qarr)
+        arr = Query._query_to_str_array(qarr)
         if name in self.query["bool"]:
             self.query["bool"][name].extend(arr)
         else:
@@ -426,16 +437,27 @@ class RangeQuery(Query):
 class Filter:
     ''' See U{Elastic Filter docs<www.elastic.co/guide/en/elasticsearch/reference/1.5/query-dsl-filters.html>} '''
     def __init__(self, query):
-        ''' Filter based on the Query object passed in the constructor '''
+        ''' Filter based on a Query object.
+        @type  query: L{Query}
+        @param query: The query to build the filter with.
+        '''
         if not isinstance(query, Query):
             raise QueryError("not a Query")
         self.filter = {"filter": query.query}
 
     def extend(self, filter_name, arr):
+        ''' Used to extend the named filter (I{e.g.} L{AndFilter}, L{OrFilter}).
+
+        @type  filter_name: string
+        @param filter_name: Name of the filter to extend.
+        @type  arr: list of Query or Query
+        @param arr: The Query(s) to add to the filter.
+        @return: L{Filter}
+        '''
         if not isinstance(arr, list):
             arr = [arr]
-        Query.is_array_query(arr)
-        filter_arr = Query.query_to_str_array(arr)
+        Query._is_array_query(arr)
+        filter_arr = Query._query_to_str_array(arr)
         if filter_name in self.filter["filter"]:
             if not isinstance(self.filter["filter"][filter_name], list):
                 self.filter["filter"][filter_name] = [self.filter["filter"][filter_name]]
@@ -446,6 +468,7 @@ class Filter:
 
 
 class TermsFilter(Filter):
+    ''' Terms Filter. '''
 
     @classmethod
     def get_terms_filter(cls, name, arr):
@@ -453,12 +476,13 @@ class TermsFilter(Filter):
 
 
 class OrFilter(Filter):
+    ''' Or Filter. '''
     def __init__(self, querys):
         ''' Or Filter based on the Query object(s) passed in the constructor '''
         if isinstance(querys, Query):
             querys = [querys]
-        Query.is_array_query(querys)
-        arr = Query.query_to_str_array(querys)
+        Query._is_array_query(querys)
+        arr = Query._query_to_str_array(querys)
         self.filter = {"filter": {"or": arr}}
 
     def extend(self, arr):
@@ -466,12 +490,13 @@ class OrFilter(Filter):
 
 
 class AndFilter(Filter):
+    ''' And Filter. '''
     def __init__(self, querys):
         ''' And Filter based on the Query object(s) passed in the constructor '''
         if isinstance(querys, Query):
             querys = [querys]
-        Query.is_array_query(querys)
-        arr = Query.query_to_str_array(querys)
+        Query._is_array_query(querys)
+        arr = Query._query_to_str_array(querys)
         self.filter = {"filter": {"and": arr}}
 
     def extend(self, arr):
@@ -479,6 +504,7 @@ class AndFilter(Filter):
 
 
 class NotFilter(Filter):
+    ''' Not Filter. '''
     def __init__(self, query):
         ''' And Filter based on the Query object(s) passed in the constructor '''
         if not isinstance(query, Query):
@@ -487,6 +513,7 @@ class NotFilter(Filter):
 
 
 class Highlight():
+    ''' Used in highlighting search result fields. '''
     def __init__(self, fields, pre_tags=None, post_tags=None):
         ''' Highlight one or more fields in the search results. '''
         if not isinstance(fields, list):
