@@ -37,6 +37,38 @@ Quick start
 
     url(r'^search/', include('elastic.urls', namespace="elastic")),
 
+Building Elastic Queries
+------------------------
+
+The classes in ``elastic_model`` module are used to build Elastic queries
+and filters to run queries and retrieve search hits, a count of the hits and
+the index mapping.
+
+An ``ElasticQuery`` object is used to build an instance of ``Search``.
+Search.get_json_response() then runs the search request and returns
+the elastic JSON results. Alternatively Search.get_result()
+can be used to return a processed form of the results without
+leading underscores (e.g. _type) which Django template does not like.
+Search.get_count() will use the Elastic count API to return the number
+of hits for a query.
+
+Example query::
+
+    query_bool = BoolQuery() 
+    query_bool.must_not([Query.term("seqid", 2)]) \ 
+              .should(RangeQuery("start", gte=10054)) \ 
+              .should(Query.term("id", "rs373328635")) 
+    query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"]) 
+    search = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+    results = search.get_json_response()
+
+An ``ElasticQuery`` object can be built from ``Query`` and ``Filter``
+objects. There are factory methods within ``ElasticQuery`` and ``Query``
+classes that provide shortcuts to building common types of queries/filters.
+When creating a new query the first port of call would therefore be
+the factory methods in ``ElasticQuery``. If this does not provide the
+exact components needed for the query then look into building it
+from the Query and Filter parent and child classes.
   
 Snapshot and Restore
 --------------------
