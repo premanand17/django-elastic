@@ -37,6 +37,59 @@ Quick start
 
     url(r'^search/', include('elastic.urls', namespace="elastic")),
 
+Create Mapping and Loading Data into Elastic
+--------------------------------------------
+
+The plugin comes with some in-built loaders. These can be listed using the
+Django command line management tool::
+
+    ./manage.py index_search --help
+    
+For example there is a generic GFF file loader::
+
+    ./manage.py index_search --indexName [index name] --indexType [gff] \
+                             --indexGFF file.gff [--isGTF]
+
+To write custom loaders there are example loaders in the management.loaders
+package. These inherit from the management.loaders.loader.Loader class and
+can be run by extending management.commands.index_search.py.
+    
+Building Elastic Queries
+------------------------
+
+The classes in the ``elastic_model`` module are used to build Elastic queries.
+A query can be used to retrieve search hits, get a count of the hits or
+to get the index mapping. The query may also be a filter or be combined
+with a filter component. This plugin attempts to provide flexibility in
+the generation of queries but also provides shortcuts to common query
+structures.
+
+An ``ElasticQuery`` object is used to build an instance of ``Search``.
+Search.get_json_response() then runs the search request and returns
+the elastic JSON results. Alternatively Search.get_result()
+can be used to return a processed form of the results without
+leading underscores (e.g. _type) which Django template does not like.
+Search.get_count() uses the Elastic count API to return the number
+of hits for a query.
+
+Example of a filtered boolean query::
+
+    query_bool = BoolQuery() 
+    query_bool.must_not([Query.term("seqid", 2)]) \ 
+              .should(RangeQuery("start", gte=10054)) \ 
+              .should(Query.term("id", "rs373328635")) 
+    query = ElasticQuery.filtered_bool(Query.match_all(),
+                                       query_bool, sources=["id", "seqid"]) 
+    search = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+    results = search.get_json_response()
+
+An ``ElasticQuery`` object can be built from ``Query`` and ``Filter``
+objects. There are factory methods within ``ElasticQuery`` and ``Query``
+classes that provide shortcuts to building common types of queries/filters.
+When creating a new query the first port of call would therefore be
+the factory methods in ``ElasticQuery``. If this does not provide the
+exact components needed for the query then look into building it
+from the ``Query`` and ``Filter`` parent and child classes.
   
 Snapshot and Restore
 --------------------

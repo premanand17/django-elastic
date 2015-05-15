@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class Loader:
+    ''' Base loader class. Defines methods for loading the mapping for an
+    index and bulk loading data. '''
 
     KEYWORD_ANALYZER = \
         {"analysis":
@@ -23,7 +25,7 @@ class Loader:
          }
 
     def mapping(self, mapping, idx_type, meta=None, analyzer=None, **options):
-        ''' Put the mapping to the Elastic server '''
+        ''' Put the mapping (L{MappingProperties}) to the Elastic server. '''
         if not isinstance(mapping, MappingProperties):
             raise LoaderError("not a MappingProperties")
 
@@ -52,7 +54,7 @@ class Loader:
             logger.warn('WARNING: '+idx_name+' mapping status: '+str(resp.status_code)+' '+str(resp.content))
 
     def bulk_load(self, idx_name, idx_type, json_data):
-        ''' Bulk load documents '''
+        ''' Bulk load documents. '''
 #         nb = sys.getsizeof(json_data)
 #         print(str(nb))
         resp = requests.put(ElasticSettings.url()+'/' + idx_name+'/' + idx_type +
@@ -70,20 +72,20 @@ class Loader:
                         logger.error(item)
 
     def get_index_name(self, **options):
-        ''' Get indexName option '''
+        ''' Get indexName option. '''
         if options['indexName']:
             return options['indexName'].lower()
         return self.__class__.__name__
 
     def open_file_to_load(self, file_name, **options):
-        ''' Open the given file '''
+        ''' Open the given file. '''
         if options[file_name].endswith('.gz'):
             return gzip.open(options[file_name], 'rb')
         else:
             return open(options[file_name], 'rb')
 
     def is_str(self, column_name, idx_name, idx_type):
-        ''' Looks at the mapping to determine if the type is a string '''
+        ''' Looks at the mapping to determine if the type is a string. '''
         if not self.mapping_json:
             self.mapping_json = Search(idx=idx_name).get_mapping(idx_type)[idx_name]['mappings']
         try:
@@ -133,6 +135,7 @@ class MappingProperties():
 
 
 class DelimeterLoader(Loader):
+    ''' Loader for files with delimited columns (comma, tab I{etc}). '''
 
     def load(self, column_names, file_handle, idx_name, idx_type='tab', delim='\t',
              is_GFF=False, is_GTF=False, chunk=5000):
@@ -215,6 +218,7 @@ class DelimeterLoader(Loader):
 
 
 class JSONLoader(Loader):
+    ''' Loader for JSON data. '''
 
     def load(self, raw_json_data, idx_name, idx_type='json'):
         ''' Index raw json data '''
