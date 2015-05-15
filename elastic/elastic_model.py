@@ -1,11 +1,16 @@
 '''
-Module to build Elastic queries and filters to run searches. An
-L{ElasticQuery} is used to build a L{Search} object and
-L{Search.get_json_response()} runs the search request.
+Used to build Elastic queries and filters to run searches.
 
-An L{ElasticQuery} object can be build from a L{Query} and
-L{Filter} objects and build in factory methods within these
-provide shortcuts to common types of queries/filters.
+An L{ElasticQuery} is used to build a L{Search} object.
+L{Search.get_json_response()} runs the search request and returns
+the elastic JSON results. Alternatively L{Search.get_result()}
+can be used to return a processed form of the results without
+leading underscores (e.g. _type) which django template does not like.
+
+An L{ElasticQuery} object can be built from L{Query} and
+L{Filter} objects and from the built in factory methods within
+these classes that provide shortcuts to common types of
+queries/filters.
 '''
 import json
 import requests
