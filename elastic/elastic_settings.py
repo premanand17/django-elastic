@@ -1,3 +1,4 @@
+''' Used to manage and retrieve Elastic settings. '''
 from django.conf import settings
 
 
