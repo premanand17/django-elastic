@@ -28,7 +28,16 @@ class Search:
     ''' Used to run Elastic searches and return results or mappings. '''
 
     def __init__(self, search_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
-        ''' Query the elastic server for given elastic query '''
+        ''' Query the elastic server for given elastic query
+        @type  search_query: L{ElasticQuery}
+        @keyword search_query: The elastic query to search (default: None).
+        @type  search_from: integer
+        @keyword search_from: Offset used in paginations (default: 0).
+        @type  size: integer
+        @keyword size: maximum number of hits to return (default: 20).
+        @type  idx: string
+        @keyword idx: index to search (default: default index defined in settings).
+        '''
         self.url = (ElasticSettings.url() + '/' + idx + '/_search?size=' + str(size) +
                     '&from='+str(search_from))
         if search_query is not None:
@@ -354,7 +363,7 @@ class Query:
     @classmethod
     def query_string(cls, query_term, **kwargs):
         ''' Factory method for
-        U{Query String Query<www.elastic.co/guide/en/elasticsearch/reference/1.3/query-dsl-query-string-query.html>}.
+        U{Query String Query<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-query-string-query.html>}.
         Simple wildcards can be used with the fields supplied
         (e.g. "fields" : ["city.*"]).
 
