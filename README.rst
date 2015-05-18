@@ -11,14 +11,22 @@ Quick start
 
     pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 
-2. Add "search" to your ``INSTALLED_APPS`` in ``settings.py``::
+2. Tastypie is required::
+
+    pip install -e git+http://github.com/django-tastypie/django-tastypie#egg=tastypie
+
+3. If you need to start a Django project::
+
+    django-admin startproject [project_name]
+
+4. Add "elastic" to your ``INSTALLED_APPS`` in ``settings.py``::
 
     INSTALLED_APPS = (
         ...
         'elastic',
     )
 
-3. Add the settings to the settings.py::
+5. Add the Elastic settings to the settings.py::
 
     # elastic search engine
     ELASTIC = {
@@ -33,9 +41,10 @@ Quick start
        }
     }
 
-4. Include the search URLconf in your project urls.py like this::
+6. Tests can be run as follows::
 
-    url(r'^search/', include('elastic.urls', namespace="elastic")),
+    ./manage.py test elastic.tests.tests_elastic_model \
+                     elastic.tests.tests_loaders
 
 Create Mapping and Loading Data into Elastic
 --------------------------------------------
@@ -52,7 +61,7 @@ For example there is a generic GFF file loader::
 
 To write custom loaders there are example loaders in the management.loaders
 package. These inherit from the management.loaders.loader.Loader class and
-can be run by extending management.commands.index_search.py.
+can be run by extending the commands in management.commands.index_search.py.
     
 Building Elastic Queries
 ------------------------
