@@ -10,7 +10,9 @@ Quick start
 1. Installation::
 
     pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
-    
+
+Tastypie is required::
+
     pip install -e git+http://github.com/django-tastypie/django-tastypie#egg=tastypie
 
 2. If you need to start a Django project::
@@ -55,7 +57,7 @@ For example there is a generic GFF file loader::
 
 To write custom loaders there are example loaders in the management.loaders
 package. These inherit from the management.loaders.loader.Loader class and
-can be run by extending management.commands.index_search.py.
+can be run by extending the commands in management.commands.index_search.py.
     
 Building Elastic Queries
 ------------------------
