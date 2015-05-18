@@ -8,7 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-fields = ["gene_symbol", "hgnc", "synonyms", "id",
+fields = ["gene_symbol", "hgnc", "synonyms", "id^2",
           "dbxrefs.*", "attr.*", "featureloc.seqid",
           "rscurrent", "rslow", "rshigh"]
 

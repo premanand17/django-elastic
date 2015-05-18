@@ -1,3 +1,4 @@
+''' Register TastyPie Elastic resources used for the tests only. '''
 from django.conf.urls import include, url
 from tastypie.api import Api
 from elastic.tastypie.api import MarkerResource, GeneResource

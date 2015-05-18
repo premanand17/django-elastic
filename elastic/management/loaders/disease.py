@@ -1,3 +1,4 @@
+''' Loader for disease data. '''
 import re
 import requests
 import json

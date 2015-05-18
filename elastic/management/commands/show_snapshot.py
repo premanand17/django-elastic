@@ -1,3 +1,4 @@
+''' Command line tool to show snapshots and repository. '''
 from django.core.management.base import BaseCommand
 from elastic.management.snapshot import Snapshot
 from elastic.elastic_settings import ElasticSettings

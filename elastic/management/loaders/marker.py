@@ -1,3 +1,4 @@
+''' Loader for marker data (I{e.g.} VCF). '''
 from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
 
 
