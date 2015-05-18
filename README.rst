@@ -41,6 +41,10 @@ Quick start
        }
     }
 
+6. Tests can be run as follows::
+
+    ./manage.py test elastic.tests.tests_elastic_model \
+                     elastic.tests.tests_loaders
 
 Create Mapping and Loading Data into Elastic
 --------------------------------------------
