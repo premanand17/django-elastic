@@ -10,15 +10,21 @@ Quick start
 1. Installation::
 
     pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
+    
+    pip install -e git+http://github.com/django-tastypie/django-tastypie#egg=tastypie
 
-2. Add "search" to your ``INSTALLED_APPS`` in ``settings.py``::
+2. If you need to start a Django project::
+
+    django-admin startproject [project_name]
+
+3. Add "elastic" to your ``INSTALLED_APPS`` in ``settings.py``::
 
     INSTALLED_APPS = (
         ...
         'elastic',
     )
 
-3. Add the settings to the settings.py::
+4. Add the Elastic settings to the settings.py::
 
     # elastic search engine
     ELASTIC = {
@@ -33,9 +39,6 @@ Quick start
        }
     }
 
-4. Include the search URLconf in your project urls.py like this::
-
-    url(r'^search/', include('elastic.urls', namespace="elastic")),
 
 Create Mapping and Loading Data into Elastic
 --------------------------------------------
