@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class Search:
     ''' Used to run Elastic queries and return search hits, hit count or the mapping. '''
 
-    def __init__(self, search_query=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
+    def __init__(self, search_query=None, aggs=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
         ''' Set up parameters to use in the search. L{ElasticQuery} is used to
         define a search query.
         @type  search_query: L{ElasticQuery}
@@ -45,6 +45,13 @@ class Search:
             if not isinstance(search_query, ElasticQuery):
                 raise QueryError("not an ElasticQuery")
             self.query = search_query.query
+
+        if aggs is not None:
+            if hasattr(self, 'query'):
+                self.query.update(aggs.aggs)
+            else:
+                self.query = aggs.aggs
+
         self.size = size
         self.idx = idx
 
@@ -385,9 +392,8 @@ class Query:
     @classmethod
     def _is_array_query(cls, arr):
         ''' Evaluate if array contents are Query objects. '''
-        for e in arr:
-            if not isinstance(e, Query):
-                raise QueryError("not a Query")
+        if not all(isinstance(y, (Query)) for y in arr):
+            raise QueryError("not a Query")
         return True
 
     @classmethod
@@ -560,6 +566,67 @@ class Highlight():
             if not isinstance(post_tags, list):
                 post_tags = [post_tags]
             self.highlight["highlight"].update({"post_tags": post_tags})
+
+
+class Aggs():
+
+    def __init__(self, agg_arr=None):
+        self.aggs = {"aggregations": {}}
+        if agg_arr is not None:
+            if not isinstance(agg_arr, list):
+                agg_arr = [agg_arr]
+            for agg in agg_arr:
+                self.aggs["aggregations"].update(agg.agg)
+
+
+class Agg():
+
+    AGGS = {"avg": {"type": dict, "params": {"field": str}},
+
+            # bucket aggregation
+            "global": {"type": dict},
+            "filter": {"type": Query},
+            "filters": {"type": list, "list_type": Query},
+            "missing": {"type": dict, "params": {"field": str}},
+            "terms": {"type": dict, "params": {"field": str, "size": int}},
+            "significant_terms": {"type": dict, "params": {"field": str}},
+            "range": {"type": dict, "params": {"field": str, 'ranges': list, "list_type": RangeQuery}}
+            }
+
+    def __init__(self, agg_name, agg_type, agg_body):
+        self.agg = {agg_name: {}}
+        AGGS = Agg.AGGS
+
+        if agg_type in AGGS:
+            if isinstance(agg_body, AGGS[agg_type]["type"]):
+                if 'params' in Agg.AGGS[agg_type]:
+                    for pkey in agg_body:
+                        if pkey not in Agg.AGGS[agg_type]['params']:
+                            raise QueryError('unrecognised aggregation parameter')
+                        if not isinstance(agg_body[pkey], Agg.AGGS[agg_type]['params'][pkey]):
+                            raise QueryError('aggregation parameter incorrect type')
+
+                if 'list_type' in AGGS[agg_type]:
+                    Agg._array_types(agg_body, AGGS[agg_type]['list_type'])
+                    str_arr = []
+                    [str_arr.append(Agg._get_query(q)) for q in agg_body]
+                    self.agg[agg_name][agg_type] = str_arr
+                else:
+                    self.agg[agg_name][agg_type] = Agg._get_query(agg_body)
+        print(json.dumps(self.agg))
+
+    @classmethod
+    def _get_query(cls, q):
+        if hasattr(q, 'query'):
+            return q.query
+        return q
+
+    @classmethod
+    def _array_types(cls, arr, atype):
+        ''' Evaluate if array contents are atype objects. '''
+        if not all(isinstance(y, (atype)) for y in arr):
+            raise QueryError("not a "+str(atype))
+        return True
 
 
 class QueryError(Exception):
