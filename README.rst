@@ -11,22 +11,22 @@ Quick start
 
     pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 
-Tastypie is required::
+2. Tastypie is required::
 
     pip install -e git+http://github.com/django-tastypie/django-tastypie#egg=tastypie
 
-2. If you need to start a Django project::
+3. If you need to start a Django project::
 
     django-admin startproject [project_name]
 
-3. Add "elastic" to your ``INSTALLED_APPS`` in ``settings.py``::
+4. Add "elastic" to your ``INSTALLED_APPS`` in ``settings.py``::
 
     INSTALLED_APPS = (
         ...
         'elastic',
     )
 
-4. Add the Elastic settings to the settings.py::
+5. Add the Elastic settings to the settings.py::
 
     # elastic search engine
     ELASTIC = {
