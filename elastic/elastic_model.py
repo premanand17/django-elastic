@@ -568,7 +568,8 @@ class Highlight():
             self.highlight["highlight"].update({"post_tags": post_tags})
 
 
-class Aggs():
+class Aggs:
+    ''' Define Aggregations '''
 
     def __init__(self, agg_arr=None):
         self.aggs = {"aggregations": {}}
@@ -576,22 +577,31 @@ class Aggs():
             if not isinstance(agg_arr, list):
                 agg_arr = [agg_arr]
             for agg in agg_arr:
+                if not isinstance(agg, Agg):
+                    raise QueryError('not an aggregation')
                 self.aggs["aggregations"].update(agg.agg)
 
 
-class Agg():
+class Agg:
+    ''' Aggregation Builder '''
 
-    AGGS = {"avg": {"type": dict, "params": {"field": str}},
+    AGGS = {
+        # metric aggregation
+        "avg": {"type": dict, "params": {"field": str}},
+        "min": {"type": dict, "params": {"field": str}},
+        "max": {"type": dict, "params": {"field": str}},
+        "sum": {"type": dict, "params": {"field": str}},
+        "stats": {"type": dict, "params": {"field": str}},
 
-            # bucket aggregation
-            "global": {"type": dict},
-            "filter": {"type": Query},
-            "filters": {"type": dict, "dict_type": Query},
-            "missing": {"type": dict, "params": {"field": str}},
-            "terms": {"type": dict, "params": {"field": str, "size": int}},
-            "significant_terms": {"type": dict, "params": {"field": str}},
-            "range": {"type": dict, "params": {"field": str, 'ranges': list}}
-            }
+        # bucket aggregation
+        "global": {"type": dict},
+        "filter": {"type": Query},
+        "filters": {"type": dict, "dict_type": Query},
+        "missing": {"type": dict, "params": {"field": str}},
+        "terms": {"type": dict, "params": {"field": str, "size": int}},
+        "significant_terms": {"type": dict, "params": {"field": str}},
+        "range": {"type": dict, "params": {"field": str, 'ranges': list}}
+        }
 
     def __init__(self, agg_name, agg_type, agg_body):
         self.agg = {agg_name: {}}
@@ -617,8 +627,6 @@ class Agg():
                     self.agg[agg_name][agg_type] = Agg._get_query(agg_body)
         else:
             raise QueryError('aggregation type unknown: '+agg_type)
-
-        print(json.dumps(self.agg))
 
     def _update_dict(self, qdict):
         for k, v in qdict.items():

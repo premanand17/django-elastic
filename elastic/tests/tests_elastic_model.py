@@ -279,7 +279,8 @@ class ElasticModelTest(TestCase):
 class AggregationsTest(TestCase):
 
     def test_query_error(self):
-        self.assertRaises(QueryError, Agg=("test", "termx", {"field": "seqid", "size": 0}))
+        self.assertRaises(QueryError, Agg, "test", "termx", {"field": "seqid", "size": 0})
+        self.assertRaises(QueryError, Aggs, "test")
 
     def test_term(self):
 
