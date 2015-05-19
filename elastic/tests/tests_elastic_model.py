@@ -301,11 +301,19 @@ class AggregationsTest(TestCase):
     def test_filter(self):
         ''' Filter Aggregation '''
         agg = [Agg('test_filter', 'filter', RangeQuery('start', gt='1000')),
-               Agg('avg_start', 'avg', {"field": 'start'})]
+               Agg('avg_start', 'avg', {"field": 'start'}),
+               Agg('min_start', 'min', {"field": 'start'}),
+               Agg('sum_start', 'sum', {"field": 'start'}),
+               Agg('stats_start', 'stats', {"field": 'start'})]
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
-        resp = search.get_json_response()
-        self.assertTrue('avg_start' in resp['aggregations'], "returned avg aggregation")
+        resp = search.get_json_response()['aggregations']
+        self.assertTrue('avg_start' in resp, "returned avg aggregation")
+        self.assertTrue('min_start' in resp, "returned min aggregation")
+
+        self.assertTrue(all(k in resp['stats_start']
+                            for k in ("min", "max", "sum", "count", "avg")),
+                        "returned min aggregation")
 
     def test_filters(self):
         ''' Filters Aggregation '''
