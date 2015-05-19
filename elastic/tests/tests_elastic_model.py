@@ -4,12 +4,14 @@ from django.test import TestCase, override_settings
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
 from elastic.elastic_model import Search, BoolQuery, Query, ElasticQuery, \
-    RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter, Highlight
+    RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter, Highlight,\
+    Agg, Aggs
 from elastic.elastic_settings import ElasticSettings
 from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
 import time
 import requests
+import json
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -272,3 +274,73 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery(Query.term("id", "rs373328635"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
+class AggregationsTest(TestCase):
+
+    def test_term(self):
+
+        ''' Terms Aggregation '''
+        agg = Agg("test", "terms", {"field": "seqid", "size": 0})
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+
+        self.assertTrue('aggregations' in resp, "returned aggregations")
+        self.assertTrue('test' in resp['aggregations'], "returned test aggregation")
+
+        ''' Ids Query with Terms Aggregation'''
+        query = ElasticQuery(Query.ids(['1', '2']))
+        search = Search(search_query=query, aggs=aggs, idx=ElasticSettings.idx('DEFAULT'), size=5)
+        resp = search.get_json_response()
+        self.assertTrue('buckets' in resp['aggregations']['test'], "returned test aggregation buckets")
+
+    def test_filter(self):
+        ''' Filter Aggregation '''
+        agg = [Agg('test_filter', 'filter', RangeQuery('start', gt='1000')),
+               Agg('avg_start', 'avg', {"field": 'start'})]
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue('avg_start' in resp['aggregations'], "returned avg aggregation")
+
+    def test_filters(self):
+        ''' Filters Aggregation '''
+        filters = {'filters': {'start_gt': RangeQuery('start', gt='1000'),
+                               'start_lt': RangeQuery('start', lt='100000')}}
+        agg = Agg('test_filters', 'filters', filters)
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue('start_lt' in resp['aggregations']['test_filters']['buckets'],
+                        "returned avg aggregation")
+
+    def test_missing(self):
+        ''' Missing Aggregation '''
+        agg = Agg("test_missing", "missing", {"field": "seqid"})
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue(resp['aggregations']['test_missing']['doc_count'] == 0,
+                        "no missing seqid fields")
+
+    def test_significant_terms(self):
+        ''' Significant Terms Aggregation '''
+        agg = Agg("test_significant_terms", "significant_terms", {"field": "start"})
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue('aggregations' in resp, "returned aggregations")
+
+    def test_range(self):
+        ''' Range Aggregation '''
+        agg = Agg("test_range_agg", "range",
+                  {"field": "start",
+                   "ranges": [{"to": 10000},
+                              {"from": 10000, "to": 15000}]})
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue(len(resp['aggregations']['test_range_agg']['buckets']) == 2,
+                        "returned two buckets in range aggregations")
