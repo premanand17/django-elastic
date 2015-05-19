@@ -301,19 +301,26 @@ class AggregationsTest(TestCase):
 
     def test_filter(self):
         ''' Filter Aggregation '''
-        agg = [Agg('test_filter', 'filter', RangeQuery('start', gt='1000')),
+        agg = [Agg('test_filter', 'filter', RangeQuery('start', gt='25000')),
                Agg('avg_start', 'avg', {"field": 'start'}),
                Agg('min_start', 'min', {"field": 'start'}),
                Agg('sum_start', 'sum', {"field": 'start'}),
-               Agg('stats_start', 'stats', {"field": 'start'})]
+               Agg('stats_start', 'stats', {"field": 'start'}),
+               Agg('count_start', 'value_count', {"field": 'start'}),
+               Agg('ext_stats_start', 'extended_stats', {"field": 'start'})]
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
         resp = search.get_json_response()['aggregations']
         self.assertTrue('avg_start' in resp, "returned avg aggregation")
         self.assertTrue('min_start' in resp, "returned min aggregation")
 
+        stats_keys = ["min", "max", "sum", "count", "avg"]
         self.assertTrue(all(k in resp['stats_start']
-                            for k in ("min", "max", "sum", "count", "avg")),
+                            for k in stats_keys),
+                        "returned min aggregation")
+        stats_keys.extend(["sum_of_squares", "variance", "std_deviation", "std_deviation_bounds"])
+        self.assertTrue(all(k in resp['ext_stats_start']
+                            for k in stats_keys),
                         "returned min aggregation")
 
     def test_filters(self):

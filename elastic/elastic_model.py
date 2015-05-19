@@ -592,6 +592,8 @@ class Agg:
         "max": {"type": dict, "params": {"field": str}},
         "sum": {"type": dict, "params": {"field": str}},
         "stats": {"type": dict, "params": {"field": str}},
+        "extended_stats": {"type": dict, "params": {"field": str}},
+        "value_count": {"type": dict, "params": {"field": str}},
 
         # bucket aggregation
         "global": {"type": dict},
