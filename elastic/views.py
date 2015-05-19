@@ -24,7 +24,7 @@ def _add_diseases(context):
 @ensure_csrf_cookie
 def search(request, query, search_idx=ElasticSettings.indices_str()):
     ''' Renders a elastic results page based on the query '''
-    elastic = Search.field_search_query(query, fields, 0, 20, idx=search_idx)
+    elastic = Search.field_search_query(query, fields=fields, search_from=0, size=20, idx=search_idx)
     context = _add_diseases(elastic.get_result(add_idx_types=True))
     return render(request, 'elastic/searchresults.html', context,
                   content_type='text/html')
