@@ -5,13 +5,12 @@ from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
 from elastic.elastic_model import Search, BoolQuery, Query, ElasticQuery, \
     RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter, Highlight,\
-    Agg, Aggs
+    Agg, Aggs, QueryError
 from elastic.elastic_settings import ElasticSettings
 from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
 import time
 import requests
-import json
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -278,6 +277,9 @@ class ElasticModelTest(TestCase):
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
 class AggregationsTest(TestCase):
+
+    def test_query_error(self):
+        self.assertRaises(QueryError, Agg=("test", "termx", {"field": "seqid", "size": 0}))
 
     def test_term(self):
 
