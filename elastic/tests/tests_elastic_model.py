@@ -3,12 +3,13 @@ queries L{elastic_model}. '''
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
-from elastic.elastic_model import Search, BoolQuery, Query, ElasticQuery, \
-    RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter, Highlight,\
-    Agg, Aggs, QueryError
 from elastic.elastic_settings import ElasticSettings
 from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
+from elastic.search import Search, ElasticQuery, Highlight
+from elastic.query import Query, BoolQuery, RangeQuery, QueryError, Filter, TermsFilter,\
+    AndFilter, NotFilter, OrFilter
+from elastic.aggs import Agg, Aggs
 import time
 import requests
 

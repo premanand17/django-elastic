@@ -3,7 +3,7 @@ import re
 import requests
 import json
 from elastic.management.loaders.loader import Loader, MappingProperties
-from elastic.elastic_model import ElasticSettings
+from elastic.search import ElasticSettings
 import logging
 
 # Get an instance of a logger

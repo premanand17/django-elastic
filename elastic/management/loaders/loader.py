@@ -3,7 +3,7 @@ import gzip
 import json
 import requests
 import re
-from elastic.elastic_model import Search, ElasticSettings
+from elastic.search import Search, ElasticSettings
 import logging
 
 # Get an instance of a logger

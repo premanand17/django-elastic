@@ -8,7 +8,7 @@ import time
 from elastic.management.loaders.utils import GFF, GFFError
 from elastic.elastic_settings import ElasticSettings
 from elastic.management.snapshot import Snapshot
-from elastic.elastic_model import Search
+from elastic.search import Search
 
 
 def setUpModule():

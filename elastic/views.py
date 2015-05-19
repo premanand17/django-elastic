@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http.response import JsonResponse
-from elastic.elastic_model import Search, Query, ElasticQuery
+from elastic.search import Search, ElasticQuery
 from elastic.elastic_settings import ElasticSettings
 import logging
 from django.views.decorators.csrf import ensure_csrf_cookie
+from elastic.query import Query
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
