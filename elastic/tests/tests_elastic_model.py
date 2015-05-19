@@ -323,6 +323,15 @@ class AggregationsTest(TestCase):
                             for k in stats_keys),
                         "returned min aggregation")
 
+    def test_top_hits(self):
+        ''' Top Hits Aggregation '''
+        agg = [Agg('test_filter', 'filter', RangeQuery('start', gt='2000')),
+               Agg('test_top_hits', 'top_hits', {"size": 1})]
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        hits = search.get_json_response()['aggregations']['test_top_hits']['hits']['hits']
+        self.assertTrue(len(hits) == 1, "returned the top hit")
+
     def test_filters(self):
         ''' Filters Aggregation '''
         filters = {'filters': {'start_gt': RangeQuery('start', gt='1000'),
