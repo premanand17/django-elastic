@@ -1,4 +1,4 @@
-''' Define Query and Filter to be used in an ElasticQuery '''
+''' Define L{Query} and L{Filter} to be used in an L{ElasticQuery} '''
 
 
 class Query:
