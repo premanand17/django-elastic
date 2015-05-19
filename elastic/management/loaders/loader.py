@@ -5,6 +5,8 @@ import requests
 import re
 from elastic.search import Search, ElasticSettings
 import logging
+from elastic.management.loaders.mapping import MappingProperties
+from elastic.management.loaders.analysis import Analyzer
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -14,15 +16,8 @@ class Loader:
     ''' Base loader class. Defines methods for loading the mapping for an
     index and bulk loading data. '''
 
-    KEYWORD_ANALYZER = \
-        {"analysis":
-         {"analyzer":
-          {"full_name":
-           {"filter": ["standard", "lowercase"],
-            "tokenizer": "keyword"}
-           }
-          }
-         }
+    KEYWORD_ANALYZER = Analyzer("full_name", tokenizer="keyword",
+                                token_filters=["standard", "lowercase"]).analyzer
 
     def mapping(self, mapping, idx_type, meta=None, analyzer=None, **options):
         ''' Put the mapping (L{MappingProperties}) to the Elastic server. '''
@@ -100,38 +95,6 @@ class Loader:
         if options['indexType']:
             return options['indexType'].lower()
         return default_type
-
-
-class MappingProperties():
-    ''' Used to create the mapping properties for an index. '''
-
-    def __init__(self, idx_type):
-        ''' For a given index type create the mapping properties. '''
-        self.idx_type = idx_type
-        self.mapping_properties = {self.idx_type: {"properties": {}}}
-        self.column_names = []
-
-    def add_property(self, name, map_type, index=None, analyzer=None, property_format=None):
-        ''' Add a property to the mapping. '''
-        self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
-        if index is not None:
-            self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
-        if analyzer is not None:
-            self.mapping_properties[self.idx_type]["properties"][name].update({"analyzer": analyzer})
-        if property_format is not None:
-            self.mapping_properties[self.idx_type]["properties"][name].update({"format": property_format})
-        self.column_names.append(name)
-        return self
-
-    def add_properties(self, mapping_properties):
-        ''' Add a nested set of properties to the mapping. '''
-        if not isinstance(mapping_properties, MappingProperties):
-            raise LoaderError("not a MappingProperties")
-        self.mapping_properties[self.idx_type]["properties"].update(mapping_properties.mapping_properties)
-        return self
-
-    def get_column_names(self):
-        return self.column_names
 
 
 class DelimeterLoader(Loader):
