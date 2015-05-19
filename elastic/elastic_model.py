@@ -75,14 +75,14 @@ class Search:
         or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range)) \
                  .extend(query_bool)
         query = ElasticQuery.filtered(Query.term("seqid", seqid), or_filter, field_list)
-        return cls(query, search_from, size, idx)
+        return cls(search_query=query, search_from=search_from, size=size, idx=idx)
 
     @classmethod
     def field_search_query(cls, query_term, fields=None,
                            search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
         ''' Constructs a field elastic query '''
         query = ElasticQuery.query_string(query_term, fields=fields)
-        return cls(query, search_from, size, idx)
+        return cls(search_query=query, search_from=search_from, size=size, idx=idx)
 
     def get_mapping(self, mapping_type=None):
         ''' Return the mappings for an index. '''
@@ -586,11 +586,11 @@ class Agg():
             # bucket aggregation
             "global": {"type": dict},
             "filter": {"type": Query},
-            "filters": {"type": list, "list_type": Query},
+            "filters": {"type": dict, "dict_type": Query},
             "missing": {"type": dict, "params": {"field": str}},
             "terms": {"type": dict, "params": {"field": str, "size": int}},
             "significant_terms": {"type": dict, "params": {"field": str}},
-            "range": {"type": dict, "params": {"field": str, 'ranges': list, "list_type": RangeQuery}}
+            "range": {"type": dict, "params": {"field": str, 'ranges': list}}
             }
 
     def __init__(self, agg_name, agg_type, agg_body):
@@ -611,9 +611,22 @@ class Agg():
                     str_arr = []
                     [str_arr.append(Agg._get_query(q)) for q in agg_body]
                     self.agg[agg_name][agg_type] = str_arr
+                elif 'dict_type' in AGGS[agg_type]:
+                    self.agg[agg_name][agg_type] = self._update_dict(agg_body)
                 else:
                     self.agg[agg_name][agg_type] = Agg._get_query(agg_body)
+        else:
+            raise QueryError('aggregation type unknown: '+agg_type)
+
         print(json.dumps(self.agg))
+
+    def _update_dict(self, qdict):
+        for k, v in qdict.items():
+            if isinstance(v, dict):
+                qdict[k] = self._update_dict(v)
+            else:
+                qdict[k] = self._get_query(v)
+        return qdict
 
     @classmethod
     def _get_query(cls, q):
