@@ -1,7 +1,8 @@
 ''' Loader for gene data. '''
 import re
-from elastic.elastic_model import Search
-from elastic.management.loaders.loader import Loader, MappingProperties
+from elastic.search import Search
+from elastic.management.loaders.loader import Loader
+from elastic.management.loaders.mapping import MappingProperties
 from elastic.management.loaders.utils import GFF
 import sys
 import json

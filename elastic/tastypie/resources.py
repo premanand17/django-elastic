@@ -3,11 +3,12 @@ inherit from when setting up an index as a resource to provide a TastyPie RESTfu
 interface. '''
 from tastypie import fields
 from tastypie.resources import Resource
-from elastic.elastic_model import Search, ElasticQuery, Query, AndFilter
+from elastic.search import Search, ElasticQuery
 from tastypie.bundle import Bundle
 from django.db.models.constants import LOOKUP_SEP
 from tastypie.exceptions import InvalidFilterError
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
+from elastic.query import Query, AndFilter
 
 
 class ElasticObject(object):
