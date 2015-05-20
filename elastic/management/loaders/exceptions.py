@@ -1,3 +1,4 @@
+''' Exceptions used in indexing. '''
 
 
 class LoaderError(Exception):

@@ -1,3 +1,5 @@
+''' Exceptions used in querying. '''
+
 
 class QueryError(Exception):
     ''' Query error  '''
