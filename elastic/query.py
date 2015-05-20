@@ -1,4 +1,5 @@
 ''' Define L{Query} and L{Filter} to be used in an L{ElasticQuery} '''
+from elastic.exceptions import QueryError, FilterError
 
 
 class Query:
@@ -206,7 +207,7 @@ class Filter:
         @param query: The query to build the filter with.
         '''
         if not isinstance(query, Query):
-            raise QueryError("not a Query")
+            raise FilterError("not a Query")
         self.filter = {"filter": query.query}
 
     def extend(self, filter_name, arr):
@@ -272,14 +273,5 @@ class NotFilter(Filter):
     def __init__(self, query):
         ''' And Filter based on the Query object(s) passed in the constructor '''
         if not isinstance(query, Query):
-            raise QueryError("not a Query")
+            raise FilterError("not a Query")
         self.filter = {"filter": {"not": query.query}}
-
-
-class QueryError(Exception):
-    ''' Query error  '''
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)

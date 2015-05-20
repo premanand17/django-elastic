@@ -7,6 +7,7 @@ from elastic.search import Search, ElasticSettings
 import logging
 from elastic.management.loaders.mapping import MappingProperties
 from elastic.management.loaders.analysis import Analyzer
+from elastic.management.loaders.exceptions import LoaderError
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -203,12 +204,3 @@ class JSONLoader(Loader):
                     json_data = ''
         finally:
             self.bulk_load(idx_name, idx_type, json_data)
-
-
-class LoaderError(Exception):
-    ''' Loader error  '''
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)

@@ -1,4 +1,5 @@
 ''' Used to create the mapping properties for an index. '''
+from elastic.management.loaders.exceptions import MappingError
 
 
 class MappingProperties():
@@ -31,12 +32,3 @@ class MappingProperties():
 
     def get_column_names(self):
         return self.column_names
-
-
-class MappingError(Exception):
-    ''' Mapping error  '''
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
