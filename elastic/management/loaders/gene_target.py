@@ -1,5 +1,6 @@
 ''' Loader for gene target data. '''
-from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
+from elastic.management.loaders.loader import DelimeterLoader
+from elastic.management.loaders.mapping import MappingProperties
 
 
 class GeneTargetManager(DelimeterLoader):
