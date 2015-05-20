@@ -1,5 +1,6 @@
 ''' Define aggregations to used in a search. '''
-from elastic.query import Query, QueryError
+from elastic.query import Query
+from elastic.exceptions import AggregationError
 
 
 class Aggs:
@@ -12,7 +13,7 @@ class Aggs:
                 agg_arr = [agg_arr]
             for agg in agg_arr:
                 if not isinstance(agg, Agg):
-                    raise QueryError('not an aggregation')
+                    raise AggregationError('not an aggregation')
                 self.aggs["aggregations"].update(agg.agg)
 
 
@@ -49,9 +50,9 @@ class Agg:
                 if 'params' in Agg.AGGS[agg_type]:
                     for pkey in agg_body:
                         if pkey not in Agg.AGGS[agg_type]['params']:
-                            raise QueryError('unrecognised aggregation parameter')
+                            raise AggregationError('unrecognised aggregation parameter')
                         if not isinstance(agg_body[pkey], Agg.AGGS[agg_type]['params'][pkey]):
-                            raise QueryError('aggregation parameter incorrect type')
+                            raise AggregationError('aggregation parameter incorrect type')
 
                 if 'list_type' in AGGS[agg_type]:
                     Agg._array_types(agg_body, AGGS[agg_type]['list_type'])
@@ -63,7 +64,7 @@ class Agg:
                 else:
                     self.agg[agg_name][agg_type] = Agg._get_query(agg_body)
         else:
-            raise QueryError('aggregation type unknown: '+agg_type)
+            raise AggregationError('aggregation type unknown: '+agg_type)
 
     def _update_dict(self, qdict):
         for k, v in qdict.items():
@@ -84,5 +85,5 @@ class Agg:
     def _array_types(cls, arr, atype):
         ''' Evaluate if array contents are atype objects. '''
         if not all(isinstance(y, (atype)) for y in arr):
-            raise QueryError("not a "+str(atype))
+            raise AggregationError("not a "+str(atype))
         return True
