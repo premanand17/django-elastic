@@ -7,8 +7,9 @@ from elastic.elastic_settings import ElasticSettings
 from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
 from elastic.search import Search, ElasticQuery, Highlight
-from elastic.query import Query, BoolQuery, RangeQuery, QueryError, Filter, TermsFilter,\
+from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter
+from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
 import time
 import requests
@@ -280,8 +281,8 @@ class ElasticModelTest(TestCase):
 class AggregationsTest(TestCase):
 
     def test_query_error(self):
-        self.assertRaises(QueryError, Agg, "test", "termx", {"field": "seqid", "size": 0})
-        self.assertRaises(QueryError, Aggs, "test")
+        self.assertRaises(AggregationError, Agg, "test", "termx", {"field": "seqid", "size": 0})
+        self.assertRaises(AggregationError, Aggs, "test")
 
     def test_term(self):
 
