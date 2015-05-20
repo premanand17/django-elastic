@@ -1,3 +1,5 @@
+''' Used to define analyzers in the mapping. '''
+
 
 class Analyzer:
     ''' See L{Custom Analyzers<www.elastic.co/guide/en/elasticsearch/guide/master/custom-analyzers.html>}. '''
