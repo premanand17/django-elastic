@@ -12,7 +12,7 @@ class Result(object):
         @keyword hits_total: Total number of docs matching search criteria.
         @type  docs: list
         @keyword docs: L{Document} hits.
-        @type  aggs: list
+        @type  aggs: dict
         @keyword aggs: L{Aggregation} results.
         '''
         self.took = took
