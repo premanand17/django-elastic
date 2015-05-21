@@ -4,38 +4,84 @@
 
 {% load staticfiles %}
 <script src="{% static "search/results_pagination.js" %}" charset="utf-8"></script>
+<script src="{% static "bands/diseases.js" %}"charset="utf-8"></script>
 <script type='text/javascript'>
 $(document).ready(function() {
 	var query = {% autoescape off %}{{ query }}.query{% endautoescape %};
 	results_pagination.build('pagination', 'result-overview', query, "{{ db }}", {{ size }}, {{ total }});
+
+    // add disease buttons
+    {% if diseases %}
+    	if (typeof diseases.addDiseaseBut === "function") { 
+    		diseases.addDiseaseBut({{ diseases|safe }});
+    	}
+    {% endif %}
 });
 </script>
 {% endblock %}
 
 {% block content %}
 
+<div id="diseases" class="btn-group btn-group-xs pull-right" role="group" style="margin: 0px;"></div>
+
 {% if error %}
 	{{ error }}
 {% endif %}
 <div class="row">
-	<div class="col-md-4"></div>
-	<div class="col-md-8" id="result-overview"></div>
+	<div class="col-md-3"></div>
+	<div class="col-md-9" id="result-overview"></div>
 </div>
 <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-3">
 	&nbsp;
 	<ul class="list-group" id="type-counter">
   		<li class="list-group-item">
-    	<span class="badge">{{ total }}</span>
-    	All
+    	All <span class="badge alert-danger">{{ total }}</span>
   		</li>
-  		{% for key, type in dbs.items %}
-  		   	<li class="list-group-item" id="{{ key }}"><a href="SEARCH_QUERY_LINK">{{ type }}</a><span class='badge'></span></li>
+  		{% for key, idx in idxs.items %}
+  			{% if idx.type != "Other" %}
+  		   		<li class="list-group-item" id="{{ key }}"><a href="SEARCH_QUERY_LINK">{{ idx.type }}</a><span class='badge'></span>
+
+  		   		{% if idx.categories %}
+  		   			<ul style='padding-left: 0;'>
+  		   			{% for cat in idx.categories %}
+  		   			<li class="list-unstyled">
+  		   				<i class="glyphicon glyphicon-plus" aria-hidden="true"></i> {{ cat }}</li>
+  		   			{% endfor %}
+  		   			</ul>
+  		   		{% endif %}
+  		   		
+  		   		{% if idx.search %}
+  		   			<ul style='padding-left: 0;'>
+  		   			{% for cat in idx.search %}
+  		   			<li class="list-unstyled">
+  		   				<button type="button" class="btn btn-default btn-sm">
+  		   					<i class="glyphicon glyphicon-search" aria-hidden="true"></i> {{ cat }}
+  		   				</button>
+  		   			{% endfor %}
+  		   			</ul>
+  		   		{% endif %}
+
+  		   		</li>
+  		   	{% endif %}
   		{% endfor %}
+
+  		<li class="list-group-item" id="{{ key }}">Other<span class='badge'></span><ul style='padding-left: 0;'>
+  		{% for key, idx in idxs.items %}
+  			{% if idx.type == "Other" %}
+  				{% if key == 'rs_merge_dbsnp142' %}
+  					<li class="list-group-item" id="{{ key }}"><a href="SEARCH_QUERY_LINK">Merged markers</a><span class='badge'></span></li>
+  				{% else %}
+  		   			<li class="list-group-item" id="{{ key }}"><a href="SEARCH_QUERY_LINK">{{ key }}</a><span class='badge'></span></li>
+  		   		{% endif %}
+  		   	{% endif %}
+  		{% endfor %}
+  		</ul></li>
+
 	</ul>
 	</div>
 	
-	<div class="col-md-8">
+	<div class="col-md-9">
 		<div id="pagination"></div>
 		<div id="results"></div>
 	</div>

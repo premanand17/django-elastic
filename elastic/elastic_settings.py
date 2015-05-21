@@ -1,3 +1,4 @@
+''' Used to manage and retrieve Elastic settings. '''
 from django.conf import settings
 
 
@@ -26,13 +27,29 @@ class ElasticSettings:
             return None
 
     @classmethod
+    def idx_only(cls, name='DEFAULT'):
+        ''' Get the index only without the type. '''
+        idx = cls.idx(name)
+        if idx is not None:
+            return cls._remove_type(idx)
+        return idx
+
+    @classmethod
     def url(cls, cluster='default'):
         ''' Return the Elastic URL '''
         return cls.getattr('ELASTIC_URL', cluster=cluster)
 
     @classmethod
     def indices_str(cls, cluster='default'):
-        ''' Get a comma separated list of indices (assumes names contain _IDX) '''
+        ''' Get a comma separated list of indices '''
         attrs = cls.attrs(cluster).get('IDX')
-        s = set([v for v in attrs.values()])
+        s = set([cls._remove_type(v) for v in attrs.values()])
         return ','.join(str(e) for e in s)
+
+    @classmethod
+    def _remove_type(cls, idx):
+        ''' If mapping type included then remove '''
+        pos = idx.find('/')
+        if pos > 0:
+            idx = idx[:-(len(idx)-pos)]
+        return idx

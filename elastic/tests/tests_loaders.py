@@ -1,3 +1,5 @@
+''' Tests for command line interface for managing Elastic repositories,
+defining mappings for indices and loading/indexing data. '''
 from django.test import TestCase
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, IDX_UPDATE
@@ -6,7 +8,7 @@ import time
 from elastic.management.loaders.utils import GFF, GFFError
 from elastic.elastic_settings import ElasticSettings
 from elastic.management.snapshot import Snapshot
-from elastic.elastic_model import Search
+from elastic.search import Search
 
 
 def setUpModule():

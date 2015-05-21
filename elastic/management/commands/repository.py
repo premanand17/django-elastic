@@ -1,3 +1,4 @@
+''' Command line tool to manage (create/delete) Elastic repository. '''
 from django.core.management.base import BaseCommand, CommandError
 from elastic.management.snapshot import Snapshot
 

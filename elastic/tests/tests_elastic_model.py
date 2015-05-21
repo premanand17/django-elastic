@@ -1,11 +1,16 @@
+''' Test for TastyPie resources (L{tastypie.ElasticResource}) and constructing
+queries L{elastic_model}. '''
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
-from elastic.elastic_model import Search, BoolQuery, Query, ElasticQuery, \
-    RangeQuery, OrFilter, AndFilter, Filter, NotFilter, TermsFilter, Highlight
 from elastic.elastic_settings import ElasticSettings
 from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
+from elastic.search import Search, ElasticQuery, Highlight
+from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
+    AndFilter, NotFilter, OrFilter
+from elastic.exceptions import AggregationError
+from elastic.aggs import Agg, Aggs
 import time
 import requests
 
@@ -27,19 +32,24 @@ def tearDownModule():
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
 class TastypieResourceTest(ResourceTestCase):
-    ''' Test Tastypie interface to Elastic indices. '''
+    ''' Test Tastypie interface to Elastic indices.
+    Note: Overriding the ROOT_URLCONF to set up test Tastypie api that
+    connects to the test indices set up for the module.
+    '''
 
     def setUp(self):
         super(TastypieResourceTest, self).setUp()
 
     def test_list(self):
+        ''' Test listing all documents. '''
         url = reverse('api_dispatch_list',
                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
         resp = self.api_client.get(url, format='json')
         self.assertValidJSONResponse(resp)
         self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
 
-    def test_list_with_parameters(self):
+    def test_list_with_filtering(self):
+        ''' Test getting a document using filtering. '''
         url = reverse('api_dispatch_list',
                       kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
         resp = self.api_client.get(url, format='json', data={'attr__Name': 'rs2664170'})
@@ -51,12 +61,20 @@ class TastypieResourceTest(ResourceTestCase):
         self.assertKeys(self.deserialize(resp), ['error'])
 
     def test_detail(self):
+        ''' Test getting a document by primary key '''
         url = reverse('api_dispatch_detail',
                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test', 'pk': '1'})
         resp = self.api_client.get(url, format='json')
         self.assertValidJSONResponse(resp)
         keys = ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info', 'resource_uri']
         self.assertKeys(self.deserialize(resp), keys)
+
+    def test_schema(self):
+        ''' Test returning the schema '''
+        url = reverse('api_get_schema',
+                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
+        resp = self.api_client.get(url, format='json')
+        self.assertValidJSONResponse(resp)
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -131,6 +149,19 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+
+    def test_bool_nested_filter(self):
+        ''' Test combined Bool filter '''
+        query_bool_nest = BoolQuery()
+        query_bool_nest.must(Query.match("id", "rs373328635").query_wrap()) \
+                       .must(Query.term("seqid", 1))
+
+        query_bool = BoolQuery()
+        query_bool.should(query_bool_nest) \
+                  .should(Query.term("seqid", 2))
+        query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.get_result()['total'] >= 1, "Nested bool filter query")
 
     def test_or_filtered_query(self):
         ''' Test building and running a filtered query. '''
@@ -244,3 +275,101 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery(Query.term("id", "rs373328635"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
+class AggregationsTest(TestCase):
+
+    def test_query_error(self):
+        self.assertRaises(AggregationError, Agg, "test", "termx", {"field": "seqid", "size": 0})
+        self.assertRaises(AggregationError, Aggs, "test")
+
+    def test_term(self):
+
+        ''' Terms Aggregation '''
+        agg = Agg("test", "terms", {"field": "seqid", "size": 0})
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+
+        self.assertTrue('aggregations' in resp, "returned aggregations")
+        self.assertTrue('test' in resp['aggregations'], "returned test aggregation")
+
+        ''' Ids Query with Terms Aggregation'''
+        query = ElasticQuery(Query.ids(['1', '2']))
+        search = Search(search_query=query, aggs=aggs, idx=ElasticSettings.idx('DEFAULT'), size=5)
+        resp = search.get_json_response()
+        self.assertTrue('buckets' in resp['aggregations']['test'], "returned test aggregation buckets")
+
+    def test_filter(self):
+        ''' Filter Aggregation '''
+        agg = [Agg('test_filter', 'filter', RangeQuery('start', gt='25000')),
+               Agg('avg_start', 'avg', {"field": 'start'}),
+               Agg('min_start', 'min', {"field": 'start'}),
+               Agg('sum_start', 'sum', {"field": 'start'}),
+               Agg('stats_start', 'stats', {"field": 'start'}),
+               Agg('count_start', 'value_count', {"field": 'start'}),
+               Agg('ext_stats_start', 'extended_stats', {"field": 'start'})]
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()['aggregations']
+        self.assertTrue('avg_start' in resp, "returned avg aggregation")
+        self.assertTrue('min_start' in resp, "returned min aggregation")
+
+        stats_keys = ["min", "max", "sum", "count", "avg"]
+        self.assertTrue(all(k in resp['stats_start']
+                            for k in stats_keys),
+                        "returned min aggregation")
+        stats_keys.extend(["sum_of_squares", "variance", "std_deviation", "std_deviation_bounds"])
+        self.assertTrue(all(k in resp['ext_stats_start']
+                            for k in stats_keys),
+                        "returned min aggregation")
+
+    def test_top_hits(self):
+        ''' Top Hits Aggregation '''
+        agg = [Agg('test_filter', 'filter', RangeQuery('start', gt='2000')),
+               Agg('test_top_hits', 'top_hits', {"size": 1})]
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        hits = search.get_json_response()['aggregations']['test_top_hits']['hits']['hits']
+        self.assertTrue(len(hits) == 1, "returned the top hit")
+
+    def test_filters(self):
+        ''' Filters Aggregation '''
+        filters = {'filters': {'start_gt': RangeQuery('start', gt='1000'),
+                               'start_lt': RangeQuery('start', lt='100000')}}
+        agg = Agg('test_filters', 'filters', filters)
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue('start_lt' in resp['aggregations']['test_filters']['buckets'],
+                        "returned avg aggregation")
+
+    def test_missing(self):
+        ''' Missing Aggregation '''
+        agg = Agg("test_missing", "missing", {"field": "seqid"})
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue(resp['aggregations']['test_missing']['doc_count'] == 0,
+                        "no missing seqid fields")
+
+    def test_significant_terms(self):
+        ''' Significant Terms Aggregation '''
+        agg = Agg("test_significant_terms", "significant_terms", {"field": "start"})
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue('aggregations' in resp, "returned aggregations")
+
+    def test_range(self):
+        ''' Range Aggregation '''
+        agg = Agg("test_range_agg", "range",
+                  {"field": "start",
+                   "ranges": [{"to": 10000},
+                              {"from": 10000, "to": 15000}]})
+        aggs = Aggs(agg)
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        resp = search.get_json_response()
+        self.assertTrue(len(resp['aggregations']['test_range_agg']['buckets']) == 2,
+                        "returned two buckets in range aggregations")

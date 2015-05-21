@@ -1,3 +1,4 @@
+''' Test for view. '''
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS2
@@ -40,7 +41,7 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_search(self):
         ''' Test a single SNP elastic '''
-        resp = self.client.get('/search/rs2476601/')
+        resp = self.client.get('/search/rs2476601/db/'+ElasticSettings.idx('MARKER'))
         self.assertEqual(resp.status_code, 200)
 #         print(resp.context)
         self.assertTrue('data' in resp.context)
@@ -49,7 +50,7 @@ class ElasticViewsTest(TestCase):
 
     def test_snp_wildcard(self):
         ''' Test a wild card elastic '''
-        resp = self.client.get('/search/rs3*/')
+        resp = self.client.get('/search/rs3*/db/'+ElasticSettings.idx('MARKER'))
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('data' in resp.context)
 
