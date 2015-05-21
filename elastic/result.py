@@ -5,6 +5,16 @@ class Result(object):
     ''' Result container for Document and Aggregation stores. '''
 
     def __init__(self, took=None, hits_total=None, docs=None, aggs=None):
+        ''' Store Documents and Aggregations and search meta data.
+        @type  took: integer
+        @keyword took: Time in milliseconds for search to run.
+        @type  hits_total: integer
+        @keyword hits_total: Total number of docs matching search criteria.
+        @type  docs: list
+        @keyword docs: L{Document} hits.
+        @type  aggs: list
+        @keyword aggs: L{Aggregation} results.
+        '''
         self.took = took
         self.hits_total = hits_total
         self.docs = docs
