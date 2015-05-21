@@ -1,7 +1,7 @@
 ''' Custom Template Tags '''
 from django import template
 from django.conf import settings
-from elastic.doc import Document
+from elastic.result import Document
 
 register = template.Library()
 
