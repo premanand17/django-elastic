@@ -30,23 +30,14 @@ class SnapshotTest(TestCase):
     def test_show(self, snapshot=None):
         call_command('show_snapshot')
         call_command('show_snapshot', all=True)
-        call_command('show_snapshot', snapshot='xxx')
 
     def test_create_delete_repository(self):
         repos = 'test_backup'
-        repo_dir = "/tmp/test_snapshot/"
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' not yet created')
-        call_command('repository', repos, dir=repo_dir)
+        call_command('repository', repos, dir="/tmp/test_snapshot/")
         self.assertTrue(Snapshot.exists(repos, ''), 'Repository '+repos+' created')
-
-        self.assertFalse(Snapshot.create_repository(repos, repo_dir),
-                         'Repository already exists.')
-        self.assertFalse(Snapshot.create_repository(repos+"X", repo_dir+"/xxx/xxxx"),
-                         'Directory to store repository not found.')
-
         call_command('repository', repos, delete=True)
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' deleted')
-        self.assertFalse(Snapshot.delete_repository(repos), 'Repository '+repos+' deleted')
 
     def test_create_restore_delete_snapshot(self):
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
@@ -63,17 +54,6 @@ class SnapshotTest(TestCase):
         call_command('restore_snapshot', snapshot)
         self.assertTrue(Search.index_exists(IDX['MARKER']['indexName']), "Restored index exists")
 
-        # remove snapshot
-        call_command('snapshot', snapshot, delete=True)
-        self.assertFalse(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
-                         "Deleted snapshot "+snapshot)
-
-    def test_create_snapshot(self):
-        snapshot = 'test_'+ElasticSettings.getattr('TEST')
-        call_command('snapshot', snapshot, indices=IDX['MARKER']['indexName'])
-        # snapshot already exist so return false
-        self.assertFalse(Snapshot.create_snapshot(ElasticSettings.getattr('REPOSITORY'),
-                                                  snapshot, IDX['MARKER']['indexName']))
         # remove snapshot
         call_command('snapshot', snapshot, delete=True)
         self.assertFalse(Snapshot.exists(ElasticSettings.getattr('REPOSITORY'), snapshot),
