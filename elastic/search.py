@@ -82,11 +82,11 @@ class Search:
         return cls(search_query=query, search_from=search_from, size=size, idx=idx)
 
     @classmethod
-    def field_search_query(cls, query_term, fields=None,
-                           search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
+    def field_search_query(cls, query_term, aggs=None, fields=None, search_from=0,
+                           size=20, idx=ElasticSettings.idx('DEFAULT')):
         ''' Constructs a field elastic query '''
         query = ElasticQuery.query_string(query_term, fields=fields)
-        return cls(search_query=query, search_from=search_from, size=size, idx=idx)
+        return cls(search_query=query, aggs=aggs, search_from=search_from, size=size, idx=idx)
 
     def get_mapping(self, mapping_type=None):
         ''' Return the mappings for an index. '''
@@ -115,7 +115,7 @@ class Search:
             logger.warn("Error: elastic response 200:" + self.url)
         return response.json()
 
-    def get_result(self, add_idx_types=False):
+    def get_result(self):
         ''' DEPRECATED: use Search.search().
         Return the elastic json result. Note: django template does not
         like underscores (e.g. _type). '''
@@ -134,8 +134,6 @@ class Search:
         context["data"] = content
         context["total"] = json_response['hits']['total']
         context["size"] = self.size
-        if add_idx_types:
-            self._add_idx_types(context)
         return context
 
     def search(self):
@@ -147,26 +145,8 @@ class Search:
         aggs = Aggregation.build_aggs(json_response)
         return Result(took=json_response['took'],
                       hits_total=json_response['hits']['total'],
-                      docs=docs, aggs=aggs)
-
-    def _add_idx_types(self, context):
-        ''' Adding index types to the context.  '''
-        idx_types = {}
-        idxs = self.idx.split(",")
-        for this_idx in idxs:
-            if this_idx == ElasticSettings.idx('MARKER'):
-                stype = {'type': 'Marker',
-                         'categories': ['synonymous', 'non-synonymous'],
-                         'search': ['in LD of selected']}
-            elif this_idx == ElasticSettings.idx('REGION'):
-                stype = {'type': 'Region'}
-            elif this_idx == ElasticSettings.idx('GENE'):
-                stype = {'type': 'Gene', 'categories': ['protein coding', 'non-coding', 'pseudogene']}
-            else:
-                stype = {'type': 'Other'}
-            idx_types[this_idx] = stype
-        context["idxs"] = idx_types
-        context["db"] = self.idx
+                      size=self.size, docs=docs, aggs=aggs,
+                      idx=self.idx, query=self.query)
 
 
 class ElasticQuery():
