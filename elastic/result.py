@@ -4,21 +4,31 @@
 class Result(object):
     ''' Result container for Document and Aggregation stores. '''
 
-    def __init__(self, took=None, hits_total=None, docs=None, aggs=None):
+    def __init__(self, took=None, hits_total=None, size=None,
+                 docs=None, aggs=None, idx=None, query=None):
         ''' Store Documents and Aggregations and search meta data.
         @type  took: integer
         @keyword took: Time in milliseconds for search to run.
         @type  hits_total: integer
         @keyword hits_total: Total number of docs matching search criteria.
+        @type  size: integer
+        @keyword size: maximum number of hits returned
         @type  docs: list
         @keyword docs: L{Document} hits.
         @type  aggs: dict
         @keyword aggs: L{Aggregation} results.
+        @type  idx: string
+        @keyword idx: Indices searched.
+        @type  query: dict
+        @keyword query: search query
         '''
         self.took = took
         self.hits_total = hits_total
+        self.size = size
         self.docs = docs
         self.aggs = aggs
+        self.idx = idx
+        self.query = query
 
 
 class Document(object):
@@ -42,6 +52,9 @@ class Document(object):
     def __setattr__(self, name, value):
         ''' Set a Document attribute. '''
         self.__dict__[name] = value
+
+    def to_dict(self):
+        return self
 
     def type(self):
         ''' Document type. '''
