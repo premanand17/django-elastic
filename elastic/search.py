@@ -18,9 +18,11 @@ from the L{Query} and L{Filter} parent and child classes.
 import json
 import requests
 import logging
+from elastic.result import Document, Result, Aggregation
 from elastic.elastic_settings import ElasticSettings
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
     Filter, OrFilter
+import warnings
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -114,8 +116,11 @@ class Search:
         return response.json()
 
     def get_result(self, add_idx_types=False):
-        ''' Return the elastic context result. Note: django template does not
-        like underscores in the context indexes (e.g. _type). '''
+        ''' DEPRECATED: use Search.search().
+        Return the elastic json result. Note: django template does not
+        like underscores (e.g. _type). '''
+        warnings.warn("Search.get_result will be removed, use Search.search()", FutureWarning)
+
         json_response = self.get_json_response()
         context = {"query": self.query}
         content = []
@@ -132,6 +137,17 @@ class Search:
         if add_idx_types:
             self._add_idx_types(context)
         return context
+
+    def search(self):
+        ''' Run the search and return a L{Result} that stores the
+        L{Document} and L{Aggregation} objects. '''
+        json_response = self.get_json_response()
+        hits = json_response['hits']['hits']
+        docs = [Document(hit) for hit in hits]
+        aggs = Aggregation.build_aggs(json_response)
+        return Result(took=json_response['took'],
+                      hits_total=json_response['hits']['total'],
+                      docs=docs, aggs=aggs)
 
     def _add_idx_types(self, context):
         ''' Adding index types to the context.  '''
