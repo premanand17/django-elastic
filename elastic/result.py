@@ -32,7 +32,8 @@ class Result(object):
 
 
 class Document(object):
-    ''' Generic object to hold Elastic document. '''
+    ''' Generic object to hold Elastic document. Enables the use
+    of getattr() on the document to get named attributes. '''
     def __init__(self, doc=None):
         if '_source' in doc:
             src = doc['_source']
