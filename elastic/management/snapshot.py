@@ -44,8 +44,8 @@ class Snapshot():
         parent = os.path.abspath(os.path.join(location, ".."))
 
         if not os.path.isdir(parent):
-            logger.error("Check directory exists: "+parent)
-            return False
+            logger.warn("Check directory exists: "+parent)
+
         data = {"type": "fs",
                 "settings": {"location": location}
                 }
