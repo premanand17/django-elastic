@@ -43,8 +43,6 @@ class SnapshotTest(TestCase):
 
         self.assertFalse(Snapshot.create_repository(repos, repo_dir),
                          'Repository already exists.')
-        self.assertFalse(Snapshot.create_repository(repos+"X", repo_dir+"/xxx/xxxx"),
-                         'Directory to store repository not found.')
 
         call_command('repository', repos, delete=True)
         self.assertFalse(Snapshot.exists(repos, ''), 'Repository '+repos+' deleted')
