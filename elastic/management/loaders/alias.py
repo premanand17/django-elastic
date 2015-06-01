@@ -7,6 +7,10 @@ class AliasManager(DelimeterLoader):
 
     def create_alias(self, **options):
         ''' Create alias index mapping and load data '''
+        object_types = ['gene', 'locus', 'marker', 'study']
+        for object_ in object_types:
+            print(object_)
+
         idx_name = self.get_index_name(**options)
         idx_alias_type = self.get_index_alias_type(**options)
 
@@ -61,24 +65,21 @@ class AliasManager(DelimeterLoader):
     def get_index_types(self, object_type):
         index_types = []
         if(re.search(r'gene', object_type)):
-            if(len(self.get_organism_enabled()) > 1):
                 index_types.extend(["human", "mouse", "rat"])
-            else:
-                index_types.extend(["human"])
         elif(re.search(r'marker', object_type)):
-                index_types.extend(["rs", "ic"])
+                index_types.extend(["rs", "ic", "dil", "position", "extra"])
         elif(re.search(r'locus', object_type)):
                 index_types.extend(self.get_diseases_enabled())
         elif(re.search(r'study', object_type)):
-                index_types.extend(["study"])
+                index_types.extend(["ImmunoBase","T1DBase"])
 
     def get_organism_enabled(self):
         org = ['Hs']
+        #org = ['Hs', 'Mm', 'Rn']
         return sorted(org)
 
     def get_diseases_enabled(self):
-        disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'OD', 'AA', 'IBD', 'NAR', 'PSC', 'SJO', 'SSC', 'VIT']
-        # disease = ['T1D']
+        disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'AA', 'IBD', 'NAR', 'PSC', 'SJO', 'SSC', 'VIT']
         return sorted(disease)
 
     def get_dis_orgs(self):

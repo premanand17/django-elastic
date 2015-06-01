@@ -1,6 +1,5 @@
 from elastic.management.loaders.loader import JSONLoader, MappingProperties
 import requests
-import json
 
 
 class CriteriaManager(JSONLoader):
@@ -11,26 +10,21 @@ class CriteriaManager(JSONLoader):
         idx_type = self.get_index_type(**options)
         print('idx name ' + idx_name)
         print('idx type ' + idx_type)
-        #mart_project = 'immunobase'
+        # mart_project = 'immunobase'
         mart_project = 't1dbase'
         mart_url = 'https://mart.' + mart_project + '.org/biomart/martservice?'
         mart_object = self.get_object_type(**options)
         mart_dataset = mart_project + '_criteria_' + mart_object
         criteria_json = self.get_criteria_info_from_biomart(mart_url, mart_dataset, **options)
         processed_criteria_json = self._post_process_criteria_info(criteria_json)
-        #print(processed_criteria_json)
         self._create_criteria_mapping(**options)
-        #self.load(criteria_json['data'], idx_name, idx_type)
         self.load(processed_criteria_json, idx_name, idx_type)
 
     def _create_criteria_mapping(self, **options):
         ''' Create the mapping for alias indexing '''
         idx_type = self.get_index_type(**options)
-        # props = MappingProperties(idx_type)
         props = self.get_properties(**options)
         self.mapping(props, idx_type=idx_type, meta=None, analyzer=self.KEYWORD_ANALYZER, **options)
-        # mapping_json = {idx_type: props}
-        # self.mapping(mapping_json, idx_type=idx_type, analyzer=self.KEYWORD_ANALYZER, **options)
 
     def _post_process_criteria_info(self, criteria_json):
         doc = []
