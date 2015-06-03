@@ -2,17 +2,20 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS2
-import requests
-import time
-import json
 from elastic.elastic_settings import ElasticSettings
+from elastic.search import Search
+import requests
+import json
+import time
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
-    time.sleep(1)
+
+    # wait for the elastic load to finish
+    Search.wait_for_load(IDX['MARKER']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
@@ -27,8 +30,15 @@ class ElasticViewsTest(TestCase):
     def test_server(self):
         ''' Test elasticsearch server is running and status '''
         try:
-            resp = requests.get(ElasticSettings.url() + '/_cluster/health/')
+            url = ElasticSettings.url() + '/_cluster/health/'
+            resp = requests.get(url)
             self.assertEqual(resp.status_code, 200, "Health page status code")
+            if resp.json()['status'] == 'red':  # allow status to recover if necessary
+                for _ in range(3):
+                    time.sleep(1)
+                    resp = requests.get(url)
+                    if resp.json()['status'] != 'red':
+                        break
             self.assertFalse(resp.json()['status'] == 'red', 'Health report - red')
         except requests.exceptions.Timeout:
             self.assertTrue(False, 'timeout exception')
