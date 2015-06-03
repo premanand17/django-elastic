@@ -6,6 +6,7 @@ from elastic.elastic_settings import ElasticSettings
 from elastic.search import Search
 import requests
 import json
+import time
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
@@ -29,8 +30,15 @@ class ElasticViewsTest(TestCase):
     def test_server(self):
         ''' Test elasticsearch server is running and status '''
         try:
-            resp = requests.get(ElasticSettings.url() + '/_cluster/health/')
+            url = ElasticSettings.url() + '/_cluster/health/'
+            resp = requests.get(url)
             self.assertEqual(resp.status_code, 200, "Health page status code")
+            if resp.json()['status'] == 'red':  # allow status to recover if necessary
+                for _ in range(3):
+                    time.sleep(1)
+                    resp = requests.get(url)
+                    if resp.json()['status'] != 'red':
+                        break
             self.assertFalse(resp.json()['status'] == 'red', 'Health report - red')
         except requests.exceptions.Timeout:
             self.assertTrue(False, 'timeout exception')
