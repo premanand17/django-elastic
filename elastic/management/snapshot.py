@@ -3,6 +3,7 @@ import requests
 import json
 import logging
 import os
+import time
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -20,6 +21,20 @@ class Snapshot():
             return False
         else:
             return True
+
+    @classmethod
+    def wait_for_snapshot(cls, repo, snapshot, count=3, delete=False):
+        ''' Wait for snapshot to exist or be deleted. '''
+        for _ in range(count):
+            try:
+                if delete:
+                    if not Snapshot.exists(repo, snapshot):
+                        return
+                elif Snapshot.exists(repo, snapshot):
+                    return
+            except KeyError:
+                continue
+            time.sleep(1)
 
     @classmethod
     def show(cls, repo, snapshots, all_repos):
