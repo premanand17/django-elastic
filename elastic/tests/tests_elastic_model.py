@@ -21,6 +21,7 @@ def setUpModule():
     call_command('index_search', **IDX['GFF_GENERIC'])
 
     # wait for the elastic load to finish
+    Search.wait_for_load(IDX['MARKER']['indexName'])
     Search.wait_for_load(IDX['GFF_GENERIC']['indexName'])
 
 
