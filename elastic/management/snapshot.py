@@ -23,7 +23,7 @@ class Snapshot():
             return True
 
     @classmethod
-    def wait_for_snapshot(cls, repo, snapshot, count=3, delete=False):
+    def wait_for_snapshot(cls, repo, snapshot, count=5, delete=False):
         ''' Wait for snapshot to exist or be deleted. '''
         for _ in range(count):
             try:

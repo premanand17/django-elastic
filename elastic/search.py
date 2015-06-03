@@ -150,7 +150,7 @@ class Search:
                       idx=self.idx, query=self.query)
 
     @classmethod
-    def wait_for_load(cls, idx, count=6):
+    def wait_for_load(cls, idx, count=5):
         ''' Method to allow a wait for index load to complete. '''
         for _ in range(count):
             try:
