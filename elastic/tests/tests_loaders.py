@@ -4,7 +4,6 @@ from django.test import TestCase
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, IDX_UPDATE
 import requests
-import time
 from elastic.management.loaders.utils import GFF, GFFError
 from elastic.elastic_settings import ElasticSettings
 from elastic.management.snapshot import Snapshot
@@ -18,11 +17,7 @@ def setUpModule():
 
     # wait for the elastic load to finish
     for key in IDX:
-        idx = IDX[key]['indexName']
-        for _ in range(3):
-            if Search(idx=idx).get_count()['count'] > 0:
-                break
-            time.sleep(1)
+        Search.wait_for_load(IDX[key]['indexName'])
 
     for idx_kwargs in IDX_UPDATE.values():
         call_command('index_search', **idx_kwargs)
@@ -97,12 +92,8 @@ class ElasticLoadersTest(TestCase):
             self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
 
             # check the index has documents, allow for the indexing to complete if necessary
-            ndocs = 0
-            for _ in range(3):
-                ndocs = Search(idx=idx).get_count()['count']
-                if ndocs > 0:
-                    break
-                time.sleep(1)
+            Search.wait_for_load(idx)
+            ndocs = Search(idx=idx).get_count()['count']
             self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))
 
     def test_mapping(self):
