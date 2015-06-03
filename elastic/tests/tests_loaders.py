@@ -100,10 +100,9 @@ class ElasticLoadersTest(TestCase):
         ''' Test loader has created and populated indices.  '''
         for key in IDX:
             idx = IDX[key]['indexName']
-            self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
-
             # check the index has documents, allow for the indexing to complete if necessary
             Search.wait_for_load(idx)
+            self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
             ndocs = Search(idx=idx).get_count()['count']
             self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))
 
