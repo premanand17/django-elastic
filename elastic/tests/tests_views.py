@@ -2,17 +2,25 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS2
+from elastic.elastic_settings import ElasticSettings
+from elastic.search import Search
 import requests
 import time
 import json
-from elastic.elastic_settings import ElasticSettings
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
 def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
-    time.sleep(1)
+
+    # wait for the elastic load to finish
+    ndocs = 0
+    for _ in range(3):
+        time.sleep(1)
+        ndocs = Search(idx=IDX['MARKER']['indexName']).get_count()['count']
+        if ndocs > 0:
+            break
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
