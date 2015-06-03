@@ -15,7 +15,15 @@ def setUpModule():
     ''' Run the index loading script to create test indices '''
     for idx_kwargs in IDX.values():
         call_command('index_search', **idx_kwargs)
-    time.sleep(2)
+
+    # wait for the elastic load to finish
+    for key in IDX:
+        idx = IDX[key]['indexName']
+        for _ in range(3):
+            if Search(idx=idx).get_count()['count'] > 0:
+                break
+            time.sleep(1)
+
     for idx_kwargs in IDX_UPDATE.values():
         call_command('index_search', **idx_kwargs)
 
