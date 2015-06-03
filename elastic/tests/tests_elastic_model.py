@@ -11,7 +11,6 @@ from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
-import time
 import requests
 
 
@@ -20,7 +19,10 @@ def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     call_command('index_search', **IDX['GFF_GENERIC'])
-    time.sleep(2)
+
+    # wait for the elastic load to finish
+    Search.wait_for_load(IDX['MARKER']['indexName'])
+    Search.wait_for_load(IDX['GFF_GENERIC']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
