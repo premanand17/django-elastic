@@ -20,7 +20,14 @@ def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     call_command('index_search', **IDX['GFF_GENERIC'])
-    time.sleep(2)
+
+    # wait for the elastic load to finish
+    ndocs = 0
+    for _ in range(3):
+        time.sleep(1)
+        ndocs = Search(idx=IDX['GFF_GENERIC']['indexName']).get_count()['count']
+        if ndocs > 0:
+            break
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
