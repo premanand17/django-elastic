@@ -77,7 +77,7 @@ class SnapshotTest(TestCase):
 
         # remove snapshot
         call_command('snapshot', snapshot, delete=True, repo=repo)
-        Snapshot.wait_for_snapshot(repo, snapshot, delete=True)
+        Snapshot.wait_for_snapshot(repo, snapshot, delete=True, count=10)
         self.assertFalse(Snapshot.exists(repo, snapshot), "Deleted snapshot "+snapshot)
 
     def test_create_snapshot(self):
