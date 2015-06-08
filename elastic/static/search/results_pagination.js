@@ -154,6 +154,10 @@
         				var summary = 'Location: <a href="/search/' + hit.seqid + ':' + hit.start + '-' + hit.end + '">' +
         				               hit.seqid + ':' + hit.start + '-' + hit.end + '</a>' 
         				addHit('region', hit.attr.region_id, hit.attr.Name, summary);
+        			} else if(hit.type == 'gene') {
+        				var gene = hit.attr.gene_name.replace(/\"/g, "")
+        				var summary = 'Gene: '+ gene + ' Gene Id:' + hit.attr.gene_id.replace(/\"/g, "");
+        				addHit('gene', gene, gene, summary);
         			}
         		}
         	}

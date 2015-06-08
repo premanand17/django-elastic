@@ -11,7 +11,6 @@ from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
-import time
 import requests
 
 
@@ -20,7 +19,10 @@ def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     call_command('index_search', **IDX['GFF_GENERIC'])
-    time.sleep(2)
+
+    # wait for the elastic load to finish
+    Search.wait_for_load(IDX['MARKER']['indexName'])
+    Search.wait_for_load(IDX['GFF_GENERIC']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -111,7 +113,7 @@ class ElasticModelTest(TestCase):
                   .should([RangeQuery("start", gte=10050)])
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
 
     def test_bool_filtered_query2(self):
         ''' Test building and running a filtered boolean query. '''
@@ -122,7 +124,7 @@ class ElasticModelTest(TestCase):
         query_string = Query.query_string("rs373328635", fields=["id", "seqid"])
         query = ElasticQuery.filtered_bool(query_string, query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
 
     def test_bool_filtered_query3(self):
         ''' Test building and running a filtered boolean query. Note:
@@ -135,7 +137,7 @@ class ElasticModelTest(TestCase):
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
 
     def test_bool_filtered_query4(self):
         ''' Test building and running a filtered boolean query.
@@ -148,7 +150,7 @@ class ElasticModelTest(TestCase):
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
 
     def test_bool_nested_filter(self):
         ''' Test combined Bool filter '''
@@ -161,7 +163,7 @@ class ElasticModelTest(TestCase):
                   .should(Query.term("seqid", 2))
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] >= 1, "Nested bool filter query")
+        self.assertTrue(elastic.search().hits_total >= 1, "Nested bool filter query")
 
     def test_or_filtered_query(self):
         ''' Test building and running a filtered query. '''
@@ -173,7 +175,7 @@ class ElasticModelTest(TestCase):
                  .extend(Query.query_string("rs*", fields=["id", "seqid"]).query_wrap())
         query = ElasticQuery.filtered(Query.term("seqid", 1), or_filter, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
     def test_and_filtered_query(self):
         ''' Test building and running a filtered query. '''
@@ -183,62 +185,67 @@ class ElasticModelTest(TestCase):
                   .extend(Query.term("seqid", 1))
         query = ElasticQuery.filtered(Query.term("seqid", 1), and_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
     def test_not_filtered_query(self):
         ''' Test building and running a filtered query. '''
         not_filter = NotFilter(RangeQuery("start", lte=10000))
         query = ElasticQuery.filtered(Query.term("seqid", 1), not_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
     def test_term_filtered_query(self):
         ''' Test filtered query with a term filter. '''
         query = ElasticQuery.filtered(Query.term("seqid", 1), Filter(Query.term("id", "rs373328635")))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic filtered query retrieved marker")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker")
 
     def test_terms_filtered_query(self):
         ''' Test filtered query with a terms filter. '''
         terms_filter = TermsFilter.get_terms_filter("id", ["rs2476601", "rs373328635"])
         query = ElasticQuery.filtered(Query.term("seqid", 1), terms_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] >= 1, "Elastic filtered query retrieved marker(s)")
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
     def test_string_query(self):
         ''' Test building and running a string query. '''
         query = ElasticQuery.query_string("rs2476601", fields=["id"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
+        docs = elastic.search()
+        self.assertTrue(len(docs.docs) == 1, "Elastic string query retrieved marker (rs2476601)")
 
     def test_string_query_with_wildcard(self):
         query = ElasticQuery.query_string("rs*", fields=["id"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
-        self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved marker (rs*)")
+        result = elastic.search()
+        self.assertTrue(result.hits_total > 1, "Elastic string query retrieved marker (rs*)")
 
     def test_match_query(self):
         ''' Test building and running a match query. '''
         query = ElasticQuery.query_match("id", "rs2476601")
-        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
+        search = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(len(search.search().docs) == 1, "Elastic string query retrieved marker (rs2476601)")
 
     def test_term_query(self):
         ''' Test building and running a match query. '''
         query = ElasticQuery(Query.term("id", "rs2476601"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs2476601)")
+        self.assertTrue(len(elastic.search().docs) == 1, "Elastic string query retrieved marker (rs2476601)")
 
         query = ElasticQuery(Query.term("seqid", "1", boost=3.0))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved markers  on chr1")
+        self.assertTrue(len(elastic.search().docs) > 1, "Elastic string query retrieved markers  on chr1")
 
     def test_terms_query(self):
         ''' Test building and running a match query. '''
         highlight = Highlight(["id"])
         query = ElasticQuery(Query.terms("id", ["rs2476601", "rs373328635"]), highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 2,
+        docs = elastic.search().docs
+        self.assertTrue(len(docs) == 2,
                         "Elastic string query retrieved markers (rs2476601, rs373328635)")
+        self.assertTrue(getattr(docs[0], 'seqid'), "Hit attribute found")
+        self.assertTrue(docs[0].highlight() is not None, "highlighting found")
 
     def test_bool_query(self):
         ''' Test a bool query. '''
@@ -251,19 +258,19 @@ class ElasticModelTest(TestCase):
                   .should(Query.match("seqid", "1"))
         query = ElasticQuery.bool(query_bool, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.get_result()['total'] == 1, "Elastic string query retrieved marker (rs373328635)")
+        self.assertTrue(len(elastic.search().docs) == 1, "Elastic string query retrieved marker (rs373328635)")
 
     def test_string_query_with_wildcard_and_highlight(self):
         highlight = Highlight("id", pre_tags="<strong>", post_tags="</strong>")
         query = ElasticQuery.query_string("rs*", fields=["id"], highlight=highlight)
-        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
-        self.assertTrue(elastic.get_result()['total'] > 1, "Elastic string query retrieved marker (rs*)")
+        search = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
+        self.assertTrue(len(search.search().docs) > 1, "Elastic string query retrieved marker (rs*)")
 
     def test_query_ids(self):
         ''' Test by query ids. '''
         query = ElasticQuery(Query.ids(['1', '2']))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
-        self.assertTrue(elastic.get_result()['total'] == 2, "Elastic string query retrieved marker (rs*)")
+        self.assertTrue(len(elastic.search().docs) == 2, "Elastic string query retrieved marker (rs*)")
 
     def test_count(self):
         ''' Test count the number of documents in an index. '''
@@ -285,21 +292,20 @@ class AggregationsTest(TestCase):
         self.assertRaises(AggregationError, Aggs, "test")
 
     def test_term(self):
-
         ''' Terms Aggregation '''
-        agg = Agg("test", "terms", {"field": "seqid", "size": 0})
+        agg_name = "test"
+        agg = Agg(agg_name, "terms", {"field": "seqid", "size": 0})
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
-        resp = search.get_json_response()
-
-        self.assertTrue('aggregations' in resp, "returned aggregations")
-        self.assertTrue('test' in resp['aggregations'], "returned test aggregation")
+        r_aggs = search.search().aggs
+        self.assertTrue(agg_name in r_aggs, "returned test aggregations")
 
         ''' Ids Query with Terms Aggregation'''
         query = ElasticQuery(Query.ids(['1', '2']))
         search = Search(search_query=query, aggs=aggs, idx=ElasticSettings.idx('DEFAULT'), size=5)
-        resp = search.get_json_response()
-        self.assertTrue('buckets' in resp['aggregations']['test'], "returned test aggregation buckets")
+        r_aggs = search.search().aggs
+        self.assertTrue(len(r_aggs[agg_name].get_buckets()) > 0, "returned test aggregation buckets")
+        self.assertTrue(getattr(r_aggs[agg_name], 'buckets')[0]['doc_count'] >= 0, "bucket document count")
 
     def test_filter(self):
         ''' Filter Aggregation '''
@@ -312,16 +318,18 @@ class AggregationsTest(TestCase):
                Agg('ext_stats_start', 'extended_stats', {"field": 'start'})]
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
-        resp = search.get_json_response()['aggregations']
-        self.assertTrue('avg_start' in resp, "returned avg aggregation")
-        self.assertTrue('min_start' in resp, "returned min aggregation")
+
+        r_aggs = search.search().aggs
+        self.assertTrue('avg_start' in r_aggs, "returned avg aggregation")
+        self.assertTrue('min_start' in r_aggs, "returned min aggregation")
 
         stats_keys = ["min", "max", "sum", "count", "avg"]
-        self.assertTrue(all(k in resp['stats_start']
+        self.assertTrue(all(hasattr(r_aggs['stats_start'], k)
                             for k in stats_keys),
                         "returned min aggregation")
+
         stats_keys.extend(["sum_of_squares", "variance", "std_deviation", "std_deviation_bounds"])
-        self.assertTrue(all(k in resp['ext_stats_start']
+        self.assertTrue(all(hasattr(r_aggs['ext_stats_start'], k)
                             for k in stats_keys),
                         "returned min aggregation")
 
@@ -331,7 +339,7 @@ class AggregationsTest(TestCase):
                Agg('test_top_hits', 'top_hits', {"size": 1})]
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
-        hits = search.get_json_response()['aggregations']['test_top_hits']['hits']['hits']
+        hits = search.search().aggs['test_top_hits'].get_hits()
         self.assertTrue(len(hits) == 1, "returned the top hit")
 
     def test_filters(self):
@@ -341,8 +349,8 @@ class AggregationsTest(TestCase):
         agg = Agg('test_filters', 'filters', filters)
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
-        resp = search.get_json_response()
-        self.assertTrue('start_lt' in resp['aggregations']['test_filters']['buckets'],
+        r_aggs = search.search().aggs
+        self.assertTrue('start_lt' in r_aggs['test_filters'].get_buckets(),
                         "returned avg aggregation")
 
     def test_missing(self):
@@ -350,8 +358,8 @@ class AggregationsTest(TestCase):
         agg = Agg("test_missing", "missing", {"field": "seqid"})
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
-        resp = search.get_json_response()
-        self.assertTrue(resp['aggregations']['test_missing']['doc_count'] == 0,
+        r_aggs = search.search().aggs
+        self.assertTrue(getattr(r_aggs['test_missing'], 'doc_count') == 0,
                         "no missing seqid fields")
 
     def test_significant_terms(self):
@@ -359,8 +367,8 @@ class AggregationsTest(TestCase):
         agg = Agg("test_significant_terms", "significant_terms", {"field": "start"})
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
-        resp = search.get_json_response()
-        self.assertTrue('aggregations' in resp, "returned aggregations")
+        r_aggs = search.search().aggs
+        self.assertTrue('test_significant_terms' in r_aggs, "returned aggregations")
 
     def test_range(self):
         ''' Range Aggregation '''
@@ -370,6 +378,6 @@ class AggregationsTest(TestCase):
                               {"from": 10000, "to": 15000}]})
         aggs = Aggs(agg)
         search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
-        resp = search.get_json_response()
-        self.assertTrue(len(resp['aggregations']['test_range_agg']['buckets']) == 2,
+        r_aggs = search.search().aggs
+        self.assertTrue(len(r_aggs['test_range_agg'].get_buckets()) == 2,
                         "returned two buckets in range aggregations")
