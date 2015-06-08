@@ -15,6 +15,7 @@ class GeneTargetManager(DelimeterLoader):
     def create_load_gene_target_index(self, **options):
         ''' Index gene target data '''
         idx_name = self.get_index_name(**options)
+        idx_type = self.get_index_type('gene_target', **options)
         f = self.open_file_to_load('indexGTarget', **options)
         line = f.readline()
         line = line.decode("utf-8")
@@ -22,11 +23,11 @@ class GeneTargetManager(DelimeterLoader):
         for i in range(len(GeneTargetManager.column_names), len(cols)-1):
             GeneTargetManager.tissue_types.append(cols[i])
 
-        self._create_gene_mapping(**options)
+        self._create_gene_mapping(idx_type, **options)
         GeneTargetManager.column_names.extend(GeneTargetManager.tissue_types)
-        self.load(GeneTargetManager.column_names, f, idx_name, 'gene_target')
+        self.load(GeneTargetManager.column_names, f, idx_name, idx_type, chunk=20000)
 
-    def _create_gene_mapping(self, **options):
+    def _create_gene_mapping(self, idx_type, **options):
         ''' Create the mapping for gene target index '''
         props = MappingProperties("gene_target")
         props.add_property("ensg", "string", index="not_analyzed") \
@@ -50,4 +51,4 @@ class GeneTargetManager(DelimeterLoader):
             props.add_property(tt, "float")
             meta["tissue_type"][tt] = "tissue_type"
 
-        self.mapping(props, idx_type='gene_target', meta=meta, **options)
+        self.mapping(props, idx_type, meta=meta, **options)
