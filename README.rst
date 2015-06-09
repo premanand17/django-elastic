@@ -11,14 +11,22 @@ Quick start
 
     pip install -e git://github.com/D-I-L/django-elastic.git#egg=elastic
 
-2. Add "search" to your ``INSTALLED_APPS`` in ``settings.py``::
+2. Tastypie is required::
+
+    pip install -e git+http://github.com/django-tastypie/django-tastypie#egg=tastypie
+
+3. If you need to start a Django project::
+
+    django-admin startproject [project_name]
+
+4. Add "elastic" to your ``INSTALLED_APPS`` in ``settings.py``::
 
     INSTALLED_APPS = (
         ...
         'elastic',
     )
 
-3. Add the settings to the settings.py::
+5. Add the Elastic settings to the settings.py::
 
     # elastic search engine
     ELASTIC = {
@@ -33,10 +41,64 @@ Quick start
        }
     }
 
-4. Include the search URLconf in your project urls.py like this::
+6. Tests can be run as follows::
 
-    url(r'^search/', include('elastic.urls', namespace="elastic")),
+    ./manage.py test elastic.tests.tests_elastic_model \
+                     elastic.tests.tests_loaders
 
+Create Mapping and Loading Data into Elastic
+--------------------------------------------
+
+The plugin comes with some in-built loaders. These can be listed using the
+Django command line management tool::
+
+    ./manage.py index_search --help
+    
+For example there is a generic GFF file loader::
+
+    ./manage.py index_search --indexName [index name] --indexType [gff] \
+                             --indexGFF file.gff [--isGTF]
+
+To write custom loaders there are example loaders in the management.loaders
+package. These inherit from the management.loaders.loader.Loader class and
+can be run by extending the commands in management.commands.index_search.py.
+    
+Building Elastic Queries
+------------------------
+
+The classes in the ``elastic_model`` module are used to build Elastic queries.
+A query can be used to retrieve search hits, get a count of the hits or
+to get the index mapping. The query may also be a filter or be combined
+with a filter component. This plugin attempts to provide flexibility in
+the generation of queries but also provides shortcuts to common query
+structures.
+
+An ``ElasticQuery`` object is used to build an instance of ``Search``.
+Search.get_json_response() then runs the search request and returns
+the elastic JSON results. Alternatively Search.get_result()
+can be used to return a processed form of the results without
+leading underscores (e.g. _type) which Django template does not like.
+Search.get_count() uses the Elastic count API to return the number
+of hits for a query.
+
+Example of a filtered boolean query::
+
+    query_bool = BoolQuery() 
+    query_bool.must_not([Query.term("seqid", 2)]) \ 
+              .should(RangeQuery("start", gte=10054)) \ 
+              .should(Query.term("id", "rs373328635")) 
+    query = ElasticQuery.filtered_bool(Query.match_all(),
+                                       query_bool, sources=["id", "seqid"]) 
+    search = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+    results = search.get_json_response()
+
+An ``ElasticQuery`` object can be built from ``Query`` and ``Filter``
+objects. There are factory methods within ``ElasticQuery`` and ``Query``
+classes that provide shortcuts to building common types of queries/filters.
+When creating a new query the first port of call would therefore be
+the factory methods in ``ElasticQuery``. If this does not provide the
+exact components needed for the query then look into building it
+from the ``Query`` and ``Filter`` parent and child classes.
   
 Snapshot and Restore
 --------------------

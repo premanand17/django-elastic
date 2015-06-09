@@ -1,8 +1,10 @@
+''' Loader for disease data. '''
 import re
 import requests
 import json
-from elastic.management.loaders.loader import Loader, MappingProperties
-from elastic.elastic_model import ElasticSettings
+from elastic.management.loaders.loader import Loader
+from elastic.management.loaders.mapping import MappingProperties
+from elastic.search import ElasticSettings
 import logging
 
 # Get an instance of a logger

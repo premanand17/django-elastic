@@ -1,3 +1,4 @@
+''' Settings used for the tests. '''
 import os
 from elastic.elastic_settings import ElasticSettings
 
