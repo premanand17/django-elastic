@@ -27,7 +27,14 @@ class Command(BaseCommand):
            "Options for diseases:\n" \
            " --indexName [index name] --indexDisease disease.list\n" \
            "Options for GFF/GTF:\n" \
-           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]"
+           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]" \
+           "Options for t1d/criteria:\n" \
+           " indexCriteria 'true' --indexName [index name] --indexProject t1dbase --applyFilter" \
+           "Options for imb/criteria:\n" \
+           " indexCriteria 'true' --indexName [index name] --indexProject immunobase --applyFilter" \
+           "Options for alias/gene:\n" \
+           " --indexAlias [dir where files to be indexed are there] --indexFeatureType gene" \
+
 
     option_list = BaseCommand.option_list + (
         make_option('--indexSNP',
@@ -83,9 +90,21 @@ class Command(BaseCommand):
                     dest='indexType',
                     help='Index type'),
         ) + (
+        make_option('--indexFeatureType',
+                    dest='indexFeatureType',
+                    help='Index feature type[gene,locus,marker,study]'),
+        ) + (
         make_option('--indexAlias',
                     dest='indexAlias',
                     help='Load aliases'),
+        ) + (
+        make_option('--indexProject',
+                    help='Project name to use',
+                    action="store", type="string", dest='indexProject'),
+        ) + (
+        make_option('--applyFilter',
+                    help='applyFilter enabled to restrict query for testing',
+                    action="store_true"),
         ) + (
         make_option('--indexCriteria',
                     dest='indexCriteria',

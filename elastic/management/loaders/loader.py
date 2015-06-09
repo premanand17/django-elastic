@@ -120,7 +120,6 @@ class DelimeterLoader(Loader):
 
                 idx_id = str(auto_num)
                 json_data += '{"index": {"_id": "%s"}}\n' % idx_id
-
                 doc_data = self.parse_line(parts, column_names, idx_name, idx_type, is_GFF, is_GTF)
                 json_data += json.dumps(doc_data) + '\n'
 
@@ -150,7 +149,11 @@ class DelimeterLoader(Loader):
                 continue
 
             if self.is_str(column_names[idx], idx_name, idx_type):
-                doc_data[column_names[idx]] = p
+                if "::" in p:
+                    p = p.split('::')
+                    doc_data[column_names[idx]] = p
+                else:
+                    doc_data[column_names[idx]] = p
             elif p.isdigit():
                 doc_data[column_names[idx]] = int(p)
             elif self._isfloat(p):
