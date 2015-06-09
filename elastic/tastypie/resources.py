@@ -1,10 +1,14 @@
+''' Generic resources (L{ElasticResource} and L{BaseGFFResource}) to
+inherit from when setting up an index as a resource to provide a TastyPie RESTful
+interface. '''
 from tastypie import fields
 from tastypie.resources import Resource
-from elastic.elastic_model import Search, ElasticQuery, Query, AndFilter
+from elastic.search import Search, ElasticQuery
 from tastypie.bundle import Bundle
 from django.db.models.constants import LOOKUP_SEP
 from tastypie.exceptions import InvalidFilterError
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
+from elastic.query import Query, AndFilter
 
 
 class ElasticObject(object):
@@ -26,6 +30,7 @@ class ElasticObject(object):
 
 
 class ElasticResource(Resource):
+    ''' Override methods to define an Elastic index as a TastyPie resource.'''
 
     def _client(self, q=None):
         ''' Get the Elastic client. '''
@@ -46,7 +51,7 @@ class ElasticResource(Resource):
 
     def get_object_list(self, request):
         ''' Gets the result list. '''
-        if self.search_filters is not None:
+        if hasattr(self, 'search_filters') and self.search_filters is not None:
             q = ElasticQuery.filtered(Query.match_all(), self.search_filters)
         else:
             q = ElasticQuery(Query.match_all())
@@ -124,7 +129,7 @@ class ElasticResource(Resource):
 
     def check_filtering(self, field_name, filter_type='exact'):
         """
-        Base on tastypie.resources.BaseModelResource.check_filtering().
+        Based on tastypie.resources.BaseModelResource.check_filtering().
         Given a field name and an optional filter type determine if a field
         can be filtered on.
         If a filter does not meet the needed conditions, it should raise an
@@ -147,12 +152,14 @@ class ElasticResource(Resource):
 
 
 class BaseGFFResource(ElasticResource):
+    ''' Generic GFF resource. '''
     # define the fields
-    seqid = fields.CharField(attribute='seqid')
-    source = fields.CharField(attribute='source')
-    type = fields.CharField(attribute='type')
-    start = fields.IntegerField(attribute='start')
-    end = fields.IntegerField(attribute='end')
-    score = fields.CharField(attribute='score')
-    phase = fields.CharField(attribute='phase')
-    attr = fields.DictField(attribute='attr')
+    seqid = fields.CharField(attribute='seqid', help_text='Sequence identifier')
+    source = fields.CharField(attribute='source', help_text='Software/algorithm that generated the feature')
+    type = fields.CharField(attribute='type', help_text='Type of feature')
+    start = fields.IntegerField(attribute='start', help_text='Start coordinate of the feature')
+    end = fields.IntegerField(attribute='end', help_text='End coordinate of the feature')
+    score = fields.CharField(attribute='score', help_text='Score of the feature')
+    strand = fields.CharField(attribute='strand', help_text='Strand of the feature')
+    phase = fields.CharField(attribute='phase', help_text='Where feature begins with reference to reading frame')
+    attr = fields.DictField(attribute='attr', help_text='List of feature attributes')

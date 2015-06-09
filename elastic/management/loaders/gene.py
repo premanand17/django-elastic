@@ -1,6 +1,8 @@
+''' Loader for gene data. '''
 import re
-from elastic.elastic_model import Search
-from elastic.management.loaders.loader import Loader, MappingProperties
+from elastic.search import Search
+from elastic.management.loaders.loader import Loader
+from elastic.management.loaders.mapping import MappingProperties
 from elastic.management.loaders.utils import GFF
 import sys
 import json
@@ -159,7 +161,8 @@ class GeneManager(Loader):
 
     def _call_elasticsearch(self, name, fields, indexName):
         ''' Call elasticsearch '''
-        elastic = Search.field_search_query(name, fields, 0, 20, indexName)
+        elastic = Search.field_search_query(name, fields=fields, search_from=0,
+                                            size=20, idx=indexName)
         return elastic.get_result()
 
     def _create_mapping(self, **options):

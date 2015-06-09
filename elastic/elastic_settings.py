@@ -1,4 +1,6 @@
+''' Used to manage and retrieve Elastic settings. '''
 from django.conf import settings
+from elastic.exceptions import SettingsError
 
 
 class ElasticSettings:
@@ -15,15 +17,27 @@ class ElasticSettings:
         return cls.attrs(cluster).get(name, None)
 
     @classmethod
-    def idx(cls, name='DEFAULT'):
-        ''' Get the index. For the DEFAULT if not defined return the first index. '''
-        idxs = cls.getattr('IDX')
+    def idx(cls, name='DEFAULT', idx_type=None, cluster='default'):
+        ''' Given the index name and optionally a type get the index URL path.
+        If 'DEFAULT' is requested but not defined return the first index. '''
+        idxs = cls.getattr('IDX', cluster=cluster)
         if name in idxs:
+            if isinstance(idxs[name], dict):
+                idx = idxs[name]['name']
+                if 'idx_type' not in idxs[name]:
+                    raise SettingsError('Index type key (idx_type) not found for '+idx)
+                if idx_type is not None:
+                    if idx_type in idxs[name]['idx_type']:
+                        return idx+'/'+idxs[name]['idx_type'][idx_type]
+                    else:
+                        raise SettingsError('Index type key ('+idx_type+') not found.')
+                else:
+                    return idx
             return idxs[name]
         else:
             if name == 'DEFAULT':
                 return idxs[list(idxs.keys())[0]]
-            return None
+        return None
 
     @classmethod
     def url(cls, cluster='default'):
@@ -32,7 +46,12 @@ class ElasticSettings:
 
     @classmethod
     def indices_str(cls, cluster='default'):
-        ''' Get a comma separated list of indices (assumes names contain _IDX) '''
+        ''' Get a comma separated list of indices '''
         attrs = cls.attrs(cluster).get('IDX')
-        s = set([v for v in attrs.values()])
+        s = set()
+        for v in attrs.values():
+            if isinstance(v, dict):
+                s.add(v['name'])
+            else:
+                s.add(v)
         return ','.join(str(e) for e in s)
