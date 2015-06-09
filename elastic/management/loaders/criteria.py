@@ -7,40 +7,46 @@ class CriteriaManager(JSONLoader):
     def create_criteria(self, **options):
         ''' Create alias index mapping and load data '''
         idx_name = self.get_index_name(**options)
-        idx_type = self.get_index_type(**options)
-        print('idx name ' + idx_name)
-        print('idx type ' + idx_type)
-        # mart_project = 'immunobase'
-        mart_project = 't1dbase'
-        mart_url = 'https://mart.' + mart_project + '.org/biomart/martservice?'
-        mart_object = self.get_object_type(**options)
-        mart_dataset = mart_project + '_criteria_' + mart_object
-        criteria_json = self.get_criteria_info_from_biomart(mart_url, mart_dataset, **options)
-        processed_criteria_json = self._post_process_criteria_info(criteria_json)
-        self._create_criteria_mapping(**options)
-        self.load(processed_criteria_json, idx_name, idx_type)
+        idx_types = self.get_index_type(**options)
+        mart_project = self.get_project(**options)
+
+        for idx_type in idx_types:
+            print('idx name ' + idx_name)
+            print(idx_type)
+            print('project name ' + mart_project)
+            mart_url = 'https://mart.' + mart_project + '.org/biomart/martservice?'
+            # mart_url = 'https://mart-dev-imb/biomart/martservice?'
+            mart_object = self.get_object_type(idx_type)
+            print('mart_project ' + mart_project + '  mart_object ' + mart_object)
+            mart_dataset = mart_project + '_criteria_' + mart_object
+            criteria_json = self.get_criteria_info_from_biomart(mart_url, mart_dataset, idx_type, **options)
+            processed_criteria_json = self._post_process_criteria_info(criteria_json, **options)
+            self._create_criteria_mapping(**options)
+            self.load(processed_criteria_json, idx_name, idx_type)
 
     def _create_criteria_mapping(self, **options):
         ''' Create the mapping for alias indexing '''
-        idx_type = self.get_index_type(**options)
-        props = self.get_properties(**options)
-        self.mapping(props, idx_type=idx_type, meta=None, analyzer=self.KEYWORD_ANALYZER, **options)
+        idx_types = self.get_index_type(**options)
 
-    def _post_process_criteria_info(self, criteria_json):
+        for idx_type in idx_types:
+            props = self.get_properties(idx_type, **options)
+            self.mapping(props, idx_type=idx_type, meta=None, analyzer=self.KEYWORD_ANALYZER, **options)
+
+    def _post_process_criteria_info(self, criteria_json, **options):
         doc = []
         for row in criteria_json['data']:
-            current_row = self.process_row(row)
+            current_row = self.process_row(row, **options)
             doc.append(current_row)
         return doc
 
-    def process_row(self, row):
+    def process_row(self, row, **options):
         current_row = {}
         current_row['Name'] = row['Name']
         current_row['Primary id'] = row['Primary id']
         current_row['Object class'] = row['Object class']
         current_row['Total score'] = row['Total score']
-        for org in self.get_organism_enabled():
-            for dis in self.get_diseases_enabled():
+        for org in self.get_organism_enabled(**options):
+            for dis in self.get_diseases_enabled(**options):
                 dis_org_header = dis + '_' + org
                 score_key = dis + ' ' + org + ' score'
                 score_key = score_key.strip()
@@ -69,41 +75,48 @@ class CriteriaManager(JSONLoader):
 
         return current_row
 
-    def get_properties(self, **options):
+    def get_properties(self, idx_type, **options):
         ''' Create the mapping for criteria index '''
-        idx_type = self.get_index_type(**options)
         props = MappingProperties(idx_type)
         props.add_property("Name", "string", analyzer="full_name")
         props.add_property("Primary id", "string", index="not_analyzed")
         props.add_property("Total score", "string", index="no")
-        dis_orgs = self.get_dis_orgs()
+        dis_orgs = self.get_dis_orgs(**options)
         for dis_org in dis_orgs:
             props.add_property(dis_org, "string", index="no")
 
         return props
 
-    def get_organism_enabled(self):
-        # hard code for now, later fetch it from db
-        # org = ['Hs']
-        org = ['Hs', 'Mm', 'Rn']
-        return sorted(org)
+    def get_organism_enabled(self, **options):
+        project = self.get_project(**options)
+        if(project == "immunobase"):
+            return ['Hs']
+        elif(project == "t1dbase"):
+            return ['Hs', 'Mm', 'Rn']
 
-    def get_diseases_enabled(self):
-        # disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'OD']
-        disease = ['T1D']
-        return sorted(disease)
+        return ['Hs']
 
-    def get_dis_orgs(self):
+    def get_diseases_enabled(self, **options):
+        project = self.get_project(**options)
+        if(project == "immunobase"):
+            return sorted(['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'OD'])
+        elif(project == "t1dbase"):
+            return ['T1D']
+
+        return sorted(['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'OD'])
+
+    def get_dis_orgs(self, **options):
         dis_orgs = []
-        orgs_enabled = self.get_organism_enabled()
-        dis_enabled = self.get_diseases_enabled()
+        orgs_enabled = self.get_organism_enabled(**options)
+        dis_enabled = self.get_diseases_enabled(**options)
         for dis in dis_enabled:
             for org in orgs_enabled:
                 dis_orgs.append(dis + '_' + org)
         return sorted(dis_orgs)
 
-    def get_object_type(self, **options):
-        idx_type = self.get_index_type(**options)
+    def get_object_type(self, idx_type):
+        print("get_object_type   ====")
+        print(idx_type)
         if(idx_type == 'gene'):
             return 'genes'
         if(idx_type == 'locus'):
@@ -114,18 +127,22 @@ class CriteriaManager(JSONLoader):
             return 'studies'
 
     def get_index_type(self, **options):
-        ''' Get indexName option '''
+        ''' Get indexType option '''
+        idx_type = []
         if options['indexType']:
-            return options['indexType'].lower()
-        return self.__class__.__name__ + '_type'
+            idx_type.append(options['indexType'].lower())
+        else:
+            idx_type.extend(['gene', 'locus', 'marker', 'study'])
+        return idx_type
 
     def get_project(self, **options):
-        ''' Get indexName option '''
-        if options['project']:
-            return options['project'].lower()
-        return 'immunobase'
+        '''return project name'''
+        if options['indexProject']:
+            return options['indexProject'].lower()
+        else:
+            return "immunobase"
 
-    def get_criteria_info_from_biomart(self, mart_url, mart_dataset, **options):
+    def get_criteria_info_from_biomart(self, mart_url, mart_dataset, idx_type, **options):
         urlTemplate = \
             mart_url + \
             'query=<?xml version="1.0" encoding="UTF-8"?>' \
@@ -137,11 +154,28 @@ class CriteriaManager(JSONLoader):
             '<Attribute name="criteria__object__main__object_class"/>' \
 
         flag_query = ''
-        for dis_org in self.get_dis_orgs():
+        for dis_org in self.get_dis_orgs(**options):
             flag_query += '<Attribute name="criteria__object__main__' + dis_org + '"/>'
             flag_query += '<Attribute name="criteria__object__main__' + dis_org + '_flag"/>'
 
-        urlTemplate += flag_query + '</Dataset>' + '</Query>'
+        urlTemplate += flag_query
+
+        if(options['applyFilter']):
+            filter_value =''
+            if(idx_type == 'gene'):
+                filter_value = 'ptpn22'
+            elif(idx_type == 'locus'):
+                filter_value = '1p13.2'
+            elif(idx_type == 'marker'):
+                filter_value = 'rs2476601'
+            elif(idx_type == 'study'):
+                filter_value = 'barrett'
+
+            filter_query = '<Filter name="criteria__alias__dm__alias" value="' + filter_value + '" filter_list=""/>'
+            urlTemplate += filter_query
+
+        urlTemplate += '</Dataset>' + '</Query>'
         queryURL = urlTemplate
-        req = requests.get(queryURL, stream=True)
+        print(queryURL)
+        req = requests.get(queryURL, stream=True, verify=False)
         return req.json()
