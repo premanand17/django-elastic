@@ -1,9 +1,14 @@
 from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
 import re
-from os.path import os
+import os
+import logging
+from bands.views import logger
 
 
 class AliasManager(DelimeterLoader):
+
+    # Get an instance of a logger
+    logger = logging.getLogger(__name__)
 
     def create_alias(self, **options):
         ''' Create alias index mapping and load data '''
@@ -32,30 +37,26 @@ class AliasManager(DelimeterLoader):
                     print(object_ + '!=' + idx_feature_type + ' Going to continue....')
                     continue
 
-            print('root dir ' + root_dir + '  index name: ' + idx_name_cur)
+            logger.warn('root dir ' + root_dir + '  index name: ' + idx_name_cur)
             idx_file = None
             types = self.get_index_types(object_)
             for type_ in types:
-                print(idx_name_cur + ' <===> ' + type_)
+
                 if root_dir.endswith('/'):
                     idx_file = root_dir + idx_dir + '/' + type_ + '.tsv'
                 else:
                     idx_file = root_dir + '/' + idx_dir + '/' + type_ + '.tsv'
-                print ('idx_file ' + idx_file)
-
-                if (os.path.exists(root_dir) and os.path.exists(idx_file)):
-                    print(idx_file + ' Exists === Proceeding to index')
-                    print(' Idx Name ' + idx_name_cur + ' idx type ' + type_)
-                    options['indexAlias'] = idx_file
-                    options['indexType'] = type_
-                    options['indexName'] = idx_name_cur
-                    self._create_alias_mapping(type_, **options)
-                    f = self.open_file_to_load('indexAlias', **options)
-                    column_names = ["internal_id", "alias", "preferred_name", "type"]
-                    self.load(column_names, f, idx_name_cur, type_)
-                    print('======================Index created for ' + type_ + ' with index name ' + idx_name_cur)
-                else:
-                    print(idx_file + ' Does not Exists ===. Please check if file exists.... Proceeding to quit')
+                    if (os.path.exists(root_dir) and os.path.exists(idx_file)):
+                        options['indexAlias'] = idx_file
+                        options['indexType'] = type_
+                        options['indexName'] = idx_name_cur
+                        self._create_alias_mapping(type_, **options)
+                        f = self.open_file_to_load('indexAlias', **options)
+                        column_names = ["internal_id", "alias", "preferred_name", "type"]
+                        self.load(column_names, f, idx_name_cur, type_)
+                        logger.warn('Index created for ' + type_ + ' with index name ' + idx_name_cur)
+                    else:
+                        logger.warn(idx_file + ' Does not Exists ..... Proceeding to quit')
 
     def _create_alias_mapping(self, idx_alias_type, **options):
         ''' Create the mapping for alias indexing '''
@@ -64,7 +65,7 @@ class AliasManager(DelimeterLoader):
         props.add_property("alias", "string", analyzer="full_name", index_options="offsets")
         props.add_property("preferred_name", "string", analyzer="full_name")
         props.add_property("type", "string", analyzer="standard")
-        print(props.mapping_properties)
+        # print(props.mapping_properties)
         self.mapping(props, idx_type=idx_alias_type, meta=None, analyzer=self.KEYWORD_ANALYZER,
                      **options)
 
