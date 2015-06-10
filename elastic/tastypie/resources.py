@@ -6,7 +6,7 @@ from tastypie.resources import Resource
 from elastic.search import Search, ElasticQuery
 from tastypie.bundle import Bundle
 from django.db.models.constants import LOOKUP_SEP
-from tastypie.exceptions import InvalidFilterError
+from tastypie.exceptions import InvalidFilterError, NotFound
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from elastic.query import Query, AndFilter
 
@@ -79,9 +79,12 @@ class ElasticResource(Resource):
     def obj_get(self, bundle, **kwargs):
         ''' Used to get by Elastic _uid. '''
         q = ElasticQuery(Query.ids(kwargs['pk']))
-        result = self._client(q).get_json_response()['hits']['hits'][0]
-        new_obj = ElasticObject(initial=result['_source'])
-        new_obj.uuid = result['_id']
+        r = self._client(q).get_json_response()['hits']['hits']
+        if len(r) <= 0:
+            raise NotFound("Couldn't find an instance which matched id='%s'." % kwargs['pk'])
+
+        new_obj = ElasticObject(initial=r[0]['_source'])
+        new_obj.uuid = r[0]['_id']
         return new_obj
 
     def obj_create(self, bundle, **kwargs):
