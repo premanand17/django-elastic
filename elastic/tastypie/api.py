@@ -55,7 +55,7 @@ class MarkerResource(ElasticResource):
     info = fields.CharField(attribute='info', help_text='Additional information')
 
     class Meta:
-        resource_name = ElasticSettings.idx('MARKER')
+        resource_name = ElasticSettings.idx('MARKER', 'MARKER')
         object_class = ElasticObject
         authorization = ReadOnlyAuthorization()
         max_limit = 100000
