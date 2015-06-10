@@ -2,13 +2,12 @@ from elastic.management.loaders.loader import DelimeterLoader, MappingProperties
 import re
 import os
 import logging
-from bands.views import logger
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class AliasManager(DelimeterLoader):
-
-    # Get an instance of a logger
-    logger = logging.getLogger(__name__)
 
     def create_alias(self, **options):
         ''' Create alias index mapping and load data '''
