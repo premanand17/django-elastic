@@ -1,5 +1,9 @@
 from elastic.management.loaders.loader import JSONLoader, MappingProperties
 import requests
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class CriteriaManager(JSONLoader):
@@ -11,13 +15,13 @@ class CriteriaManager(JSONLoader):
         mart_project = self.get_project(**options)
 
         for idx_type in idx_types:
-            print('idx name ' + idx_name)
-            print(idx_type)
-            print('project name ' + mart_project)
+            logger.warn('idx name ' + idx_name)
+            logger.warn('idx_type' + idx_type)
+            logger.warn('project name ' + mart_project)
             mart_url = 'https://mart.' + mart_project + '.org/biomart/martservice?'
             # mart_url = 'https://mart-dev-imb/biomart/martservice?'
             mart_object = self.get_object_type(idx_type)
-            print('mart_project ' + mart_project + '  mart_object ' + mart_object)
+            logger.warn('mart_project ' + mart_project + '  mart_object ' + mart_object)
             mart_dataset = mart_project + '_criteria_' + mart_object
             criteria_json = self.get_criteria_info_from_biomart(mart_url, mart_dataset, idx_type, **options)
             processed_criteria_json = self._post_process_criteria_info(criteria_json, **options)
@@ -115,8 +119,7 @@ class CriteriaManager(JSONLoader):
         return sorted(dis_orgs)
 
     def get_object_type(self, idx_type):
-        print("get_object_type   ====")
-        print(idx_type)
+        ''' Get object type  '''
         if(idx_type == 'gene'):
             return 'genes'
         if(idx_type == 'locus'):
@@ -161,7 +164,7 @@ class CriteriaManager(JSONLoader):
         urlTemplate += flag_query
 
         if(options['applyFilter']):
-            filter_value =''
+            filter_value = ''
             if(idx_type == 'gene'):
                 filter_value = 'ptpn22'
             elif(idx_type == 'locus'):
@@ -176,6 +179,5 @@ class CriteriaManager(JSONLoader):
 
         urlTemplate += '</Dataset>' + '</Query>'
         queryURL = urlTemplate
-        print(queryURL)
         req = requests.get(queryURL, stream=True, verify=False)
         return req.json()
