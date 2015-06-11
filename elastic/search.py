@@ -67,9 +67,9 @@ class Search:
         self.idx = idx
 
     @classmethod
-    def index_exists(cls, idx, url=ElasticSettings.url()):
+    def index_exists(cls, idx, idx_type='', url=ElasticSettings.url()):
         ''' Check if an index exists. '''
-        url += '/' + idx + '/_mapping'
+        url += '/' + idx + '/' + idx_type + '/_mapping'
         response = requests.get(url)
         if "error" in response.json():
             return False
