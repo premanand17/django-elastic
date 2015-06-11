@@ -21,16 +21,22 @@ class GeneResource(BaseGFFResource):
         allowed_methods = ['get', 'post']
 
 
-class GwasBarrettResource(BaseGFFResource):
+class DiseaseResource(ElasticResource):
+    tier = fields.IntegerField(attribute='tier', help_text='Tier')
+    name = fields.CharField(attribute='name', help_text='Disease name')
+    description = fields.CharField(attribute='description', help_text='Disease description')
+    code = fields.CharField(attribute='code', help_text='Disease code')
+    colour = fields.CharField(attribute='colour', help_text='Disease colour')
 
     class Meta:
-        resource_name = 'gb2_hg19_gwas_t1d_barrett_4_17_0'
+        resource_name = ElasticSettings.idx('DISEASE')
         object_class = ElasticObject
         authorization = ReadOnlyAuthorization()
         max_limit = 100000
         filtering = {
-            'attr': ['gene_name', 'gene_id'],
-            'seqid': ALL,
+            'tier': ALL,
+            'name': ALL,
+            'code': ALL,
         }
         allowed_methods = ['get', 'post']
 
@@ -40,8 +46,8 @@ class MarkerResource(ElasticResource):
 
     # define the fields
     seqid = fields.CharField(attribute='seqid', help_text='Sequence identifier')
-    start = fields.IntegerField(attribute='start', help_text='Refernce position')
-    id = fields.CharField(attribute='id', help_text='Unique indentifier')
+    start = fields.IntegerField(attribute='start', help_text='Reference position')
+    id = fields.CharField(attribute='id', help_text='Unique identifier')
     ref = fields.CharField(attribute='ref', help_text='Reference bases')
     alt = fields.CharField(attribute='alt', help_text='Alternate bases')
     qual = fields.CharField(attribute='qual', help_text='Quality score')
@@ -49,7 +55,7 @@ class MarkerResource(ElasticResource):
     info = fields.CharField(attribute='info', help_text='Additional information')
 
     class Meta:
-        resource_name = ElasticSettings.idx_only('MARKER')
+        resource_name = ElasticSettings.idx('MARKER', 'MARKER')
         object_class = ElasticObject
         authorization = ReadOnlyAuthorization()
         max_limit = 100000

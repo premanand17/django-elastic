@@ -26,7 +26,7 @@ def _categories(idx):
     idxs = idx.split(",")
     idx_types = {}
     for this_idx in idxs:
-        if this_idx+'/marker' == ElasticSettings.idx('MARKER'):
+        if this_idx+'/marker' == ElasticSettings.idx('MARKER', 'MARKER'):
             stype = {'type': 'Marker',
                      'categories': ['synonymous', 'non-synonymous'],
                      'search': ['in LD of selected']}
@@ -101,5 +101,6 @@ def ajax_range_overlap_search(request, src, start, stop, search_idx, ajax):
         return JsonResponse(elastic.get_count())
     search_from = request.POST.get("from")
     size = request.POST.get("size")
-    elastic = Search.range_overlap_query(src, start, stop, search_from, size, idx=search_idx)
+    elastic = Search.range_overlap_query(src, start, stop, search_from=search_from,
+                                         size=size, idx=search_idx)
     return JsonResponse(elastic.get_json_response())

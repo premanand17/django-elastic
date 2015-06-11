@@ -32,7 +32,9 @@ logger = logging.getLogger(__name__)
 class Search:
     ''' Used to run Elastic queries and return search hits, hit count or the mapping. '''
 
-    def __init__(self, search_query=None, aggs=None, search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT')):
+    def __init__(self, search_query=None, aggs=None, search_from=0, size=20,
+                 idx=ElasticSettings.idx('DEFAULT'), idx_type='',
+                 url=ElasticSettings.url()):
         ''' Set up parameters to use in the search. L{ElasticQuery} is used to
         define a search query.
         @type  search_query: L{ElasticQuery}
@@ -43,9 +45,13 @@ class Search:
         @keyword size: maximum number of hits to return (default: 20).
         @type  idx: string
         @keyword idx: index to search (default: default index defined in settings).
+        @type  idx_type: string
+        @keyword idx_type: index type (default: '').
+        @type  url: string
+        @keyword url: Elastic URL (default: default cluster URL).
         '''
-        self.url = (ElasticSettings.url() + '/' + idx + '/_search?size=' + str(size) +
-                    '&from='+str(search_from))
+        self.url = (url + '/' + idx + '/' + idx_type +
+                    '/_search?size=' + str(size) + '&from='+str(search_from))
         if search_query is not None:
             if not isinstance(search_query, ElasticQuery):
                 raise QueryError("not an ElasticQuery")
@@ -61,9 +67,9 @@ class Search:
         self.idx = idx
 
     @classmethod
-    def index_exists(cls, idx, url=ElasticSettings.url()):
+    def index_exists(cls, idx, idx_type='', url=ElasticSettings.url()):
         ''' Check if an index exists. '''
-        url += '/' + idx + '/_mapping'
+        url += '/' + idx + '/' + idx_type + '/_mapping'
         response = requests.get(url)
         if "error" in response.json():
             return False
