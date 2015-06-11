@@ -88,5 +88,6 @@ class AliasManager(DelimeterLoader):
         return index_types
 
     def get_diseases_enabled(self):
-        disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE', 'T1D', 'UC', 'AA', 'IBD', 'NAR', 'PSC', 'SJO', 'SSC', 'VIT']
+        disease = ['AS', 'ATD', 'CEL', 'CRO', 'JIA', 'MS', 'PBC', 'PSO', 'RA', 'SLE',
+                   'T1D', 'UC', 'AA', 'IBD', 'NAR', 'PSC', 'SJO', 'SSC', 'VIT']
         return sorted(disease)
