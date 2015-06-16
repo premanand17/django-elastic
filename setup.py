@@ -13,6 +13,7 @@ setup(
     version='0.0.1',
     packages=find_packages(),
     package_data={'elastic': ['tests/data/*gz',
+                              'tests/data/*json',
                               'tests/data/alias_test_dir/gene_alias/*',
                               'tests/data/alias_test_dir/locus_alias/*',
                               'tests/data/alias_test_dir/marker_alias/*',
