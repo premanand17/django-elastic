@@ -1,7 +1,11 @@
 ''' Loader for JSON data. '''
 import json
+import logging
 from elastic.management.loaders.loader import JSONLoader
 from elastic.management.loaders.mapping import MappingProperties
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class JsonManager(JSONLoader):
@@ -20,6 +24,9 @@ class JsonManager(JSONLoader):
         with open(options['indexJson']) as data_file:
             json_data = json.load(data_file)
 
+        if len(json_data["docs"]) < 1:
+            logger.debug("No documents to load!")
+            return
         self._create_json_mapping(idx_type, json_data["mapping"], **options)
         self.load(json_data["docs"], idx_name, idx_type)
 
