@@ -38,7 +38,7 @@ class SnapshotTest(TestCase):
     ''' Test elastic snapshot and restore. '''
 
     TEST_REPO = 'test_backup_'+ElasticSettings.getattr('TEST')
-    TEST_REPO_DIR = "/tmp/test_snapshot/"
+    TEST_REPO_DIR = ElasticSettings.getattr('TEST_REPO_DIR')
 
     def test_show(self, snapshot=None):
         call_command('show_snapshot')
