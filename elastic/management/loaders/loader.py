@@ -191,13 +191,14 @@ class JSONLoader(Loader):
         ''' Index raw json data '''
         json_data = ''
         line_num = 0
-        auto_num = 1
         try:
             for row in raw_json_data:
-                idx_id = str(auto_num)
-                json_data += '{"index": {"_id": "%s"}}\n' % idx_id
+                if '_id' in row:
+                    json_data += '{"index": {"_id": "%s"}}\n' % row['_id']
+                    del row['_id']
+                else:
+                    json_data += '{"index": {}}\n'
                 json_data += json.dumps(row) + '\n'
-                auto_num += 1
                 line_num += 1
 
                 if(line_num > 5000):
