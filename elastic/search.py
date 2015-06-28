@@ -24,6 +24,7 @@ from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuer
     Filter, OrFilter
 import warnings
 import time
+from builtins import classmethod
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -70,6 +71,16 @@ class Search:
     def index_exists(cls, idx, idx_type='', url=ElasticSettings.url()):
         ''' Check if an index exists. '''
         url += '/' + idx + '/' + idx_type + '/_mapping'
+        response = requests.get(url)
+        if "error" in response.json():
+            return False
+        return True
+
+    @classmethod
+    def index_refresh(cls, idx, idx_type='', url=ElasticSettings.url()):
+        ''' Refresh to make all operations performed since the last refresh
+        available for search'''
+        url += '/' + idx + '/' + idx_type + '/_refresh'
         response = requests.get(url)
         if "error" in response.json():
             return False
@@ -158,6 +169,7 @@ class Search:
     @classmethod
     def wait_for_load(cls, idx, count=5):
         ''' Method to allow a wait for index load to complete. '''
+        Search.index_refresh(idx=idx)
         for _ in range(count):
             try:
                 if Search(idx=idx).get_count()['count'] > 0:
