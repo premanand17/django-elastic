@@ -18,7 +18,7 @@ def setUpModule():
 
     # wait for the elastic load to finish
     for key in IDX:
-        Search.wait_for_load(IDX[key]['indexName'])
+        Search.index_refresh(IDX[key]['indexName'])
 
     for idx_kwargs in IDX_UPDATE.values():
         call_command('index_search', **idx_kwargs)
@@ -41,9 +41,8 @@ class SnapshotTest(TestCase):
     TEST_REPO_DIR = ElasticSettings.getattr('TEST_REPO_DIR')
 
     def test_show(self, snapshot=None):
-        call_command('show_snapshot')
-        call_command('show_snapshot', all=True)
-        call_command('show_snapshot', snapshot='xxx')
+        self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', False))
+        self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', True))
 
     def test_create_delete_repository(self):
         repo = SnapshotTest.TEST_REPO
@@ -72,7 +71,7 @@ class SnapshotTest(TestCase):
         self.assertFalse(Search.index_exists(IDX['MARKER']['indexName']), "Removed index")
         # restore from snapshot
         call_command('restore_snapshot', snapshot, repo=repo)
-        Search.wait_for_load(IDX['MARKER']['indexName'])
+        Search.index_refresh(IDX['MARKER']['indexName'])
         self.assertTrue(Search.index_exists(IDX['MARKER']['indexName']), "Restored index exists")
 
         # remove snapshot
@@ -101,7 +100,7 @@ class ElasticLoadersTest(TestCase):
         for key in IDX:
             idx = IDX[key]['indexName']
             # check the index has documents, allow for the indexing to complete if necessary
-            Search.wait_for_load(idx)
+#             Search.index_refresh(idx)
             self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
             ndocs = Search(idx=idx).get_count()['count']
             self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))

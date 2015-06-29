@@ -26,16 +26,18 @@ class Loader:
             raise LoaderError("not a MappingProperties")
 
         idx_name = self.get_index_name(**options)
+        number_of_shards = self.get_number_of_shards(**options)
         url = ElasticSettings.url() + '/' + idx_name
         resp = requests.get(url)
         if resp.status_code == 200:
             logger.warn('WARNING: '+idx_name + ' index already exists!')
         else:
             # create index
+            idx_settings = {"settings": {"number_of_shards": number_of_shards}}
             if analyzer is not None:
-                resp = requests.put(url, json.dumps({'settings': analyzer}))
-            else:
-                requests.put(url)
+                idx_settings['settings'].update(analyzer)
+
+            resp = requests.put(url, data=json.dumps(idx_settings))
 
         mapping_json = mapping.mapping_properties
         if meta is not None:
@@ -72,6 +74,12 @@ class Loader:
         if options['indexName']:
             return options['indexName'].lower()
         return self.__class__.__name__
+
+    def get_number_of_shards(self, **options):
+        ''' Get number of shards option. '''
+        if options['shards']:
+            return int(options['shards'])
+        return 5
 
     def open_file_to_load(self, file_name, **options):
         ''' Open the given file. '''

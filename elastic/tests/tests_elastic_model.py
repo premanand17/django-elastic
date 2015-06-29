@@ -22,8 +22,8 @@ def setUpModule():
     call_command('index_search', **IDX['GFF_GENERIC'])
 
     # wait for the elastic load to finish
-    Search.wait_for_load(IDX['MARKER']['indexName'])
-    Search.wait_for_load(IDX['GFF_GENERIC']['indexName'])
+    Search.index_refresh(IDX['MARKER']['indexName'])
+    Search.index_refresh(IDX['GFF_GENERIC']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
