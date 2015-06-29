@@ -23,7 +23,6 @@ from elastic.elastic_settings import ElasticSettings
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
     Filter, OrFilter
 import warnings
-import time
 from builtins import classmethod
 
 # Get an instance of a logger
@@ -165,18 +164,6 @@ class Search:
                       hits_total=json_response['hits']['total'],
                       size=self.size, docs=docs, aggs=aggs,
                       idx=self.idx, query=self.query)
-
-    @classmethod
-    def wait_for_load(cls, idx, count=5):
-        ''' Method to allow a wait for index load to complete. '''
-        Search.index_refresh(idx=idx)
-        for _ in range(count):
-            try:
-                if Search(idx=idx).get_count()['count'] > 0:
-                    break
-            except KeyError:
-                continue
-            time.sleep(1)
 
 
 class Update(object):
