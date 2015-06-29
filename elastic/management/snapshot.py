@@ -47,8 +47,9 @@ class Snapshot():
         if resp.status_code != 200:
             logger.error("Returned status (for "+url+"): "+str(resp.status_code))
             logger.error(resp.json()["error"])
-        else:
-            print(json.dumps(resp.json(), indent=4))
+            return False
+        print(json.dumps(resp.json(), indent=4))
+        return True
 
     @classmethod
     def create_repository(self, repo, location):
