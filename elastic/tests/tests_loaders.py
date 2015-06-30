@@ -8,6 +8,11 @@ from elastic.management.loaders.utils import GFF, GFFError
 from elastic.elastic_settings import ElasticSettings
 from elastic.management.snapshot import Snapshot
 from elastic.search import Search
+import time
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 def setUpModule():
@@ -45,6 +50,7 @@ class SnapshotTest(TestCase):
         self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', True))
 
     def test_create_delete_repository(self):
+        self.wait_for_running_snapshot()
         repo = SnapshotTest.TEST_REPO
         self.assertTrue(Snapshot.exists(repo, ''), 'Repository '+repo+' created')
 
@@ -58,6 +64,7 @@ class SnapshotTest(TestCase):
         self.assertTrue(Snapshot.exists(repo, ''), 'Repository '+repo+' created')
 
     def test_create_restore_delete_snapshot(self):
+        self.wait_for_running_snapshot()
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
         repo = SnapshotTest.TEST_REPO
 
@@ -65,6 +72,8 @@ class SnapshotTest(TestCase):
         call_command('snapshot', snapshot, indices=IDX['MARKER']['indexName'], repo=repo)
         Snapshot.wait_for_snapshot(repo, snapshot)
         self.assertTrue(Snapshot.exists(repo, snapshot), "Created snapshot "+snapshot)
+        # snapshot already exist so return false
+        self.assertFalse(Snapshot.create_snapshot(repo, snapshot, IDX['MARKER']['indexName']))
 
         # delete index
         requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
@@ -79,18 +88,14 @@ class SnapshotTest(TestCase):
         Snapshot.wait_for_snapshot(repo, snapshot, delete=True, count=10)
         self.assertFalse(Snapshot.exists(repo, snapshot), "Deleted snapshot "+snapshot)
 
-    def test_create_snapshot(self):
-        snapshot = 'test_'+ElasticSettings.getattr('TEST')
-        repo = SnapshotTest.TEST_REPO
-        call_command('snapshot', snapshot, indices=IDX['MARKER']['indexName'], repo=repo)
-        Snapshot.wait_for_snapshot(repo, snapshot)
-
-        # snapshot already exist so return false
-        self.assertFalse(Snapshot.create_snapshot(repo, snapshot, IDX['MARKER']['indexName']))
-        # remove snapshot
-        call_command('snapshot', snapshot, delete=True, repo=repo)
-        self.assertFalse(Snapshot.exists(repo, snapshot),
-                         "Deleted snapshot "+snapshot)
+    def wait_for_running_snapshot(self):
+        ''' Wait for a running snapshot to complete. '''
+        for _ in range(10):
+            if not Snapshot.is_running():
+                return
+            time.sleep(2)
+        logger.warn('Long running snapshot')
+        self.assertTrue(False, 'Long running snapshot')
 
 
 class ElasticLoadersTest(TestCase):
