@@ -12,6 +12,7 @@ from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
 import requests
+import time
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -21,8 +22,8 @@ def setUpModule():
     call_command('index_search', **IDX['GFF_GENERIC'])
 
     # wait for the elastic load to finish
-    Search.wait_for_load(IDX['MARKER']['indexName'])
-    Search.wait_for_load(IDX['GFF_GENERIC']['indexName'])
+    Search.index_refresh(IDX['MARKER']['indexName'])
+    Search.index_refresh(IDX['GFF_GENERIC']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -42,11 +43,19 @@ class TastypieResourceTest(ResourceTestCase):
     def setUp(self):
         super(TastypieResourceTest, self).setUp()
 
+    def safe_get_request(self, url, data=None):
+        ''' Routine to allow for TastyPie to intialise if needed. '''
+        resp = self.api_client.get(url, format='json', data=data)
+        if len(self.deserialize(resp)['objects']) < 1:
+            time.sleep(2)
+            resp = self.api_client.get(url, format='json', data=data)
+        return resp
+
     def test_list(self):
         ''' Test listing all documents. '''
         url = reverse('api_dispatch_list',
                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
-        resp = self.api_client.get(url, format='json')
+        resp = self.safe_get_request(url)
         self.assertValidJSONResponse(resp)
         self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
 
@@ -54,8 +63,7 @@ class TastypieResourceTest(ResourceTestCase):
         ''' Test getting a document using filtering. '''
         url = reverse('api_dispatch_list',
                       kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
-        resp = self.api_client.get(url, format='json', data={'attr__Name': 'rs2664170'})
-        print(self.deserialize(resp))
+        resp = self.safe_get_request(url, data={'attr__Name': 'rs2664170'})
         self.assertValidJSONResponse(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 1, 'Retrieved stored markers')
 
