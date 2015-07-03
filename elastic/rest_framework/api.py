@@ -1,5 +1,6 @@
 from rest_framework import serializers, viewsets
 from elastic.rest_framework.resources import ListElasticMixin
+from elastic.elastic_settings import ElasticSettings
 
 
 class PublicationSerializer(serializers.Serializer):
@@ -37,3 +38,22 @@ class DiseaseViewSet(ListElasticMixin, viewsets.GenericViewSet):
     serializer_class = DiseaseSerializer
     idx = 'disease'
     filter_fields = ('name', 'code')
+
+
+class MarkerSerializer(serializers.Serializer):
+    ''' Indexed dbSNP resource. '''
+
+    seqid = serializers.CharField(help_text='Sequence identifier')
+    start = serializers.IntegerField(help_text='Reference position')
+    id = serializers.CharField(help_text='Unique identifier')
+    ref = serializers.CharField(help_text='Reference bases')
+    alt = serializers.CharField(help_text='Alternate bases')
+    qual = serializers.CharField(help_text='Quality score')
+    filter = serializers.CharField(help_text='Filter status')
+    info = serializers.CharField(help_text='Additional information')
+
+
+class MarkerViewSet(ListElasticMixin, viewsets.GenericViewSet):
+    serializer_class = MarkerSerializer
+    idx = resource_name = ElasticSettings.idx('MARKER', 'MARKER')
+    filter_fields = ('seqid', 'id', 'start')
