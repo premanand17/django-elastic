@@ -4,6 +4,7 @@ from elastic.query import Query, AndFilter
 from rest_framework.filters import DjangoFilterBackend, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
+from django.http.response import Http404
 
 
 class ElasticLimitOffsetPagination(LimitOffsetPagination):
@@ -75,13 +76,14 @@ class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
 
 
 class ListElasticMixin(object):
-    """ List a queryset. """
+    ''' List a queryset. '''
     filter_backends = [ElasticFilterBackend, ]
 
     def get_queryset(self):
         return None
 
     def list(self, request, *args, **kwargs):
+        ''' Retrieve a list of documents. '''
         qs = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -92,7 +94,21 @@ class ListElasticMixin(object):
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        """ Retrieve a model instance. """
+        ''' Retrieve a document instance. '''
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+    def get_object(self):
+        q = ElasticQuery(Query.ids(self.kwargs[self.lookup_field]))
+        s = Search(search_query=q, idx=getattr(self, 'idx'))
+        try:
+            result = s.get_json_response()['hits']['hits'][0]
+            obj = ElasticObject(initial=result['_source'])
+            obj.uuid = result['_id']
+
+            # May raise a permission denied
+            self.check_object_permissions(self.request, obj)
+            return obj
+        except (TypeError, ValueError, IndexError):
+            raise Http404
