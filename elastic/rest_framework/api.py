@@ -23,3 +23,17 @@ class PublicationViewSet(ListElasticMixin, viewsets.GenericViewSet):
     serializer_class = PublicationSerializer
     idx = 'publications_v0.0.1'
     filter_fields = ('PMID', 'title', 'authors__LastName', 'tags__disease')
+
+
+class DiseaseSerializer(serializers.Serializer):
+    tier = serializers.IntegerField(help_text='Tier')
+    name = serializers.CharField(help_text='Disease name')
+    description = serializers.CharField(help_text='Disease description')
+    code = serializers.CharField(help_text='Disease code')
+    colour = serializers.CharField(help_text='Disease colour')
+
+
+class DiseaseViewSet(ListElasticMixin, viewsets.GenericViewSet):
+    serializer_class = DiseaseSerializer
+    idx = 'disease'
+    filter_fields = ('name', 'code')
