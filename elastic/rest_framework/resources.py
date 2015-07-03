@@ -9,6 +9,9 @@ from rest_framework.pagination import LimitOffsetPagination
 class ElasticLimitOffsetPagination(LimitOffsetPagination):
 
     def paginate_queryset(self, queryset, request, view=None):
+        if not hasattr(view, 'es_count'):
+            return super().paginate_queryset(queryset, request, view)
+
         self.limit = self.get_limit(request)
         if self.limit is None:
             return None
@@ -86,4 +89,10 @@ class ListElasticMixin(object):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        """ Retrieve a model instance. """
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
         return Response(serializer.data)
