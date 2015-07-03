@@ -15,7 +15,7 @@ class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
             q = ElasticQuery.filtered(Query.match_all(), search_filters)
         else:
             q = ElasticQuery(Query.match_all())
-        s = Search(search_query=q, idx=getattr(view, 'idx'), size=50)
+        s = Search(search_query=q, idx=getattr(view, 'idx'), size=5000)
         json_results = s.get_json_response()
         results = []
         for result in json_results['hits']['hits']:
@@ -57,5 +57,11 @@ class ListElasticMixin(object):
         return None
 
     def list(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.filter_queryset(self.get_queryset()), many=True)
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
