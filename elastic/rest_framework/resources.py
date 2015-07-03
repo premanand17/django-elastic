@@ -3,11 +3,31 @@ from elastic.tastypie.resources import ElasticObject
 from elastic.query import Query, AndFilter
 from rest_framework.filters import DjangoFilterBackend, OrderingFilter
 from rest_framework.response import Response
+from rest_framework.pagination import LimitOffsetPagination
+
+
+class ElasticLimitOffsetPagination(LimitOffsetPagination):
+
+    def paginate_queryset(self, queryset, request, view=None):
+        self.limit = self.get_limit(request)
+        if self.limit is None:
+            return None
+
+        self.offset = self.get_offset(request)
+        self.count = view.es_count
+        self.request = request
+        if self.count > self.limit and self.template is not None:
+            self.display_page_controls = True
+        return queryset
 
 
 class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
+        paginator = view.paginator
+        q_size = paginator.get_limit(request)
+        q_from = view.paginator.get_offset(request)
+
         filterable = getattr(view, 'filter_fields', [])
         filters = dict([(k, v) for k, v in request.GET.items() if k in filterable])
         search_filters = self.build_filters(filters=filters)
@@ -15,13 +35,15 @@ class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
             q = ElasticQuery.filtered(Query.match_all(), search_filters)
         else:
             q = ElasticQuery(Query.match_all())
-        s = Search(search_query=q, idx=getattr(view, 'idx'), size=5000)
+        s = Search(search_query=q, idx=getattr(view, 'idx'), size=q_size, search_from=q_from)
         json_results = s.get_json_response()
         results = []
         for result in json_results['hits']['hits']:
             new_obj = ElasticObject(initial=result['_source'])
             new_obj.uuid = result['_id']
             results.append(new_obj)
+        view.es_count = json_results['hits']['total']
+
         return results
 
     def build_filters(self, filters=None):
