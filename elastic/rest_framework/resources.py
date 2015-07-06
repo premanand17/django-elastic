@@ -1,3 +1,4 @@
+''' Pagination, filter and elastic list and retrieve views. '''
 from elastic.search import Search, ElasticQuery
 from elastic.tastypie.resources import ElasticObject
 from elastic.query import Query, AndFilter
@@ -83,7 +84,7 @@ class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
 
 
 class ListElasticMixin(object):
-    ''' List a queryset. '''
+    ''' List queryset. '''
     filter_backends = [ElasticFilterBackend, ]
 
     def get_queryset(self):
@@ -100,6 +101,9 @@ class ListElasticMixin(object):
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 
+
+class RetrieveElasticMixin(object):
+    ''' Retrieve an instance. '''
     def retrieve(self, request, *args, **kwargs):
         ''' Retrieve a document instance. '''
         instance = self.get_object()
