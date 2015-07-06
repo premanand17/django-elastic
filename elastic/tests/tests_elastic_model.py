@@ -13,6 +13,8 @@ from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
 import requests
 import time
+from rest_framework.test import APITestCase
+import json
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -31,6 +33,28 @@ def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
     requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
+class RestFrameworkTest(APITestCase):
+    ''' Test Django rest framework interface to Elastic indices. '''
+
+    def test_list(self):
+        url = reverse('rest-router:marker_test-list')
+        resp = self.client.get(url, format='json')
+        self.assertGreater(json.loads(resp.content.decode())['count'], 0, 'Retrieved stored markers')
+
+    def test_list_filtering(self):
+        url = reverse('rest-router:marker_test-list')
+        resp = self.client.get(url, format='json', data={'id': 'rs2476601'})
+        self.assertEqual(json.loads(resp.content.decode())['count'], 1, 'Retrieved rs2476601')
+
+    def test_detail(self):
+        url = reverse('rest-router:marker_test-detail', kwargs={'pk': '1'})
+        resp = self.client.get(url, format='json')
+        res = json.loads(resp.content.decode())
+        for k in ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info']:
+            self.assertTrue(k in res, 'Contains '+k)
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
