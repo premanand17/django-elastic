@@ -8,6 +8,7 @@ from django.http.response import Http404
 
 
 class ElasticLimitOffsetPagination(LimitOffsetPagination):
+    ''' Extend L{LimitOffsetPagination} for pagination of elastic resources. '''
 
     def paginate_queryset(self, queryset, request, view=None):
         if not hasattr(view, 'es_count'):
@@ -26,15 +27,16 @@ class ElasticLimitOffsetPagination(LimitOffsetPagination):
 
 
 class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
+    ''' Extend L{DjangoFilterBackend} for filtering elastic resources. '''
 
     def filter_queryset(self, request, queryset, view):
-        paginator = view.paginator
-        q_size = paginator.get_limit(request)
+        ''' Override this method to request just the documents required from elastic. '''
+        q_size = view.paginator.get_limit(request)
         q_from = view.paginator.get_offset(request)
 
         filterable = getattr(view, 'filter_fields', [])
         filters = dict([(k, v) for k, v in request.GET.items() if k in filterable])
-        search_filters = self.build_filters(filters=filters)
+        search_filters = self._build_filters(filters=filters)
         if search_filters is not None:
             q = ElasticQuery.filtered(Query.match_all(), search_filters)
         else:
@@ -47,10 +49,10 @@ class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
             new_obj.uuid = result['_id']
             results.append(new_obj)
         view.es_count = json_results['hits']['total']
-
         return results
 
-    def build_filters(self, filters=None):
+    def _build_filters(self, filters=None):
+        ''' Build filters using L{AndFilter}. '''
         if filters is None:
             filters = {}
 
@@ -62,7 +64,6 @@ class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
 
             if len(filter_bits):
                 filter_type = filter_bits.pop()
-
             if filter_type != 'exact':
                 field_name = field_name + "." + filter_type
 
@@ -71,7 +72,6 @@ class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
                 and_filter = AndFilter(q)
             else:
                 and_filter.extend(q)
-
         return and_filter
 
 
