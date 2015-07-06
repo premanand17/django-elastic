@@ -1,5 +1,7 @@
+''' Django REST framework Elastic resources. '''
 from rest_framework import serializers, viewsets
-from elastic.rest_framework.resources import ListElasticMixin, ElasticLimitOffsetPagination
+from elastic.rest_framework.resources import ListElasticMixin, ElasticLimitOffsetPagination,\
+    RetrieveElasticMixin
 from elastic.elastic_settings import ElasticSettings
 
 
@@ -20,7 +22,7 @@ class PublicationSerializer(serializers.Serializer):
     tags = serializers.DictField()
 
 
-class PublicationViewSet(ListElasticMixin, viewsets.GenericViewSet):
+class PublicationViewSet(RetrieveElasticMixin, ListElasticMixin, viewsets.GenericViewSet):
     serializer_class = PublicationSerializer
     pagination_class = ElasticLimitOffsetPagination
     idx = 'publications_v0.0.1'
@@ -36,7 +38,7 @@ class DiseaseSerializer(serializers.Serializer):
     colour = serializers.CharField(help_text='Disease colour')
 
 
-class DiseaseViewSet(ListElasticMixin, viewsets.GenericViewSet):
+class DiseaseViewSet(RetrieveElasticMixin, ListElasticMixin, viewsets.GenericViewSet):
     serializer_class = DiseaseSerializer
     pagination_class = ElasticLimitOffsetPagination
     idx = 'disease'
@@ -56,7 +58,7 @@ class MarkerSerializer(serializers.Serializer):
     info = serializers.CharField(help_text='Additional information')
 
 
-class MarkerViewSet(ListElasticMixin, viewsets.GenericViewSet):
+class MarkerViewSet(RetrieveElasticMixin, ListElasticMixin, viewsets.GenericViewSet):
     serializer_class = MarkerSerializer
     pagination_class = ElasticLimitOffsetPagination
     idx = resource_name = ElasticSettings.idx('MARKER', 'MARKER')
