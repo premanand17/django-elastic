@@ -1,10 +1,10 @@
 from rest_framework import serializers, viewsets
-from elastic.rest_framework.resources import ListElasticMixin
+from elastic.rest_framework.resources import ListElasticMixin, ElasticLimitOffsetPagination
 from elastic.elastic_settings import ElasticSettings
 
 
 class PublicationSerializer(serializers.Serializer):
-    ''' Publication serializer '''
+    ''' Publication resource. '''
 
     class PublicationAuthor(serializers.Serializer):
         ForeName = serializers.ReadOnlyField()
@@ -22,11 +22,13 @@ class PublicationSerializer(serializers.Serializer):
 
 class PublicationViewSet(ListElasticMixin, viewsets.GenericViewSet):
     serializer_class = PublicationSerializer
+    pagination_class = ElasticLimitOffsetPagination
     idx = 'publications_v0.0.1'
     filter_fields = ('PMID', 'title', 'authors__LastName', 'tags__disease')
 
 
 class DiseaseSerializer(serializers.Serializer):
+    ''' Disease resource. '''
     tier = serializers.IntegerField(help_text='Tier')
     name = serializers.CharField(help_text='Disease name')
     description = serializers.CharField(help_text='Disease description')
@@ -36,6 +38,7 @@ class DiseaseSerializer(serializers.Serializer):
 
 class DiseaseViewSet(ListElasticMixin, viewsets.GenericViewSet):
     serializer_class = DiseaseSerializer
+    pagination_class = ElasticLimitOffsetPagination
     idx = 'disease'
     filter_fields = ('name', 'code')
 
@@ -55,5 +58,6 @@ class MarkerSerializer(serializers.Serializer):
 
 class MarkerViewSet(ListElasticMixin, viewsets.GenericViewSet):
     serializer_class = MarkerSerializer
+    pagination_class = ElasticLimitOffsetPagination
     idx = resource_name = ElasticSettings.idx('MARKER', 'MARKER')
     filter_fields = ('seqid', 'id', 'start')
