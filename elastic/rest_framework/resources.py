@@ -25,6 +25,13 @@ class ElasticLimitOffsetPagination(LimitOffsetPagination):
             self.display_page_controls = True
         return queryset
 
+    def get_limit(self, request):
+        ''' Override so that if a limit per page is not set a default of 10 is used. '''
+        limit = super().get_limit(request)
+        if limit is None:
+            return 10
+        return limit
+
 
 class ElasticFilterBackend(OrderingFilter, DjangoFilterBackend):
     ''' Extend L{DjangoFilterBackend} for filtering elastic resources. '''
