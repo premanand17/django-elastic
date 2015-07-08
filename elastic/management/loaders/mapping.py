@@ -5,13 +5,16 @@ from elastic.management.loaders.exceptions import MappingError
 class MappingProperties():
     ''' Build the mapping properties for an index. '''
 
-    def __init__(self, idx_type):
+    def __init__(self, idx_type, parent=None):
         ''' For a given index type create the mapping properties. '''
         self.idx_type = idx_type
         self.mapping_properties = {self.idx_type: {"properties": {}}}
+        if parent is not None:
+            self.mapping_properties[self.idx_type].update({"_parent": {"type": parent}})
         self.column_names = []
 
-    def add_property(self, name, map_type, index=None, analyzer=None, property_format=None, index_options=None):
+    def add_property(self, name, map_type, index=None, analyzer=None,
+                     property_format=None, index_options=None):
         ''' Add a property to the mapping. '''
         self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
         if index is not None:

@@ -50,6 +50,8 @@ class Loader:
 
         if(resp.status_code != 200):
             logger.warn('WARNING: '+idx_name+' mapping status: '+str(resp.status_code)+' '+str(resp.content))
+            return False
+        return True
 
     def bulk_load(self, idx_name, idx_type, json_data):
         ''' Bulk load documents. '''
