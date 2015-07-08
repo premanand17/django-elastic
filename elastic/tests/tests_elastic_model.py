@@ -2,7 +2,9 @@
 queries L{elastic_model}. '''
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
+from elastic.management.loaders.mapping import MappingProperties
+from elastic.management.loaders.loader import Loader
+from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
 from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
@@ -11,10 +13,10 @@ from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
-import requests
-import time
 from rest_framework.test import APITestCase
 import json
+import requests
+import time
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -135,6 +137,19 @@ class ElasticModelTest(TestCase):
         # err check
         mapping = elastic.get_mapping('marker/xx')
         self.assertTrue('error' in mapping, "Database name in mapping result")
+
+    def test_mapping_parent(self):
+        ''' Test creating mapping with parent child relationship. '''
+        gene_mapping = MappingProperties("gene")
+        inta_mapping = MappingProperties("interactions", "gene")
+        load = Loader()
+        idx = "test__mapping__"+SEARCH_SUFFIX
+        options = {"indexName": idx, "shards": 1}
+        status = load.mapping(gene_mapping, "gene", **options)
+        self.assertTrue(status, "mapping genes")
+        status = load.mapping(inta_mapping, "interactions", **options)
+        self.assertTrue(status, "mapping inteactions")
+        requests.delete(ElasticSettings.url() + '/' + idx)
 
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
