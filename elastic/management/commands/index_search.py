@@ -114,6 +114,11 @@ class Command(BaseCommand):
         make_option('--indexJson',
                     dest='indexJson',
                     help='Load json file'),
+        ) + (
+        make_option('--shards',
+                    dest='shards',
+                    default=5,
+                    help='No. of shards [default: %default]'),
         )
 
     def handle(self, *args, **options):

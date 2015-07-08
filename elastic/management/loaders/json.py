@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class JsonManager(JSONLoader):
-    ''' Assumes the 'mapping' is given and there is a list of 'docs'.
+    ''' Optionally include the 'mapping' and there is a list of 'docs'.
     {
        "mapping": {"properties": {...}},
        "docs": [...]
@@ -27,7 +27,9 @@ class JsonManager(JSONLoader):
         if len(json_data["docs"]) < 1:
             logger.debug("No documents to load!")
             return
-        self._create_json_mapping(idx_type, json_data["mapping"], **options)
+
+        if 'mapping' in json_data:
+            self._create_json_mapping(idx_type, json_data["mapping"], **options)
         self.load(json_data["docs"], idx_name, idx_type)
 
     def _create_json_mapping(self, idx_type, mapping, **options):

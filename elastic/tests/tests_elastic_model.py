@@ -2,7 +2,9 @@
 queries L{elastic_model}. '''
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
+from elastic.management.loaders.mapping import MappingProperties
+from elastic.management.loaders.loader import Loader
+from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
 from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
@@ -11,7 +13,10 @@ from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
+from rest_framework.test import APITestCase
+import json
 import requests
+import time
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -21,8 +26,8 @@ def setUpModule():
     call_command('index_search', **IDX['GFF_GENERIC'])
 
     # wait for the elastic load to finish
-    Search.wait_for_load(IDX['MARKER']['indexName'])
-    Search.wait_for_load(IDX['GFF_GENERIC']['indexName'])
+    Search.index_refresh(IDX['MARKER']['indexName'])
+    Search.index_refresh(IDX['GFF_GENERIC']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -30,6 +35,28 @@ def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
     requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
+class RestFrameworkTest(APITestCase):
+    ''' Test Django rest framework interface to Elastic indices. '''
+
+    def test_list(self):
+        url = reverse('rest-router:marker_test-list')
+        resp = self.client.get(url, format='json')
+        self.assertGreater(json.loads(resp.content.decode())['count'], 0, 'Retrieved stored markers')
+
+    def test_list_filtering(self):
+        url = reverse('rest-router:marker_test-list')
+        resp = self.client.get(url, format='json', data={'id': 'rs2476601'})
+        self.assertEqual(json.loads(resp.content.decode())['count'], 1, 'Retrieved rs2476601')
+
+    def test_detail(self):
+        url = reverse('rest-router:marker_test-detail', kwargs={'pk': '1'})
+        resp = self.client.get(url, format='json')
+        res = json.loads(resp.content.decode())
+        for k in ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info']:
+            self.assertTrue(k in res, 'Contains '+k)
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
@@ -42,11 +69,19 @@ class TastypieResourceTest(ResourceTestCase):
     def setUp(self):
         super(TastypieResourceTest, self).setUp()
 
+    def safe_get_request(self, url, data=None):
+        ''' Routine to allow for TastyPie to intialise if needed. '''
+        resp = self.api_client.get(url, format='json', data=data)
+        if len(self.deserialize(resp)['objects']) < 1:
+            time.sleep(2)
+            resp = self.api_client.get(url, format='json', data=data)
+        return resp
+
     def test_list(self):
         ''' Test listing all documents. '''
         url = reverse('api_dispatch_list',
                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
-        resp = self.api_client.get(url, format='json')
+        resp = self.safe_get_request(url)
         self.assertValidJSONResponse(resp)
         self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
 
@@ -54,8 +89,7 @@ class TastypieResourceTest(ResourceTestCase):
         ''' Test getting a document using filtering. '''
         url = reverse('api_dispatch_list',
                       kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
-        resp = self.api_client.get(url, format='json', data={'attr__Name': 'rs2664170'})
-        print(self.deserialize(resp))
+        resp = self.safe_get_request(url, data={'attr__Name': 'rs2664170'})
         self.assertValidJSONResponse(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 1, 'Retrieved stored markers')
 
@@ -103,6 +137,19 @@ class ElasticModelTest(TestCase):
         # err check
         mapping = elastic.get_mapping('marker/xx')
         self.assertTrue('error' in mapping, "Database name in mapping result")
+
+    def test_mapping_parent(self):
+        ''' Test creating mapping with parent child relationship. '''
+        gene_mapping = MappingProperties("gene")
+        inta_mapping = MappingProperties("interactions", "gene")
+        load = Loader()
+        idx = "test__mapping__"+SEARCH_SUFFIX
+        options = {"indexName": idx, "shards": 1}
+        status = load.mapping(gene_mapping, "gene", **options)
+        self.assertTrue(status, "mapping genes")
+        status = load.mapping(inta_mapping, "interactions", **options)
+        self.assertTrue(status, "mapping inteactions")
+        requests.delete(ElasticSettings.url() + '/' + idx)
 
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
