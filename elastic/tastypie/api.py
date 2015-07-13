@@ -1,15 +1,10 @@
 ''' TastyPie Elastic Index Resources. '''
-from tastypie import fields, bundle, http
+from tastypie import fields
 from tastypie.constants import ALL
 from elastic.tastypie.resources import BaseGFFResource, ElasticObject,\
     ElasticResource
 from elastic.elastic_settings import ElasticSettings
-from tastypie.authorization import ReadOnlyAuthorization, DjangoAuthorization
-from tastypie.authentication import BasicAuthentication, ApiKeyAuthentication
-from tastypie.exceptions import TastypieError
-from django_template import settings
-from django.shortcuts import render_to_response
-from django.http.response import HttpResponse
+from tastypie.authorization import ReadOnlyAuthorization
 
 
 class GeneResource(BaseGFFResource):
@@ -17,20 +12,13 @@ class GeneResource(BaseGFFResource):
     class Meta:
         resource_name = ElasticSettings.idx('GFF_GENES')
         object_class = ElasticObject
-        #authentication = BasicAuthentication()
-        authentication = ApiKeyAuthentication()
-        #authorization = ReadOnlyAuthorization()
-        authorization = DjangoAuthorization()
+        authorization = ReadOnlyAuthorization()
         max_limit = 100000
         filtering = {
             'attr': ['gene_name', 'gene_id', 'Name'],
             'seqid': ALL,
         }
         allowed_methods = ['get', 'post']
-        
-    def hydrate(self, bundle, request):
-        bundle.obj.updated_by_id = request.user.id
-        return bundle
 
 
 class DiseaseResource(ElasticResource):
