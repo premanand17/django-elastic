@@ -25,13 +25,13 @@ class DiseaseManager(Loader):
                 continue
             parts = re.split('\t', line)
             data = {"name": parts[0],
-                    "code": parts[2],
+                    "code": parts[2].lower(),
                     "description": parts[1],
                     "colour": parts[3],
                     "tier": int(parts[4])
                     }
             resp = requests.put(ElasticSettings.url()+'/' +
-                                index_name+'/disease/'+parts[2],
+                                index_name+'/disease/'+parts[2].lower(),
                                 data=json.dumps(data))
             if resp.status_code == 201:
                 logger.debug("Loaded "+parts[0])
