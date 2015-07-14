@@ -23,7 +23,7 @@ from elastic.elastic_settings import ElasticSettings
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
     Filter, OrFilter
 import warnings
-import time
+from builtins import classmethod
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -70,6 +70,16 @@ class Search:
     def index_exists(cls, idx, idx_type='', url=ElasticSettings.url()):
         ''' Check if an index exists. '''
         url += '/' + idx + '/' + idx_type + '/_mapping'
+        response = requests.get(url)
+        if "error" in response.json():
+            return False
+        return True
+
+    @classmethod
+    def index_refresh(cls, idx, idx_type='', url=ElasticSettings.url()):
+        ''' Refresh to make all operations performed since the last refresh
+        available for search'''
+        url += '/' + idx + '/' + idx_type + '/_refresh'
         response = requests.get(url)
         if "error" in response.json():
             return False
@@ -155,16 +165,20 @@ class Search:
                       size=self.size, docs=docs, aggs=aggs,
                       idx=self.idx, query=self.query)
 
+
+class Update(object):
+
     @classmethod
-    def wait_for_load(cls, idx, count=5):
-        ''' Method to allow a wait for index load to complete. '''
-        for _ in range(count):
-            try:
-                if Search(idx=idx).get_count()['count'] > 0:
-                    break
-            except KeyError:
-                continue
-            time.sleep(1)
+    def update_doc(cls, doc, update_field, url=ElasticSettings.url()):
+        url = (url + '/' + doc._meta['_index'] + '/' +
+               doc.type() + '/' + doc._meta['_id'] + '/_update')
+        response = requests.post(url, data=json.dumps(update_field))
+
+        logger.debug("curl -XPOST '" + url + " -d '" + json.dumps(update_field) + "'")
+        if response.status_code != 200:
+            logger.warn("Error: elastic response 200:" + url)
+            logger.warn(response.json())
+        return response.json()
 
 
 class ElasticQuery():

@@ -13,6 +13,20 @@ class Snapshot():
     ''' Show, create and delete Elastic snapshots. '''
 
     @classmethod
+    def is_running(cls, repo=''):
+        url = ElasticSettings.url() + '/_snapshot/' + repo + '/_status'
+        resp = requests.get(url)
+        if resp.status_code != 200:
+            logger.debug(url+' :: '+resp.status_code)
+        else:
+            json_resp = resp.json()
+            try:
+                return len(json_resp['snapshots']) > 0
+            except Exception as e:
+                logger.error(e)
+        return False
+
+    @classmethod
     def exists(cls, repo, snapshot):
         ''' Test if the repository/snapshot exists. '''
         url = ElasticSettings.url() + '/_snapshot/' + repo + '/' + snapshot
@@ -47,8 +61,9 @@ class Snapshot():
         if resp.status_code != 200:
             logger.error("Returned status (for "+url+"): "+str(resp.status_code))
             logger.error(resp.json()["error"])
-        else:
-            print(json.dumps(resp.json(), indent=4))
+            return False
+        print(json.dumps(resp.json(), indent=4))
+        return True
 
     @classmethod
     def create_repository(self, repo, location):

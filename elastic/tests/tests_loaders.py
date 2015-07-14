@@ -8,6 +8,11 @@ from elastic.management.loaders.utils import GFF, GFFError
 from elastic.elastic_settings import ElasticSettings
 from elastic.management.snapshot import Snapshot
 from elastic.search import Search
+import time
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 def setUpModule():
@@ -18,7 +23,7 @@ def setUpModule():
 
     # wait for the elastic load to finish
     for key in IDX:
-        Search.wait_for_load(IDX[key]['indexName'])
+        Search.index_refresh(IDX[key]['indexName'])
 
     for idx_kwargs in IDX_UPDATE.values():
         call_command('index_search', **idx_kwargs)
@@ -38,13 +43,14 @@ class SnapshotTest(TestCase):
     ''' Test elastic snapshot and restore. '''
 
     TEST_REPO = 'test_backup_'+ElasticSettings.getattr('TEST')
-    TEST_REPO_DIR = "/tmp/test_snapshot/"
+    TEST_REPO_DIR = ElasticSettings.getattr('TEST_REPO_DIR')
 
     def test_show(self, snapshot=None):
-        call_command('show_snapshot')
-        call_command('show_snapshot', all=True)
+        self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', False))
+        self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', True))
 
     def test_create_delete_repository(self):
+        self.wait_for_running_snapshot()
         repo = SnapshotTest.TEST_REPO
         self.assertTrue(Snapshot.exists(repo, ''), 'Repository '+repo+' created')
 
@@ -58,6 +64,7 @@ class SnapshotTest(TestCase):
         self.assertTrue(Snapshot.exists(repo, ''), 'Repository '+repo+' created')
 
     def test_create_restore_delete_snapshot(self):
+        self.wait_for_running_snapshot()
         snapshot = 'test_'+ElasticSettings.getattr('TEST')
         repo = SnapshotTest.TEST_REPO
 
@@ -65,13 +72,15 @@ class SnapshotTest(TestCase):
         call_command('snapshot', snapshot, indices=IDX['MARKER']['indexName'], repo=repo)
         Snapshot.wait_for_snapshot(repo, snapshot)
         self.assertTrue(Snapshot.exists(repo, snapshot), "Created snapshot "+snapshot)
+        # snapshot already exist so return false
+        self.assertFalse(Snapshot.create_snapshot(repo, snapshot, IDX['MARKER']['indexName']))
 
         # delete index
         requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
         self.assertFalse(Search.index_exists(IDX['MARKER']['indexName']), "Removed index")
         # restore from snapshot
         call_command('restore_snapshot', snapshot, repo=repo)
-        Search.wait_for_load(IDX['MARKER']['indexName'])
+        Search.index_refresh(IDX['MARKER']['indexName'])
         self.assertTrue(Search.index_exists(IDX['MARKER']['indexName']), "Restored index exists")
 
         # remove snapshot
@@ -79,18 +88,14 @@ class SnapshotTest(TestCase):
         Snapshot.wait_for_snapshot(repo, snapshot, delete=True, count=10)
         self.assertFalse(Snapshot.exists(repo, snapshot), "Deleted snapshot "+snapshot)
 
-    def test_create_snapshot(self):
-        snapshot = 'test_'+ElasticSettings.getattr('TEST')
-        repo = SnapshotTest.TEST_REPO
-        call_command('snapshot', snapshot, indices=IDX['MARKER']['indexName'], repo=repo)
-        Snapshot.wait_for_snapshot(repo, snapshot)
-
-        # snapshot already exist so return false
-        self.assertFalse(Snapshot.create_snapshot(repo, snapshot, IDX['MARKER']['indexName']))
-        # remove snapshot
-        call_command('snapshot', snapshot, delete=True, repo=repo)
-        self.assertFalse(Snapshot.exists(repo, snapshot),
-                         "Deleted snapshot "+snapshot)
+    def wait_for_running_snapshot(self):
+        ''' Wait for a running snapshot to complete. '''
+        for _ in range(10):
+            if not Snapshot.is_running():
+                return
+            time.sleep(2)
+        logger.warn('Long running snapshot')
+        self.assertTrue(False, 'Long running snapshot')
 
 
 class ElasticLoadersTest(TestCase):
@@ -100,7 +105,7 @@ class ElasticLoadersTest(TestCase):
         for key in IDX:
             idx = IDX[key]['indexName']
             # check the index has documents, allow for the indexing to complete if necessary
-            Search.wait_for_load(idx)
+#             Search.index_refresh(idx)
             self.assertTrue(Search.index_exists(idx=idx), 'Index exists: '+idx)
             ndocs = Search(idx=idx).get_count()['count']
             self.assertTrue(ndocs > 0, "Elastic count documents in " + idx + ": " + str(ndocs))
