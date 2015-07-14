@@ -203,11 +203,14 @@ class JSONLoader(Loader):
         line_num = 0
         try:
             for row in raw_json_data:
+                row_obj = {"index": {}}
                 if '_id' in row:
-                    json_data += '{"index": {"_id": "%s"}}\n' % row['_id']
+                    row_obj['index'].update({"_id": row['_id']})
                     del row['_id']
-                else:
-                    json_data += '{"index": {}}\n'
+                if '_parent' in row:
+                    row_obj['index'].update({"parent": row['_parent']})
+                    del row['_parent']
+                json_data += json.dumps(row_obj) + '\n'
                 json_data += json.dumps(row) + '\n'
                 line_num += 1
 
