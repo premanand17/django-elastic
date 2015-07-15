@@ -37,6 +37,31 @@ def tearDownModule():
     requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
 
 
+class ServerTest(TestCase):
+
+    def test_server(self):
+        ''' Test elasticsearch server is running and status '''
+        try:
+            url = ElasticSettings.url() + '/_cluster/health/'
+            resp = requests.get(url)
+            self.assertEqual(resp.status_code, 200, "Health page status code")
+            if resp.json()['status'] == 'red':  # allow status to recover if necessary
+                for _ in range(3):
+                    time.sleep(1)
+                    resp = requests.get(url)
+                    if resp.json()['status'] != 'red':
+                        break
+            self.assertFalse(resp.json()['status'] == 'red', 'Health report - red')
+        except requests.exceptions.Timeout:
+            self.assertTrue(False, 'timeout exception')
+        except requests.exceptions.TooManyRedirects:
+            self.assertTrue(False, 'too many redirects exception')
+        except requests.exceptions.ConnectionError:
+            self.assertTrue(False, 'request connection exception')
+        except requests.exceptions.RequestException:
+            self.assertTrue(False, 'request exception')
+
+
 @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
 class RestFrameworkTest(APITestCase):
     ''' Test Django rest framework interface to Elastic indices. '''
