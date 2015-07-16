@@ -11,4 +11,6 @@ def doc_attr(doc, arg):
     ''' Gets attribute of an object dynamically from a string name '''
     if not isinstance(doc, Document):
         return settings.TEMPLATE_STRING_IF_INVALID
+    if arg not in doc.__dict__:
+        return None
     return getattr(doc, arg)
