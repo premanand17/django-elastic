@@ -37,26 +37,61 @@ def tearDownModule():
     requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
 
 
+class ServerTest(TestCase):
+
+    def test_server(self):
+        ''' Test elasticsearch server is running and status '''
+        try:
+            url = ElasticSettings.url() + '/_cluster/health/'
+            resp = requests.get(url)
+            self.assertEqual(resp.status_code, 200, "Health page status code")
+            if resp.json()['status'] == 'red':  # allow status to recover if necessary
+                for _ in range(3):
+                    time.sleep(1)
+                    resp = requests.get(url)
+                    if resp.json()['status'] != 'red':
+                        break
+            self.assertFalse(resp.json()['status'] == 'red', 'Health report - red')
+        except requests.exceptions.Timeout:
+            self.assertTrue(False, 'timeout exception')
+        except requests.exceptions.TooManyRedirects:
+            self.assertTrue(False, 'too many redirects exception')
+        except requests.exceptions.ConnectionError:
+            self.assertTrue(False, 'request connection exception')
+        except requests.exceptions.RequestException:
+            self.assertTrue(False, 'request exception')
+
+
 @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
 class RestFrameworkTest(APITestCase):
     ''' Test Django rest framework interface to Elastic indices. '''
 
     def test_list(self):
+        ''' Test retrieving a list via rest. '''
         url = reverse('rest-router:marker_test-list')
         resp = self.client.get(url, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp['Content-Type'].startswith('application/json'))
         self.assertGreater(json.loads(resp.content.decode())['count'], 0, 'Retrieved stored markers')
 
     def test_list_filtering(self):
+        ''' Test retrieving a list via rest and filtering. '''
         url = reverse('rest-router:marker_test-list')
         resp = self.client.get(url, format='json', data={'id': 'rs2476601'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp['Content-Type'].startswith('application/json'))
         self.assertEqual(json.loads(resp.content.decode())['count'], 1, 'Retrieved rs2476601')
 
     def test_detail(self):
+        ''' Test retrieving a single document via rest. '''
         url = reverse('rest-router:marker_test-detail', kwargs={'pk': '1'})
         resp = self.client.get(url, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp['Content-Type'].startswith('application/json'))
+
         res = json.loads(resp.content.decode())
-        for k in ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info']:
-            self.assertTrue(k in res, 'Contains '+k)
+        expected = ['alt', 'filter', 'id', 'info', 'qual', 'ref', 'seqid', 'start']
+        self.assertEqual(sorted(res.keys()), sorted(expected))
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
