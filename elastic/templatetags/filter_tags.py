@@ -14,3 +14,19 @@ def doc_attr(doc, arg):
     if arg not in doc.__dict__:
         return None
     return getattr(doc, arg)
+
+
+@register.filter
+def doc_keys(doc):
+    ''' Gets the keys of the document object. '''
+    if not isinstance(doc, Document):
+        return settings.TEMPLATE_STRING_IF_INVALID
+    return sorted(list(doc.__dict__.keys()))
+
+
+@register.filter
+def doc_highlight(doc):
+    ''' Gets the highlighted section. '''
+    if not isinstance(doc, Document):
+        return settings.TEMPLATE_STRING_IF_INVALID
+    return doc.highlight()
