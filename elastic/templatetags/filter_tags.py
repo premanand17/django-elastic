@@ -35,8 +35,9 @@ def doc_highlight(doc):
     if doc.highlight() is None:
         return ''
     for key, values in doc.highlight().items():
+        html += '<strong>%s</strong>: ' % key
         for value in values:
-            html += '<strong>%s</strong>: %s; ' % (key, value)
+            html += '%s<br/> ' % value
     return html
 
 
@@ -53,5 +54,6 @@ def doc_link(doc):
     ''' Gets the document details. '''
     if not isinstance(doc, Document):
         return settings.TEMPLATE_STRING_IF_INVALID
+
     return ElasticSettings.url() + '/' + doc.index() + '/' + doc.type() + \
-        '/' + doc.id() + '?routing=' + doc.id()
+        '/' + doc.doc_id() + '?routing=' + doc.doc_id()
