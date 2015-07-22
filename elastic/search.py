@@ -65,6 +65,7 @@ class Search:
 
         self.size = size
         self.idx = idx
+        self.idx_type = idx_type
 
     @classmethod
     def index_exists(cls, idx, idx_type='', url=ElasticSettings.url()):
@@ -107,7 +108,7 @@ class Search:
 
     def get_mapping(self, mapping_type=None):
         ''' Return the mappings for an index. '''
-        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/_mapping')
+        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/' + self.idx_type + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
         response = requests.get(self.mapping_url)
