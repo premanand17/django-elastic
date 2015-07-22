@@ -65,12 +65,12 @@ class Document(object):
             return self.__dict__['_meta']['_type']
         return None
 
-    def id(self):
+    def doc_id(self):
         ''' Document id. '''
-        return self.__dict__['_meta']['_id']
+        return str(self.__dict__['_meta']['_id'])
 
     def index(self):
-        ''' Document id. '''
+        ''' Document index. '''
         return self.__dict__['_meta']['_index']
 
     def highlight(self):
