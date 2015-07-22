@@ -35,7 +35,7 @@ def doc_highlight(doc):
     if doc.highlight() is None:
         return ''
     for key, values in doc.highlight().items():
-        html += '<strong>%s</strong>: ' % key
+        html += '%s: ' % key
         for value in values:
             html += '%s<br/> ' % value
     return html
