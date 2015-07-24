@@ -3,6 +3,10 @@ from rest_framework import serializers, viewsets
 from elastic.rest_framework.resources import ListElasticMixin, ElasticLimitOffsetPagination,\
     RetrieveElasticMixin
 from elastic.elastic_settings import ElasticSettings
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 class PublicationSerializer(serializers.Serializer):
@@ -23,10 +27,20 @@ class PublicationSerializer(serializers.Serializer):
 
 
 class PublicationViewSet(RetrieveElasticMixin, ListElasticMixin, viewsets.GenericViewSet):
+    authentication_classes = (TokenAuthentication, SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+
     serializer_class = PublicationSerializer
     pagination_class = ElasticLimitOffsetPagination
     idx = 'publications_v0.0.1'
     filter_fields = ('PMID', 'title', 'authors__LastName', 'tags__disease')
+
+    def get(self, request):
+        content = {
+            'user': unicode(request.user),  # `django.contrib.auth.User` instance.
+            'auth': unicode(request.auth),  # None
+        }
+        return Response(content)
 
 
 class DiseaseSerializer(serializers.Serializer):
