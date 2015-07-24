@@ -65,6 +65,7 @@ class Search:
 
         self.size = size
         self.idx = idx
+        self.idx_type = idx_type
 
     @classmethod
     def index_exists(cls, idx, idx_type='', url=ElasticSettings.url()):
@@ -107,7 +108,7 @@ class Search:
 
     def get_mapping(self, mapping_type=None):
         ''' Return the mappings for an index. '''
-        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/_mapping')
+        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/' + self.idx_type + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
         response = requests.get(self.mapping_url)
@@ -305,7 +306,7 @@ class Highlight():
     ''' Used in highlighting search result fields, see
     U{Elastic highlighting docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}.
     '''
-    def __init__(self, fields, pre_tags=None, post_tags=None):
+    def __init__(self, fields, pre_tags=None, post_tags=None, number_of_fragments=None, fragment_size=None):
         ''' Highlight one or more fields in the search results. '''
         if not isinstance(fields, list):
             fields = [fields]
@@ -321,3 +322,7 @@ class Highlight():
             if not isinstance(post_tags, list):
                 post_tags = [post_tags]
             self.highlight["highlight"].update({"post_tags": post_tags})
+        if number_of_fragments is not None:
+            self.highlight["highlight"].update({"number_of_fragments": number_of_fragments})
+        if fragment_size is not None:
+            self.highlight["highlight"].update({"fragment_size": fragment_size})
