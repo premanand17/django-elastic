@@ -48,6 +48,8 @@ class Document(object):
 
     def __getattr__(self, name):
         ''' Return Document attribute. '''
+        if name not in self.__dict__:
+            return None
         return self.get(name, None)
 
     def __setattr__(self, name, value):
@@ -62,6 +64,14 @@ class Document(object):
         if '_type' in self.__dict__['_meta']:
             return self.__dict__['_meta']['_type']
         return None
+
+    def doc_id(self):
+        ''' Document id. '''
+        return str(self.__dict__['_meta']['_id'])
+
+    def index(self):
+        ''' Document index. '''
+        return self.__dict__['_meta']['_index']
 
     def highlight(self):
         ''' Highlight match. '''
