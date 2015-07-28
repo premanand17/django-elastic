@@ -270,7 +270,7 @@ class ElasticQuery():
         return cls(query, sources, highlight)
 
     @classmethod
-    def query_string(cls, query_term, sources=None, highlight=None, **string_opts):
+    def query_string(cls, query_term, sources=None, highlight=None, query_filter=None, **string_opts):
         ''' Factory method for creating elastic Query String Query.
 
         @type  query_term: string
@@ -279,9 +279,14 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
+        @type query_filter: Filter
+        @keyword query_filter: Optional filter for query.
         @return: L{ElasticQuery}
         '''
-        query = Query.query_string(query_term, **string_opts)
+        if query_filter is None:
+            query = Query.query_string(query_term, **string_opts)
+        else:
+            query = FilteredQuery(Query.query_string(query_term, **string_opts), query_filter)
         return cls(query, sources, highlight)
 
     @classmethod
