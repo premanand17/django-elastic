@@ -167,6 +167,31 @@ class Search:
                       idx=self.idx, query=self.query)
 
 
+class Suggest(object):
+    ''' Suggest handles requests for populating search auto completion. '''
+
+    @classmethod
+    def suggest(cls, term, idx, url=ElasticSettings.url(),
+                name='data', field='suggest', size=5):
+        ''' Auto completion suggestions for a given term. '''
+        url = (url + '/' + idx + '/' + '/_suggest')
+        suggest = {
+            name: {
+                "text": term,
+                "completion": {
+                    "field": field,
+                    "size": size
+                }
+            }
+        }
+        response = requests.post(url, data=json.dumps(suggest))
+        logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(suggest) + "'")
+        if response.status_code != 200:
+            logger.warn("Error: elastic response 200:" + url)
+            logger.warn(response.json())
+        return response.json()
+
+
 class Update(object):
 
     @classmethod

@@ -14,13 +14,20 @@ class MappingProperties():
         self.column_names = []
 
     def add_property(self, name, map_type, index=None, analyzer=None,
+                     index_analyzer=None, search_analyzer=None,
                      property_format=None, index_options=None):
         ''' Add a property to the mapping. '''
         self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
         if index is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"index": index})
+
         if analyzer is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"analyzer": analyzer})
+        if index_analyzer is not None:
+            self.mapping_properties[self.idx_type]["properties"][name].update({"index_analyzer": index_analyzer})
+        if search_analyzer is not None:
+            self.mapping_properties[self.idx_type]["properties"][name].update({"search_analyzer": search_analyzer})
+
         if property_format is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"format": property_format})
         if index_options is not None:
