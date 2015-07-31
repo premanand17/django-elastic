@@ -167,6 +167,36 @@ class Search:
                       idx=self.idx, query=self.query)
 
 
+class ScanAndScroll(object):
+    ''' Use Elastic scan and scroll api. '''
+
+    @classmethod
+    def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=ElasticSettings.url()):
+        ''' Scan and scroll an index and optionally provide a function argument to
+        process the hits. '''
+        url_search_scan = url + '/' + idx + '/' + idx_type + '/_search?search_type=scan&scroll=1m'
+        query = {
+            "query": {"match_all": {}},
+            "size":  1000
+        }
+        response = requests.post(url_search_scan, data=json.dumps(query))
+        _scroll_id = response.json()['_scroll_id']
+        url_scan_scroll = url + '/_search/scroll?scroll=4m'
+
+        count = 0
+        while True:
+            response = requests.post(url_scan_scroll, data=_scroll_id)
+            _scroll_id = response.json()['_scroll_id']
+            hits = response.json()['hits']['hits']
+            nhits = len(hits)
+            if nhits == 0:
+                break
+            count += nhits
+            if call_fun is not None:
+                call_fun(response.json())
+        print("No. Docs = "+str(count))
+
+
 class Suggest(object):
     ''' Suggest handles requests for populating search auto completion. '''
 
