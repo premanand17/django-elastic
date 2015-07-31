@@ -196,7 +196,7 @@ class ScanAndScroll(object):
             count += nhits
             if call_fun is not None:
                 call_fun(response.json())
-        print("No. Docs = "+str(count))
+        logger.debug("Scanned No. Docs ( "+idx+"/"+idx_type+" ) = "+str(count))
 
 
 class Suggest(object):
