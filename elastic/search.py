@@ -171,17 +171,19 @@ class ScanAndScroll(object):
     ''' Use Elastic scan and scroll api. '''
 
     @classmethod
-    def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=ElasticSettings.url()):
+    def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=ElasticSettings.url(),
+                        time_to_keep_scoll=1):
         ''' Scan and scroll an index and optionally provide a function argument to
         process the hits. '''
-        url_search_scan = url + '/' + idx + '/' + idx_type + '/_search?search_type=scan&scroll=1m'
+        url_search_scan = (url + '/' + idx + '/' + idx_type + '/_search?search_type=scan&scroll=' +
+                           str(time_to_keep_scoll) + 'm')
         query = {
             "query": {"match_all": {}},
             "size":  1000
         }
         response = requests.post(url_search_scan, data=json.dumps(query))
         _scroll_id = response.json()['_scroll_id']
-        url_scan_scroll = url + '/_search/scroll?scroll=4m'
+        url_scan_scroll = url + '/_search/scroll?scroll=' + str(time_to_keep_scoll) + 'm'
 
         count = 0
         while True:
