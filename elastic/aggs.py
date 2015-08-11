@@ -1,10 +1,10 @@
-''' Define aggregations to used in a search. '''
+''' Define elastic aggregation(s) to be used in a search. '''
 from elastic.query import Query
 from elastic.exceptions import AggregationError
 
 
 class Aggs:
-    ''' Define Aggregations '''
+    ''' Define a set of Aggregations. '''
 
     def __init__(self, agg_arr=None):
         self.aggs = {"aggregations": {}}
@@ -39,9 +39,18 @@ class Agg:
         "terms": {"type": dict, "params": {"field": str, "size": int}},
         "significant_terms": {"type": dict, "params": {"field": str}},
         "range": {"type": dict, "params": {"field": str, 'ranges': list}}
-        }
+    }
 
     def __init__(self, agg_name, agg_type, agg_body):
+        ''' Construct an aggregation based on the aggregation type.
+
+        @type  agg_name: str
+        @param agg_name: Aggregation name.
+        @type  agg_type: str
+        @param agg_type: Aggregation type (from AGGS).
+        @type  agg_body: dict
+        @param agg_body: Aggregation body.
+        '''
         self.agg = {agg_name: {}}
         AGGS = Agg.AGGS
 
