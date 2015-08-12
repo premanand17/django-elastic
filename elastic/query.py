@@ -4,7 +4,7 @@ from elastic.exceptions import QueryError, FilterError
 
 class Query:
     ''' Used to build various queries, see
-    U{Elastic query docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-queries.html>}. '''
+    U{Elastic query docs<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-queries.html>}. '''
 
     def __init__(self, query):
         '''
@@ -79,7 +79,7 @@ class Query:
         @param arr: The terms to match.
         @type  minimum_should_match: integer, percentage
         @keyword minimum_should_match:
-        U{minimum_should_match<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-minimum-should-match.html>}
+        U{minimum_should_match<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-minimum-should-match.html>}
         @return: L{Query}
         '''
         if minimum_should_match != 0:
@@ -102,7 +102,7 @@ class Query:
     @classmethod
     def query_string(cls, query_term, **kwargs):
         ''' Factory method for
-        U{Query String Query<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-query-string-query.html>}.
+        U{Query String Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html>}
         Simple wildcards can be used with the fields supplied
         (e.g. "fields" : ["city.*"]).
 
@@ -118,6 +118,15 @@ class Query:
             if key not in Query.STRING_OPTS:
                 raise QueryError("option "+key+" unrecognised as a String Query option")
             query["query_string"][key] = value
+        return cls(query)
+
+    @classmethod
+    def query_type_for_filter(cls, ftype):
+        ''' Used as a filter for an index type.
+        @type  ftype: string
+        @param ftype: Index type to filter.
+        '''
+        query = {"type": {"value": ftype}}
         return cls(query)
 
     @classmethod
@@ -200,7 +209,7 @@ class RangeQuery(Query):
 
 class Filter:
     ''' Used to build various filters, see
-    U{Elastic filter docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filters.html>} '''
+    U{Elastic filter docs<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filters.html>} '''
     def __init__(self, query):
         ''' Filter based on a Query object.
         @type  query: L{Query}

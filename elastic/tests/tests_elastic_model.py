@@ -289,6 +289,13 @@ class ElasticModelTest(TestCase):
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
+    def test_type_filtered_query(self):
+        ''' Test filtered query with a type filter. '''
+        type_filter = Filter(Query.query_type_for_filter("marker"))
+        query = ElasticQuery.filtered(Query.term("seqid", 1), type_filter)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
+
     def test_string_query(self):
         ''' Test building and running a string query. '''
         query = ElasticQuery.query_string("rs2476601", fields=["id"])
