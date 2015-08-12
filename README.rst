@@ -38,13 +38,13 @@ Quick start
              },
             'TEST': 'test_suffix',
             'REPOSITORY': 'my_backup',
+            'TEST_REPO_DIR': '/path/repos/test_snapshot/',
        }
     }
 
 6. Tests can be run as follows::
 
-    ./manage.py test elastic.tests.tests_elastic_model \
-                     elastic.tests.tests_loaders
+    ./manage.py test elastic.tests
 
 Create Mapping and Loading Data into Elastic
 --------------------------------------------
