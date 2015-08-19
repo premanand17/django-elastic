@@ -89,6 +89,20 @@ class Query:
         return cls(query)
 
     @classmethod
+    def missing_terms(cls, name, arr):
+        ''' Factory method for Terms Query.
+         -d '{"query":{"filtered":{"filter":{"terms":{"group_name":["dil"]}}}}}'
+         -d '{"query":{"filtered":{"filter":{"missing":{ "field":"group_name"}}}}}'
+        @type  name: name
+        @param name: The name of the field.
+        @type  arr: array
+        @param arr: The terms to match.
+        @return: L{Query}
+        '''
+        query = {"missing": {name: arr}}
+        return cls(query)
+
+    @classmethod
     def match(cls, match_id, match_str):
         ''' Factory method for Basic match query.
         @type  match_id: string
@@ -238,6 +252,10 @@ class TermsFilter(Filter):
     @classmethod
     def get_terms_filter(cls, name, arr):
         return cls(Query.terms(name, arr, minimum_should_match=0))
+
+    @classmethod
+    def get_missing_terms_filter(cls, name, arr):
+        return cls(Query.missing_terms(name, arr))
 
 
 class OrFilter(Filter):
