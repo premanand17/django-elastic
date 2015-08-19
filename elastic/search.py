@@ -107,18 +107,20 @@ class Search:
         return cls(search_query=query, aggs=aggs, search_from=search_from, size=size, idx=idx)
 
     def get_mapping(self, mapping_type=None):
-        ''' Return the mappings for an index. '''
-        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/' + self.idx_type + '/_mapping')
+        ''' Return the mappings for an index (host:port/{index}/_mapping/{type}). '''
+        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
+        elif self.idx_type is not None:
+            self.mapping_url += '/'+self.idx_type
         response = requests.get(self.mapping_url)
         if response.status_code != 200:
-            return json.dumps({"error": response.status_code})
+            return json.dumps({"error": response.status_code, "url": self.mapping_url})
         return response.json()
 
     def get_count(self):
         ''' Return the elastic count for a query result '''
-        url = ElasticSettings.url() + '/' + self.idx + '/_count?'
+        url = ElasticSettings.url() + '/' + self.idx + '/' + self.idx_type + '/_count?'
         data = {}
         if hasattr(self, 'query'):
             data = json.dumps(self.query)
