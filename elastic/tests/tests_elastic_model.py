@@ -189,13 +189,13 @@ class ElasticModelTest(TestCase):
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
         query_bool = BoolQuery()
-        query_bool.must([Query.term("id", "rs373328635")]) \
+        query_bool.must([Query.term("id", "rs768019142")]) \
                   .must_not([Query.term("seqid", 2)]) \
                   .should(RangeQuery("start", gte=10054)) \
                   .should([RangeQuery("start", gte=10050)])
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
 
     def test_bool_filtered_query2(self):
         ''' Test building and running a filtered boolean query. '''
@@ -203,10 +203,10 @@ class ElasticModelTest(TestCase):
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
                   .must(Query.term("seqid", 1))
-        query_string = Query.query_string("rs373328635", fields=["id", "seqid"])
+        query_string = Query.query_string("rs768019142", fields=["id", "seqid"])
         query = ElasticQuery.filtered_bool(query_string, query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
 
     def test_bool_filtered_query3(self):
         ''' Test building and running a filtered boolean query. Note:
@@ -214,12 +214,12 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery()
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
-                  .must(Query.query_string("rs373328635", fields=["id", "seqid"]).query_wrap()) \
+                  .must(Query.query_string("rs768019142", fields=["id", "seqid"]).query_wrap()) \
                   .must(Query.term("seqid", 1))
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
 
     def test_bool_filtered_query4(self):
         ''' Test building and running a filtered boolean query.
@@ -227,17 +227,17 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery()
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
-                  .must(Query.match("id", "rs373328635").query_wrap()) \
+                  .must(Query.match("id", "rs768019142").query_wrap()) \
                   .must(Query.term("seqid", 1))
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
 
     def test_bool_nested_filter(self):
         ''' Test combined Bool filter '''
         query_bool_nest = BoolQuery()
-        query_bool_nest.must(Query.match("id", "rs373328635").query_wrap()) \
+        query_bool_nest.must(Query.match("id", "rs768019142").query_wrap()) \
                        .must(Query.term("seqid", 1))
 
         query_bool = BoolQuery()
@@ -278,14 +278,21 @@ class ElasticModelTest(TestCase):
 
     def test_term_filtered_query(self):
         ''' Test filtered query with a term filter. '''
-        query = ElasticQuery.filtered(Query.term("seqid", 1), Filter(Query.term("id", "rs373328635")))
+        query = ElasticQuery.filtered(Query.term("seqid", 1), Filter(Query.term("id", "rs768019142")))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker")
 
     def test_terms_filtered_query(self):
         ''' Test filtered query with a terms filter. '''
-        terms_filter = TermsFilter.get_terms_filter("id", ["rs2476601", "rs373328635"])
+        terms_filter = TermsFilter.get_terms_filter("id", ["rs2476601", "rs768019142"])
         query = ElasticQuery.filtered(Query.term("seqid", 1), terms_filter)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_type_filtered_query(self):
+        ''' Test filtered query with a type filter. '''
+        type_filter = Filter(Query.query_type_for_filter("marker"))
+        query = ElasticQuery.filtered(Query.term("seqid", 1), type_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
@@ -321,11 +328,11 @@ class ElasticModelTest(TestCase):
     def test_terms_query(self):
         ''' Test building and running a match query. '''
         highlight = Highlight(["id"])
-        query = ElasticQuery(Query.terms("id", ["rs2476601", "rs373328635"]), highlight=highlight)
+        query = ElasticQuery(Query.terms("id", ["rs2476601", "rs768019142"]), highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         docs = elastic.search().docs
         self.assertTrue(len(docs) == 2,
-                        "Elastic string query retrieved markers (rs2476601, rs373328635)")
+                        "Elastic string query retrieved markers (rs2476601, rs768019142)")
         self.assertTrue(getattr(docs[0], 'seqid'), "Hit attribute found")
         self.assertTrue(docs[0].highlight() is not None, "highlighting found")
 
@@ -333,14 +340,14 @@ class ElasticModelTest(TestCase):
         ''' Test a bool query. '''
         query_bool = BoolQuery()
         highlight = Highlight(["id", "seqid"])
-        query_bool.must(Query.term("id", "rs373328635")) \
+        query_bool.must(Query.term("id", "rs768019142")) \
                   .must(RangeQuery("start", gt=1000)) \
                   .must_not(Query.match("seqid", "2")) \
                   .should(Query.match("seqid", "3")) \
                   .should(Query.match("seqid", "1"))
         query = ElasticQuery.bool(query_bool, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(len(elastic.search().docs) == 1, "Elastic string query retrieved marker (rs373328635)")
+        self.assertTrue(len(elastic.search().docs) == 1, "Elastic string query retrieved marker (rs768019142)")
 
     def test_string_query_with_wildcard_and_highlight(self):
         highlight = Highlight("id", pre_tags="<strong>", post_tags="</strong>")
@@ -361,7 +368,7 @@ class ElasticModelTest(TestCase):
 
     def test_count_with_query(self):
         ''' Test count the number of documents returned by a query. '''
-        query = ElasticQuery(Query.term("id", "rs373328635"))
+        query = ElasticQuery(Query.term("id", "rs768019142"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
 

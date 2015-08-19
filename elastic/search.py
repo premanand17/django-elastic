@@ -107,18 +107,20 @@ class Search:
         return cls(search_query=query, aggs=aggs, search_from=search_from, size=size, idx=idx)
 
     def get_mapping(self, mapping_type=None):
-        ''' Return the mappings for an index. '''
-        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/' + self.idx_type + '/_mapping')
+        ''' Return the mappings for an index (host:port/{index}/_mapping/{type}). '''
+        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
+        elif self.idx_type is not None:
+            self.mapping_url += '/'+self.idx_type
         response = requests.get(self.mapping_url)
         if response.status_code != 200:
-            return json.dumps({"error": response.status_code})
+            return json.dumps({"error": response.status_code, "url": self.mapping_url})
         return response.json()
 
     def get_count(self):
         ''' Return the elastic count for a query result '''
-        url = ElasticSettings.url() + '/' + self.idx + '/_count?'
+        url = ElasticSettings.url() + '/' + self.idx + '/' + self.idx_type + '/_count?'
         data = {}
         if hasattr(self, 'query'):
             data = json.dumps(self.query)
@@ -165,6 +167,63 @@ class Search:
                       hits_total=json_response['hits']['total'],
                       size=self.size, docs=docs, aggs=aggs,
                       idx=self.idx, query=self.query)
+
+
+class ScanAndScroll(object):
+    ''' Use Elastic scan and scroll api. '''
+
+    @classmethod
+    def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=ElasticSettings.url(),
+                        time_to_keep_scoll=1):
+        ''' Scan and scroll an index and optionally provide a function argument to
+        process the hits. '''
+        url_search_scan = (url + '/' + idx + '/' + idx_type + '/_search?search_type=scan&scroll=' +
+                           str(time_to_keep_scoll) + 'm')
+        query = {
+            "query": {"match_all": {}},
+            "size":  1000
+        }
+        response = requests.post(url_search_scan, data=json.dumps(query))
+        _scroll_id = response.json()['_scroll_id']
+        url_scan_scroll = url + '/_search/scroll?scroll=' + str(time_to_keep_scoll) + 'm'
+
+        count = 0
+        while True:
+            response = requests.post(url_scan_scroll, data=_scroll_id)
+            _scroll_id = response.json()['_scroll_id']
+            hits = response.json()['hits']['hits']
+            nhits = len(hits)
+            if nhits == 0:
+                break
+            count += nhits
+            if call_fun is not None:
+                call_fun(response.json())
+        logger.debug("Scanned No. Docs ( "+idx+"/"+idx_type+" ) = "+str(count))
+
+
+class Suggest(object):
+    ''' Suggest handles requests for populating search auto completion. '''
+
+    @classmethod
+    def suggest(cls, term, idx, url=ElasticSettings.url(),
+                name='data', field='suggest', size=5):
+        ''' Auto completion suggestions for a given term. '''
+        url = (url + '/' + idx + '/' + '/_suggest')
+        suggest = {
+            name: {
+                "text": term,
+                "completion": {
+                    "field": field,
+                    "size": size
+                }
+            }
+        }
+        response = requests.post(url, data=json.dumps(suggest))
+        logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(suggest) + "'")
+        if response.status_code != 200:
+            logger.warn("Error: elastic response 200:" + url)
+            logger.warn(response.json())
+        return response.json()
 
 
 class Update(object):
@@ -270,7 +329,7 @@ class ElasticQuery():
         return cls(query, sources, highlight)
 
     @classmethod
-    def query_string(cls, query_term, sources=None, highlight=None, **string_opts):
+    def query_string(cls, query_term, sources=None, highlight=None, query_filter=None, **string_opts):
         ''' Factory method for creating elastic Query String Query.
 
         @type  query_term: string
@@ -279,9 +338,14 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
+        @type query_filter: Filter
+        @keyword query_filter: Optional filter for query.
         @return: L{ElasticQuery}
         '''
-        query = Query.query_string(query_term, **string_opts)
+        if query_filter is None:
+            query = Query.query_string(query_term, **string_opts)
+        else:
+            query = FilteredQuery(Query.query_string(query_term, **string_opts), query_filter)
         return cls(query, sources, highlight)
 
     @classmethod

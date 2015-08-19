@@ -3,6 +3,7 @@ from django import template
 from django.conf import settings
 from elastic.result import Document
 from elastic.elastic_settings import ElasticSettings
+import re
 
 register = template.Library()
 
@@ -27,7 +28,8 @@ def doc_keys(doc):
 
 @register.filter
 def doc_highlight(doc):
-    ''' Gets the highlighted section. '''
+    ''' Gets the highlighted section and split into fragments for parsing
+    html tags as safe. '''
     if not isinstance(doc, Document):
         return settings.TEMPLATE_STRING_IF_INVALID
 
@@ -38,7 +40,8 @@ def doc_highlight(doc):
         html += '%s: ' % key
         for value in values:
             html += '%s<br/> ' % value
-    return html
+    html_fragments = re.split('(<strong>|</strong>|<br/>)', html)
+    return html_fragments
 
 
 @register.filter
