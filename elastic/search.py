@@ -116,7 +116,7 @@ class Search:
         response = requests.get(self.mapping_url)
         if response.status_code != 200:
             return json.dumps({"error": response.status_code,
-                               "response": response.json(),
+                               "response": response.content.decode("utf-8"),
                                "url": self.mapping_url})
         return response.json()
 
