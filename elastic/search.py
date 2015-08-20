@@ -77,11 +77,10 @@ class Search:
         return True
 
     @classmethod
-    def index_refresh(cls, idx, idx_type='', url=ElasticSettings.url()):
+    def index_refresh(cls, idx, url=ElasticSettings.url()):
         ''' Refresh to make all operations performed since the last refresh
         available for search'''
-        url += '/' + idx + '/' + idx_type + '/_refresh'
-        response = requests.get(url)
+        response = requests.get(url + '/' + idx + '/_refresh')
         if "error" in response.json():
             return False
         return True
