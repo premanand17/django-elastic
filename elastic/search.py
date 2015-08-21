@@ -114,9 +114,11 @@ class Search:
             self.mapping_url += '/'+self.idx_type
         response = requests.get(self.mapping_url)
         if response.status_code != 200:
-            return json.dumps({"error": response.status_code,
-                               "response": response.content.decode("utf-8"),
-                               "url": self.mapping_url})
+            json_err = json.dumps({"error": response.status_code,
+                                   "response": response.content.decode("utf-8"),
+                                   "url": self.mapping_url})
+            logger.warn(json_err)
+            return json_err
         return response.json()
 
     def get_count(self):
