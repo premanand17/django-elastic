@@ -142,7 +142,7 @@ class Search:
         ''' DEPRECATED: use Search.search().
         Return the elastic json result. Note: django template does not
         like underscores (e.g. _type). '''
-        warnings.warn("Search.get_result will be removed, use Search.search()", FutureWarning)
+        warnings.warn("DEPRECATED :: Search.get_result will be removed, use Search.search()!", FutureWarning)
 
         json_response = self.get_json_response()
         context = {"query": self.query}
