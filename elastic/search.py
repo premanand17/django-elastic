@@ -80,7 +80,7 @@ class Search:
     def index_refresh(cls, idx, url=ElasticSettings.url()):
         ''' Refresh to make all operations performed since the last refresh
         available for search'''
-        response = requests.get(url + '/' + idx + '/_refresh')
+        response = requests.post(url + '/' + idx + '/_refresh')
         if "error" in response.json():
             return False
         return True
