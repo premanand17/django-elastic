@@ -77,11 +77,10 @@ class Search:
         return True
 
     @classmethod
-    def index_refresh(cls, idx, idx_type='', url=ElasticSettings.url()):
+    def index_refresh(cls, idx, url=ElasticSettings.url()):
         ''' Refresh to make all operations performed since the last refresh
         available for search'''
-        url += '/' + idx + '/' + idx_type + '/_refresh'
-        response = requests.get(url)
+        response = requests.get(url + '/' + idx + '/_refresh')
         if "error" in response.json():
             return False
         return True
@@ -115,7 +114,11 @@ class Search:
             self.mapping_url += '/'+self.idx_type
         response = requests.get(self.mapping_url)
         if response.status_code != 200:
-            return json.dumps({"error": response.status_code, "url": self.mapping_url})
+            json_err = json.dumps({"error": response.status_code,
+                                   "response": response.content.decode("utf-8"),
+                                   "url": self.mapping_url})
+            logger.warn(json_err)
+            return json_err
         return response.json()
 
     def get_count(self):
