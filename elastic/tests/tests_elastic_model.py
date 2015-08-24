@@ -8,7 +8,7 @@ from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
 from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
-from elastic.search import Search, ElasticQuery, Highlight
+from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter
 from elastic.exceptions import AggregationError
@@ -146,6 +146,20 @@ class TastypieResourceTest(ResourceTestCase):
                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
         resp = self.api_client.get(url, format='json')
         self.assertValidJSONResponse(resp)
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
+class ScanAndScrollTest(TestCase):
+
+    def test_scan_and_scroll(self):
+        ''' Test scan and scroll interface. '''
+        def check_hits(resp_json):
+            self.assertTrue('hits' in resp_json, 'scan and scroll hits')
+            self.assertGreaterEqual(len(resp_json['hits']['hits']), 1)
+
+        ScanAndScroll.scan_and_scroll(ElasticSettings.idx('DEFAULT'), call_fun=check_hits)
+        ScanAndScroll.scan_and_scroll(ElasticSettings.idx('DEFAULT'), call_fun=check_hits,
+                                      query=ElasticQuery.query_string("rs2476601", fields=["id"]))
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)

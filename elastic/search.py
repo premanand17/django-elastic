@@ -82,6 +82,7 @@ class Search:
         available for search'''
         response = requests.post(url + '/' + idx + '/_refresh')
         if "error" in response.json():
+            logger.warn(response.content.decode("utf-8"))
             return False
         return True
 
@@ -177,15 +178,20 @@ class ScanAndScroll(object):
 
     @classmethod
     def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=ElasticSettings.url(),
-                        time_to_keep_scoll=1):
+                        time_to_keep_scoll=1, query=None):
         ''' Scan and scroll an index and optionally provide a function argument to
         process the hits. '''
         url_search_scan = (url + '/' + idx + '/' + idx_type + '/_search?search_type=scan&scroll=' +
                            str(time_to_keep_scoll) + 'm')
-        query = {
-            "query": {"match_all": {}},
-            "size":  1000
-        }
+        if query is None:
+            query = {
+                "query": {"match_all": {}},
+                "size":  1000
+            }
+        else:
+            if not isinstance(query, ElasticQuery):
+                raise QueryError("not a Query")
+            query = query.query
         response = requests.post(url_search_scan, data=json.dumps(query))
         _scroll_id = response.json()['_scroll_id']
         url_scan_scroll = url + '/_search/scroll?scroll=' + str(time_to_keep_scoll) + 'm'
