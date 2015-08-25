@@ -21,7 +21,7 @@ import logging
 from elastic.result import Document, Result, Aggregation
 from elastic.elastic_settings import ElasticSettings
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
-    Filter, OrFilter
+    Filter, OrFilter, HasParentQuery
 import warnings
 from builtins import classmethod
 
@@ -256,9 +256,9 @@ class ElasticQuery():
 
     I{Advanced options:}
     Sources can be defined to set the fields that operations return (see
-    U{source filtering<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-source-filtering.html>}).
+    U{source filtering<www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html>}).
     Also
-    U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}
+    U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/current/search-request-highlighting.html>}
     can be defined for one or more fields in search results.  '''
 
     def __init__(self, query, sources=None, highlight=None):
@@ -300,7 +300,7 @@ class ElasticQuery():
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None, highlight=None):
         ''' Factory method for creating an elastic
-        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filtered-query.html>}
+        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html>}
         (L{FilteredQuery<elastic_model.FilteredQuery>}) using a Bool filter.
 
         @type  query_bool: Query
@@ -320,7 +320,7 @@ class ElasticQuery():
     @classmethod
     def filtered(cls, query_match, query_filter, sources=None, highlight=None):
         ''' Factory method for creating an elastic
-        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filtered-query.html>}
+        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html>}
         (L{FilteredQuery<elastic_model.FilteredQuery>}).
 
         @type  query_bool: Query
@@ -336,6 +336,23 @@ class ElasticQuery():
 
         query = FilteredQuery(query_match, query_filter)
         return cls(query, sources, highlight)
+
+    @classmethod
+    def has_parent(cls, parent_type, query, sources=None, highlight=None):
+        ''' Factory method for creating an elastic
+        U{Has Parent Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-parent-query.html>}.
+
+        @type  parent_type: str
+        @param parent_type: Parent type.
+        @type  query_bool: Query
+        @param query_bool: The query to be used.
+        @type  sources: array of result fields
+        @keyword sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @keyword highlight: Define the highlighting of results (default: None).
+        @return: L{ElasticQuery}
+        '''
+        return cls(HasParentQuery(parent_type, query), sources, highlight)
 
     @classmethod
     def query_string(cls, query_term, sources=None, highlight=None, query_filter=None, **string_opts):
