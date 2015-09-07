@@ -90,7 +90,7 @@ class Query:
 
     @classmethod
     def missing_terms(cls, name, arr):
-        ''' Factory method for Terms Query.
+        ''' Factory method for Missing Terms Query.
          -d '{"query":{"filtered":{"filter":{"terms":{"group_name":["dil"]}}}}}'
          -d '{"query":{"filtered":{"filter":{"missing":{ "field":"group_name"}}}}}'
         @type  name: name
