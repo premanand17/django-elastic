@@ -302,6 +302,14 @@ class ElasticModelTest(TestCase):
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
+    def test_missing_terms_filtered_query(self):
+        ''' Test filtered query with a missing terms filter. '''
+        terms_filter = TermsFilter.get_missing_terms_filter("field", "group_name")
+        query = ElasticQuery.filtered(Query.match_all(), terms_filter)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        docs = elastic.search().docs
+        self.assertTrue(len(docs) == 3, "Elastic string query retrieved all public docs")
+
     def test_type_filtered_query(self):
         ''' Test filtered query with a type filter. '''
         type_filter = Filter(Query.query_type_for_filter("marker"))
