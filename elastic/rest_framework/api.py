@@ -8,7 +8,6 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 import logging
-from pydgin_auth.permissions import check_has_permission
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +29,6 @@ class PublicationSerializer(serializers.Serializer):
 
 
 class PublicationViewSet(RetrieveElasticMixin, ListElasticMixin, viewsets.GenericViewSet):
-    # authentication_classes = (TokenAuthentication, SessionAuthentication, BasicAuthentication)
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
@@ -76,13 +74,13 @@ class MarkerSerializer(serializers.Serializer):
     info = serializers.CharField(help_text='Additional information')
 
 
-class PydginCustomMarkerPermission(permissions.BasePermission):
-
-    def has_permission(self, request, view):
-        print("checking has permission for {}".format(request.user))
-        has_perm = check_has_permission(request.user, 'MARKER')
-        print("Returning {} from PydginCustomMarkerPermission".format(has_perm))
-        return has_perm
+# class PydginCustomMarkerPermission(permissions.BasePermission):
+#
+#    def has_permission(self, request, view):
+#        print("checking has permission for {}".format(request.user))
+#        has_perm = check_has_permission(request.user, 'MARKER')
+#        print("Returning {} from PydginCustomMarkerPermission".format(has_perm))
+#        return has_perm
 
 
 class MarkerViewSet(RetrieveElasticMixin, ListElasticMixin, viewsets.GenericViewSet):
@@ -91,4 +89,4 @@ class MarkerViewSet(RetrieveElasticMixin, ListElasticMixin, viewsets.GenericView
     idx = resource_name = ElasticSettings.idx('MARKER', 'MARKER')
     filter_fields = ('seqid', 'id', 'start')
     # model = TheModel
-    permission_classes = (PydginCustomMarkerPermission,)
+    # permission_classes = (PydginCustomMarkerPermission,)
