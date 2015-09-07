@@ -161,13 +161,21 @@ class Query:
 class FilteredQuery(Query):
     ''' Filtered Query - used to combine a query and a filter. '''
     def __init__(self, query, query_filter):
-        ''' Bool query '''
+        ''' Construct a filtered query '''
         if not isinstance(query, Query):
             raise QueryError("not a Query")
         if not isinstance(query_filter, Filter):
             raise QueryError("not a Filter")
         self.query = {"filtered": {"query": query.query}}
         self.query["filtered"].update(query_filter.filter)
+
+
+class HasParentQuery(Query):
+    ''' Has Parent Query. '''
+    def __init__(self, parent_type, query):
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
+        self.query = {"has_parent": {"type": parent_type, "query": query.query}}
 
 
 class BoolQuery(Query):

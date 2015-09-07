@@ -21,7 +21,7 @@ import logging
 from elastic.result import Document, Result, Aggregation
 from elastic.elastic_settings import ElasticSettings
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
-    Filter, OrFilter
+    Filter, OrFilter, HasParentQuery
 import warnings
 from builtins import classmethod
 
@@ -77,12 +77,12 @@ class Search:
         return True
 
     @classmethod
-    def index_refresh(cls, idx, idx_type='', url=ElasticSettings.url()):
+    def index_refresh(cls, idx, url=ElasticSettings.url()):
         ''' Refresh to make all operations performed since the last refresh
         available for search'''
-        url += '/' + idx + '/' + idx_type + '/_refresh'
-        response = requests.get(url)
+        response = requests.post(url + '/' + idx + '/_refresh')
         if "error" in response.json():
+            logger.warn(response.content.decode("utf-8"))
             return False
         return True
 
@@ -115,7 +115,11 @@ class Search:
             self.mapping_url += '/'+self.idx_type
         response = requests.get(self.mapping_url)
         if response.status_code != 200:
-            return json.dumps({"error": response.status_code, "url": self.mapping_url})
+            json_err = json.dumps({"error": response.status_code,
+                                   "response": response.content.decode("utf-8"),
+                                   "url": self.mapping_url})
+            logger.warn(json_err)
+            return json_err
         return response.json()
 
     def get_count(self):
@@ -139,7 +143,7 @@ class Search:
         ''' DEPRECATED: use Search.search().
         Return the elastic json result. Note: django template does not
         like underscores (e.g. _type). '''
-        warnings.warn("Search.get_result will be removed, use Search.search()", FutureWarning)
+        warnings.warn("DEPRECATED :: Search.get_result will be removed, use Search.search()!", FutureWarning)
 
         json_response = self.get_json_response()
         context = {"query": self.query}
@@ -174,15 +178,20 @@ class ScanAndScroll(object):
 
     @classmethod
     def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=ElasticSettings.url(),
-                        time_to_keep_scoll=1):
+                        time_to_keep_scoll=1, query=None):
         ''' Scan and scroll an index and optionally provide a function argument to
         process the hits. '''
         url_search_scan = (url + '/' + idx + '/' + idx_type + '/_search?search_type=scan&scroll=' +
                            str(time_to_keep_scoll) + 'm')
-        query = {
-            "query": {"match_all": {}},
-            "size":  1000
-        }
+        if query is None:
+            query = {
+                "query": {"match_all": {}},
+                "size":  1000
+            }
+        else:
+            if not isinstance(query, ElasticQuery):
+                raise QueryError("not a Query")
+            query = query.query
         response = requests.post(url_search_scan, data=json.dumps(query))
         _scroll_id = response.json()['_scroll_id']
         url_scan_scroll = url + '/_search/scroll?scroll=' + str(time_to_keep_scoll) + 'm'
@@ -247,9 +256,9 @@ class ElasticQuery():
 
     I{Advanced options:}
     Sources can be defined to set the fields that operations return (see
-    U{source filtering<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-source-filtering.html>}).
+    U{source filtering<www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html>}).
     Also
-    U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}
+    U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/current/search-request-highlighting.html>}
     can be defined for one or more fields in search results.  '''
 
     def __init__(self, query, sources=None, highlight=None):
@@ -291,7 +300,7 @@ class ElasticQuery():
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None, highlight=None):
         ''' Factory method for creating an elastic
-        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filtered-query.html>}
+        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html>}
         (L{FilteredQuery<elastic_model.FilteredQuery>}) using a Bool filter.
 
         @type  query_bool: Query
@@ -311,7 +320,7 @@ class ElasticQuery():
     @classmethod
     def filtered(cls, query_match, query_filter, sources=None, highlight=None):
         ''' Factory method for creating an elastic
-        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filtered-query.html>}
+        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html>}
         (L{FilteredQuery<elastic_model.FilteredQuery>}).
 
         @type  query_bool: Query
@@ -327,6 +336,23 @@ class ElasticQuery():
 
         query = FilteredQuery(query_match, query_filter)
         return cls(query, sources, highlight)
+
+    @classmethod
+    def has_parent(cls, parent_type, query, sources=None, highlight=None):
+        ''' Factory method for creating an elastic
+        U{Has Parent Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-parent-query.html>}.
+
+        @type  parent_type: str
+        @param parent_type: Parent type.
+        @type  query_bool: Query
+        @param query_bool: The query to be used.
+        @type  sources: array of result fields
+        @keyword sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @keyword highlight: Define the highlighting of results (default: None).
+        @return: L{ElasticQuery}
+        '''
+        return cls(HasParentQuery(parent_type, query), sources, highlight)
 
     @classmethod
     def query_string(cls, query_term, sources=None, highlight=None, query_filter=None, **string_opts):

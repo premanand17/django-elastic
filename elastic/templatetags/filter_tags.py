@@ -4,6 +4,7 @@ from django.conf import settings
 from elastic.result import Document
 from elastic.elastic_settings import ElasticSettings
 import re
+import collections
 
 register = template.Library()
 
@@ -53,6 +54,14 @@ def doc_type(doc):
 
 
 @register.filter
+def doc_id(doc):
+    ''' Gets the document ID. '''
+    if not isinstance(doc, Document):
+        return settings.TEMPLATE_STRING_IF_INVALID
+    return doc.doc_id()
+
+
+@register.filter
 def doc_link(doc):
     ''' Gets the document details. '''
     if not isinstance(doc, Document):
@@ -60,3 +69,22 @@ def doc_link(doc):
 
     return ElasticSettings.url() + '/' + doc.index() + '/' + doc.type() + \
         '/' + doc.doc_id() + '?routing=' + doc.doc_id()
+
+
+@register.filter(name='sort')
+def listsort(value):
+    ''' Sort list and iterable arguments. '''
+    if isinstance(value, list):
+        try:
+            new_list = list(value)
+            new_list.sort()
+            return new_list
+        except TypeError:
+            # sorting a list of dictionaries?
+            if 'key' in value[0]:
+                return sorted(value, key=lambda k: k['key'])
+    elif isinstance(value, collections.Iterable):
+        return sorted(value)
+    return value
+
+listsort.is_safe = True
