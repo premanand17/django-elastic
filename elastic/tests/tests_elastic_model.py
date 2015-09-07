@@ -6,7 +6,6 @@ from elastic.management.loaders.mapping import MappingProperties
 from elastic.management.loaders.loader import Loader
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
-from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
 from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
@@ -94,58 +93,58 @@ class RestFrameworkTest(APITestCase):
         self.assertEqual(sorted(res.keys()), sorted(expected))
 
 
-@override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
-class TastypieResourceTest(ResourceTestCase):
-    ''' Test Tastypie interface to Elastic indices.
-    Note: Overriding the ROOT_URLCONF to set up test Tastypie api that
-    connects to the test indices set up for the module.
-    '''
-
-    def setUp(self):
-        super(TastypieResourceTest, self).setUp()
-
-    def safe_get_request(self, url, data=None):
-        ''' Routine to allow for TastyPie to intialise if needed. '''
-        resp = self.api_client.get(url, format='json', data=data)
-        if len(self.deserialize(resp)['objects']) < 1:
-            time.sleep(2)
-            resp = self.api_client.get(url, format='json', data=data)
-        return resp
-
-    def test_list(self):
-        ''' Test listing all documents. '''
-        url = reverse('api_dispatch_list',
-                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
-        resp = self.safe_get_request(url)
-        self.assertValidJSONResponse(resp)
-        self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
-
-    def test_list_with_filtering(self):
-        ''' Test getting a document using filtering. '''
-        url = reverse('api_dispatch_list',
-                      kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
-        resp = self.safe_get_request(url, data={'attr__Name': 'rs2664170'})
-        self.assertValidJSONResponse(resp)
-        self.assertEqual(len(self.deserialize(resp)['objects']), 1, 'Retrieved stored markers')
-
-        resp = self.api_client.get(url, format='json', data={'attr__xxx': 'rs2664170'})
-        self.assertKeys(self.deserialize(resp), ['error'])
-
-    def test_detail(self):
-        ''' Test getting a document by primary key '''
-        url = reverse('api_dispatch_detail',
-                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test', 'pk': '1'})
-        resp = self.api_client.get(url, format='json')
-        self.assertValidJSONResponse(resp)
-        keys = ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info', 'resource_uri']
-        self.assertKeys(self.deserialize(resp), keys)
-
-    def test_schema(self):
-        ''' Test returning the schema '''
-        url = reverse('api_get_schema',
-                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
-        resp = self.api_client.get(url, format='json')
-        self.assertValidJSONResponse(resp)
+# @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
+# class TastypieResourceTest(ResourceTestCase):
+#     ''' Test Tastypie interface to Elastic indices.
+#     Note: Overriding the ROOT_URLCONF to set up test Tastypie api that
+#     connects to the test indices set up for the module.
+#     '''
+#
+#     def setUp(self):
+#         super(TastypieResourceTest, self).setUp()
+#
+#     def safe_get_request(self, url, data=None):
+#         ''' Routine to allow for TastyPie to intialise if needed. '''
+#         resp = self.api_client.get(url, format='json', data=data)
+#         if len(self.deserialize(resp)['objects']) < 1:
+#             time.sleep(2)
+#             resp = self.api_client.get(url, format='json', data=data)
+#         return resp
+#
+#     def test_list(self):
+#         ''' Test listing all documents. '''
+#         url = reverse('api_dispatch_list',
+#                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
+#         resp = self.safe_get_request(url)
+#         self.assertValidJSONResponse(resp)
+#         self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
+#
+#     def test_list_with_filtering(self):
+#         ''' Test getting a document using filtering. '''
+#         url = reverse('api_dispatch_list',
+#                       kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
+#         resp = self.safe_get_request(url, data={'attr__Name': 'rs2664170'})
+#         self.assertValidJSONResponse(resp)
+#         self.assertEqual(len(self.deserialize(resp)['objects']), 1, 'Retrieved stored markers')
+#
+#         resp = self.api_client.get(url, format='json', data={'attr__xxx': 'rs2664170'})
+#         self.assertKeys(self.deserialize(resp), ['error'])
+#
+#     def test_detail(self):
+#         ''' Test getting a document by primary key '''
+#         url = reverse('api_dispatch_detail',
+#                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test', 'pk': '1'})
+#         resp = self.api_client.get(url, format='json')
+#         self.assertValidJSONResponse(resp)
+#         keys = ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info', 'resource_uri']
+#         self.assertKeys(self.deserialize(resp), keys)
+#
+#     def test_schema(self):
+#         ''' Test returning the schema '''
+#         url = reverse('api_get_schema',
+#                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
+#         resp = self.api_client.get(url, format='json')
+#         self.assertValidJSONResponse(resp)
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)

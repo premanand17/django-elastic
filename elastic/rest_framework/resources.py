@@ -1,11 +1,11 @@
 ''' Pagination, filter and elastic list and retrieve views. '''
 from elastic.search import Search, ElasticQuery
-from elastic.tastypie.resources import ElasticObject
 from elastic.query import Query, AndFilter
 from rest_framework.filters import DjangoFilterBackend, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from django.http.response import Http404
+from elastic.rest_framework.elastic_obj import ElasticObject
 
 
 class ElasticLimitOffsetPagination(LimitOffsetPagination):
