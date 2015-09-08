@@ -1,5 +1,5 @@
 ''' Django REST framework Elastic resources. '''
-from rest_framework import serializers, viewsets, permissions
+from rest_framework import serializers, viewsets
 from elastic.rest_framework.resources import ListElasticMixin, ElasticLimitOffsetPagination,\
     RetrieveElasticMixin
 from elastic.elastic_settings import ElasticSettings
@@ -15,9 +15,8 @@ class PublicationSerializer(serializers.Serializer):
     ''' Publication resource. '''
 
     class PublicationAuthor(serializers.Serializer):
-        ForeName = serializers.ReadOnlyField()
-        LastName = serializers.ReadOnlyField()
-        Initials = serializers.ReadOnlyField()
+        name = serializers.ReadOnlyField()
+        initials = serializers.ReadOnlyField()
 
     PMID = serializers.IntegerField()
     title = serializers.ReadOnlyField()
@@ -34,8 +33,8 @@ class PublicationViewSet(RetrieveElasticMixin, ListElasticMixin, viewsets.Generi
 
     serializer_class = PublicationSerializer
     pagination_class = ElasticLimitOffsetPagination
-    idx = 'publications_v0.0.1'
-    filter_fields = ('PMID', 'title', 'authors__LastName', 'tags__disease')
+    idx = ElasticSettings.idx('PUBLICATION')
+    filter_fields = ('PMID', 'title', 'authors__name', 'tags__disease')
 
     def get(self, request):
         content = {
