@@ -44,6 +44,8 @@ IDX = {'GENE': {'indexName': 'test__gene_'+SEARCH_SUFFIX,
        'STUDY_ALIAS': {'indexName': 'test__study_alias_'+SEARCH_SUFFIX,
                        'indexAlias': SEARCH_TEST_DATA_PATH + 'alias_test_dir',
                        'indexFeatureType': 'study', 'shards': NUMBER_OF_SHARDS},
+       'PRIVATE_REGIONS_GFF': {'indexName': 'test__private_regions_gff_'+SEARCH_SUFFIX, 'indexType': 'gff',
+                               'indexGFF': SEARCH_TEST_DATA_PATH+'private_regions.gff.gz', 'shards': NUMBER_OF_SHARDS},
        }
 
 IDX_UPDATE = {'GENE_UPDATE': {'indexName': 'test__gene_'+SEARCH_SUFFIX, 'build': 'GRCh38',

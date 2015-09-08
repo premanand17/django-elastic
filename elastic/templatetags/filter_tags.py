@@ -28,24 +28,6 @@ def doc_keys(doc):
 
 
 @register.filter
-def doc_highlight(doc):
-    ''' Gets the highlighted section and split into fragments for parsing
-    html tags as safe. '''
-    if not isinstance(doc, Document):
-        return settings.TEMPLATE_STRING_IF_INVALID
-
-    html = ''
-    if doc.highlight() is None:
-        return ''
-    for key, values in doc.highlight().items():
-        html += '%s: ' % key
-        for value in values:
-            html += '%s<br/> ' % value
-    html_fragments = re.split('(<strong>|</strong>|<br/>)', html)
-    return html_fragments
-
-
-@register.filter
 def doc_type(doc):
     ''' Gets the document type. '''
     if not isinstance(doc, Document):
