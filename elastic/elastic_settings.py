@@ -1,6 +1,9 @@
 ''' Used to manage and retrieve Elastic settings. '''
 from django.conf import settings
 from elastic.exceptions import SettingsError
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class ElasticSettings:
@@ -21,6 +24,9 @@ class ElasticSettings:
         ''' Given the index name and optionally a type get the index URL path.
         If 'DEFAULT' is requested but not defined return the random index. '''
         idxs = cls.getattr('IDX', cluster=cluster)
+        if idxs is None:
+            logger.warn('No indexes defined')
+            return
         if name in idxs:
             if isinstance(idxs[name], dict):
                 idx = idxs[name]['name']
