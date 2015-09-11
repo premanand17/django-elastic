@@ -19,7 +19,7 @@ class ElasticSettings:
     @classmethod
     def idx(cls, name='DEFAULT', idx_type=None, cluster='default'):
         ''' Given the index name and optionally a type get the index URL path.
-        If 'DEFAULT' is requested but not defined return the first index. '''
+        If 'DEFAULT' is requested but not defined return the random index. '''
         idxs = cls.getattr('IDX', cluster=cluster)
         if name in idxs:
             if isinstance(idxs[name], dict):
@@ -36,7 +36,8 @@ class ElasticSettings:
             return idxs[name]
         else:
             if name == 'DEFAULT':
-                return idxs[list(idxs.keys())[0]]
+                name = list(idxs.keys())[0]
+                return ElasticSettings.idx(name=name, idx_type=idx_type, cluster=cluster)
         return None
 
     @classmethod
