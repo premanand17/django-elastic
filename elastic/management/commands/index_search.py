@@ -7,6 +7,7 @@ from elastic.management.loaders.gene import GeneManager
 from elastic.management.loaders.disease import DiseaseManager
 from elastic.management.loaders.gene_target import GeneTargetManager
 from elastic.management.loaders.gff import GFFManager
+from elastic.management.loaders.bed import BEDManager
 from elastic.management.loaders.alias import AliasManager
 from elastic.management.loaders.criteria import CriteriaManager
 from elastic.management.loaders.json import JsonManager
@@ -28,14 +29,15 @@ class Command(BaseCommand):
            "Options for diseases:\n" \
            " --indexName [index name] --indexDisease disease.list\n" \
            "Options for GFF/GTF:\n" \
-           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]" \
+           " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]\n" \
+           "Options for BED:\n" \
+           " --indexName [index name] --indexType [bed] --indexBED file.bed\n" \
            "Options for t1d/criteria:\n" \
            " indexCriteria 'true' --indexName [index name] --indexProject t1dbase --applyFilter" \
            "Options for imb/criteria:\n" \
            " indexCriteria 'true' --indexName [index name] --indexProject immunobase --applyFilter" \
            "Options for alias/gene:\n" \
            " --indexAlias [dir where files to be indexed are there] --indexFeatureType gene" \
-
 
     option_list = BaseCommand.option_list + (
         make_option('--indexSNP',
@@ -86,6 +88,10 @@ class Command(BaseCommand):
                     dest='isGTF',
                     help='GTF file type',
                     action="store_true"),
+        ) + (
+        make_option('--indexBED',
+                    dest='indexBED',
+                    help='Load BED file'),
         ) + (
         make_option('--indexType',
                     dest='indexType',
@@ -148,6 +154,10 @@ class Command(BaseCommand):
         elif options['indexGFF']:
             gff = GFFManager()
             gff.create_load_gff_index(**options)
+
+        elif options['indexBED']:
+            bed = BEDManager()
+            bed.create_load_bed_index(**options)
 
         elif options['indexAlias']:
             alias = AliasManager()

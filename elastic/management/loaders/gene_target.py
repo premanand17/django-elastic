@@ -1,27 +1,33 @@
 ''' Loader for gene target data. '''
+import re
+
 from elastic.management.loaders.loader import DelimeterLoader
 from elastic.management.loaders.mapping import MappingProperties
 
 
 class GeneTargetManager(DelimeterLoader):
-    tissue_types = ["Monocytes", "Macrophages_M0", "Macrophages_M1", "Macrophages_M2", "Neutrophils",
-                    "Megakaryocytes", "Endothelial_precursors", "Erythroblasts", "Foetal_thymus", "Naive_CD4",
-                    "Total_CD4_MF", "Total_CD4_Activated", "Total_CD4_NonActivated", "Naive_CD8", "Total_CD8",
-                    "Naive_B", "Total_B"]
+    tissue_types = []
+
+    column_names = ["ensg", "name", "biotype", "strand",
+                    "baitChr", "baitStart", "baitEnd", "baitID", "baitName",
+                    "oeChr", "oeStart", "oeEnd", "oeID", "oeName", "dist"]
 
     def create_load_gene_target_index(self, **options):
         ''' Index gene target data '''
         idx_name = self.get_index_name(**options)
-        self._create_gene_mapping(**options)
+        idx_type = self.get_index_type('gene_target', **options)
         f = self.open_file_to_load('indexGTarget', **options)
-        column_names = ["ensg", "name", "biotype", "strand",
-                        "baitChr", "baitStart", "baitEnd", "baitID", "baitName",
-                        "oeChr", "oeStart", "oeEnd", "oeID", "oeName", "dist"]
-        column_names.extend(GeneTargetManager.tissue_types)
+        line = f.readline()
+        line = line.decode("utf-8")
+        cols = re.split('\t', line)
+        for i in range(len(GeneTargetManager.column_names), len(cols)-1):
+            GeneTargetManager.tissue_types.append(cols[i])
 
-        self.load(column_names, f, idx_name, 'gene_target')
+        self._create_gene_mapping(idx_type, **options)
+        GeneTargetManager.column_names.extend(GeneTargetManager.tissue_types)
+        self.load(GeneTargetManager.column_names, f, idx_name, idx_type, chunk=20000)
 
-    def _create_gene_mapping(self, **options):
+    def _create_gene_mapping(self, idx_type, **options):
         ''' Create the mapping for gene target index '''
         props = MappingProperties("gene_target")
         props.add_property("ensg", "string", index="not_analyzed") \
@@ -45,4 +51,4 @@ class GeneTargetManager(DelimeterLoader):
             props.add_property(tt, "float")
             meta["tissue_type"][tt] = "tissue_type"
 
-        self.mapping(props, idx_type='gene_target', meta=meta, **options)
+        self.mapping(props, idx_type, meta=meta, **options)

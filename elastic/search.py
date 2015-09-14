@@ -96,7 +96,7 @@ class Search:
         or_filter = OrFilter(RangeQuery("start", gte=start_range, lte=end_range))
         or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range)) \
                  .extend(query_bool)
-        query = ElasticQuery.filtered(Query.term("seqid", seqid), or_filter, field_list)
+        query = ElasticQuery.filtered(Query.terms("seqid", [seqid, str("chr"+seqid)]), or_filter, field_list)
         return cls(search_query=query, search_from=search_from, size=size, idx=idx)
 
     @classmethod
