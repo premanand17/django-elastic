@@ -30,8 +30,6 @@ class ElasticSettings:
         if name in idxs:
             if isinstance(idxs[name], dict):
                 idx = idxs[name]['name']
-                if 'idx_type' not in idxs[name]:
-                    raise SettingsError('Index type key (idx_type) not found for '+idx)
                 if idx_type is not None:
                     if idx_type in idxs[name]['idx_type']:
                         return idx+'/'+idxs[name]['idx_type'][idx_type]
@@ -55,21 +53,21 @@ class ElasticSettings:
     def idx_props(cls, idx_name='ALL'):
         ''' Build the search index names, keys and types and return as a dictionary. '''
         elastic_attrs = ElasticSettings.attrs()
-        search_idx = elastic_attrs.get('SEARCH').get('IDX_TYPES')
-        suggesters = elastic_attrs.get('SEARCH').get('AUTOSUGGEST')
+        search_idx = elastic_attrs.get('IDX')
+        suggesters = elastic_attrs.get('AUTOSUGGEST')
 
         if idx_name == 'ALL':
             return {
                 "idx": ','.join(ElasticSettings.idx(name) for name in search_idx.keys()),
                 "idx_keys": list(search_idx.keys()),
-                "idx_type": ','.join(itype for types in search_idx.values() for itype in types),
+                "idx_type": ','.join(itype for vals in search_idx.values() for itype in vals['search_engine']),
                 "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
             }
         else:
             return {
                 "idx": ElasticSettings.idx(idx_name),
                 "idx_keys": [idx_name],
-                "idx_type": ','.join(it for it in search_idx[idx_name]),
+                "idx_type": ','.join(search_idx[idx_name]['search_engine']),
                 "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
             }
 
