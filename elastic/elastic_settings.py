@@ -50,11 +50,11 @@ class ElasticSettings:
         return cls.getattr('ELASTIC_URL', cluster=cluster)
 
     @classmethod
-    def idx_props(cls, idx_name='ALL'):
-        ''' Build the search index names, keys and types and return as a dictionary. '''
-        elastic_attrs = ElasticSettings.attrs()
-        search_idx = elastic_attrs.get('IDX')
-        suggesters = elastic_attrs.get('AUTOSUGGEST')
+    def search_props(cls, idx_name='ALL'):
+        ''' Build the search index names, keys, types and suggesters. Return as a dictionary. '''
+        eattrs = ElasticSettings.attrs()
+        search_idx = {key: value for (key, value) in eattrs.get('IDX').items() if 'search_engine' in value}
+        suggesters = eattrs.get('AUTOSUGGEST')
 
         if idx_name == 'ALL':
             return {
