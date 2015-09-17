@@ -243,7 +243,7 @@ class Update(object):
                doc.type() + '/' + doc._meta['_id'] + '/_update')
         response = requests.post(url, data=json.dumps(update_field))
 
-        logger.debug("curl -XPOST '" + url + " -d '" + json.dumps(update_field) + "'")
+        logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(update_field) + "'")
         if response.status_code != 200:
             logger.warn("Error: elastic response 200:" + url)
             logger.warn(response.json())
