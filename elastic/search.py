@@ -33,7 +33,7 @@ class Search:
     ''' Used to run Elastic queries and return search hits, hit count or the mapping. '''
 
     def __init__(self, search_query=None, aggs=None, search_from=0, size=20,
-                 idx=ElasticSettings.idx('DEFAULT'), idx_type='',
+                 search_type=None, idx=ElasticSettings.idx('DEFAULT'), idx_type='',
                  url=ElasticSettings.url()):
         ''' Set up parameters to use in the search. L{ElasticQuery} is used to
         define a search query.
@@ -43,6 +43,8 @@ class Search:
         @keyword search_from: Offset used in paginations (default: 0).
         @type  size: integer
         @keyword size: maximum number of hits to return (default: 20).
+        @type search_type: bool
+        @keyword search_type: Set search type = count for aggregations.
         @type  idx: string
         @keyword idx: index to search (default: default index defined in settings).
         @type  idx_type: string
@@ -50,8 +52,11 @@ class Search:
         @type  url: string
         @keyword url: Elastic URL (default: default cluster URL).
         '''
-        self.url = (url + '/' + idx + '/' + idx_type +
-                    '/_search?size=' + str(size) + '&from='+str(search_from))
+        if search_type is None:
+            self.url = (url + '/' + idx + '/' + idx_type +
+                        '/_search?size=' + str(size) + '&from='+str(search_from))
+        else:
+            self.url = (url + '/' + idx + '/' + idx_type + '/_search?search_type=count')
         if search_query is not None:
             if not isinstance(search_query, ElasticQuery):
                 raise QueryError("not an ElasticQuery")
