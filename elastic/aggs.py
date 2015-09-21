@@ -29,7 +29,8 @@ class Agg:
         "stats": {"type": dict, "params": {"field": str}},
         "extended_stats": {"type": dict, "params": {"field": str}},
         "value_count": {"type": dict, "params": {"field": str}},
-        "top_hits": {"type": dict, "params": {"from": int, "size": int, "sort": list}},
+        "top_hits": {"type": dict, "params": {"from": int, "size": int, "sort": list,
+                                              "_source": list, "highlight": dict}},
 
         # bucket aggregation
         "global": {"type": dict},
@@ -41,7 +42,7 @@ class Agg:
         "range": {"type": dict, "params": {"field": str, 'ranges': list}}
     }
 
-    def __init__(self, agg_name, agg_type, agg_body):
+    def __init__(self, agg_name, agg_type, agg_body, sub_agg=None):
         ''' Construct an aggregation based on the aggregation type.
 
         @type  agg_name: str
@@ -50,6 +51,8 @@ class Agg:
         @param agg_type: Aggregation type (from AGGS).
         @type  agg_body: dict
         @param agg_body: Aggregation body.
+        @type  sub_agg: Agg
+        @param sub_agg: Bucketing aggregations can have sub-aggregations.
         '''
         self.agg = {agg_name: {}}
         AGGS = Agg.AGGS
@@ -59,7 +62,7 @@ class Agg:
                 if 'params' in Agg.AGGS[agg_type]:
                     for pkey in agg_body:
                         if pkey not in Agg.AGGS[agg_type]['params']:
-                            raise AggregationError('unrecognised aggregation parameter')
+                            raise AggregationError(pkey+' unrecognised aggregation parameter')
                         if not isinstance(agg_body[pkey], Agg.AGGS[agg_type]['params'][pkey]):
                             raise AggregationError('aggregation parameter incorrect type')
 
@@ -74,6 +77,9 @@ class Agg:
                     self.agg[agg_name][agg_type] = Agg._get_query(agg_body)
         else:
             raise AggregationError('aggregation type unknown: '+agg_type)
+
+        if sub_agg is not None:
+            self.agg[agg_name]['aggs'] = sub_agg.agg
 
     def _update_dict(self, qdict):
         for k, v in qdict.items():
