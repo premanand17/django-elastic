@@ -25,13 +25,16 @@ class DiseaseManager(Loader):
                 continue
             parts = re.split('\t', line)
             data = {"name": parts[0],
-                    "code": parts[2],
+                    "code": parts[2].lower(),
                     "description": parts[1],
                     "colour": parts[3],
                     "tier": int(parts[4])
                     }
+            data['suggest'] = {}
+            data['suggest']["input"] = [parts[2].lower(), parts[0]]
+            data['suggest']["weight"] = 50
             resp = requests.put(ElasticSettings.url()+'/' +
-                                index_name+'/disease/'+parts[2],
+                                index_name+'/disease/'+parts[2].lower(),
                                 data=json.dumps(data))
             if resp.status_code == 201:
                 logger.debug("Loaded "+parts[0])
@@ -41,9 +44,11 @@ class DiseaseManager(Loader):
     def _create_disease_mapping(self, **options):
         ''' Create the mapping for disease indexing '''
         props = MappingProperties("disease")
-        props.add_property("name", "string", index="not_analyzed") \
-             .add_property("code", "string", index="not_analyzed") \
+        props.add_property("name", "string") \
+             .add_property("code", "string") \
              .add_property("description", "string", index="not_analyzed") \
              .add_property("colour", "string", index="not_analyzed") \
-             .add_property("tier", "integer", index="not_analyzed")
-        self.mapping(props, 'disease', **options)
+             .add_property("tier", "integer", index="not_analyzed") \
+             .add_property("suggest", "completion",
+                           index_analyzer="full_name", search_analyzer="full_name")
+        self.mapping(props, 'disease', analyzer=Loader.KEYWORD_ANALYZER, **options)

@@ -48,6 +48,8 @@ class Document(object):
 
     def __getattr__(self, name):
         ''' Return Document attribute. '''
+        if name not in self.__dict__:
+            return None
         return self.get(name, None)
 
     def __setattr__(self, name, value):
@@ -62,6 +64,14 @@ class Document(object):
         if '_type' in self.__dict__['_meta']:
             return self.__dict__['_meta']['_type']
         return None
+
+    def doc_id(self):
+        ''' Document id. '''
+        return str(self.__dict__['_meta']['_id'])
+
+    def index(self):
+        ''' Document index. '''
+        return self.__dict__['_meta']['_index']
 
     def highlight(self):
         ''' Highlight match. '''
@@ -87,7 +97,24 @@ class Aggregation(object):
 
     def get_buckets(self):
         ''' Return Aggregation buckets. '''
-        return self.__dict__['buckets']
+        if 'buckets' in self.__dict__:
+            return self.__dict__['buckets']
+        return None
+
+    def get_docs_in_buckets(self):
+        ''' Return document hits in Aggregation buckets. '''
+        buckets = self.get_buckets()
+        doc_buckets = {}
+        for bucket in buckets:
+            for k in bucket:
+                if hasattr(bucket[k], '__contains__') and 'hits' in bucket[k]:
+                    hits = bucket[k]['hits']['hits']
+                    docs = [Document(hit) for hit in hits]
+                    doc_buckets[bucket['key']] = {
+                        'docs': docs,
+                        'doc_count': bucket['doc_count']
+                    }
+        return doc_buckets
 
     def get_hits(self):
         ''' Return Aggregation hits. '''

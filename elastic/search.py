@@ -21,9 +21,9 @@ import logging
 from elastic.result import Document, Result, Aggregation
 from elastic.elastic_settings import ElasticSettings
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
-    Filter, OrFilter
+    Filter, OrFilter, HasParentQuery
 import warnings
-import time
+from builtins import classmethod
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class Search:
     ''' Used to run Elastic queries and return search hits, hit count or the mapping. '''
 
     def __init__(self, search_query=None, aggs=None, search_from=0, size=20,
-                 idx=ElasticSettings.idx('DEFAULT'), idx_type='',
+                 search_type=None, idx=ElasticSettings.idx('DEFAULT'), idx_type='',
                  url=ElasticSettings.url()):
         ''' Set up parameters to use in the search. L{ElasticQuery} is used to
         define a search query.
@@ -43,6 +43,8 @@ class Search:
         @keyword search_from: Offset used in paginations (default: 0).
         @type  size: integer
         @keyword size: maximum number of hits to return (default: 20).
+        @type search_type: bool
+        @keyword search_type: Set search type = count for aggregations.
         @type  idx: string
         @keyword idx: index to search (default: default index defined in settings).
         @type  idx_type: string
@@ -50,8 +52,11 @@ class Search:
         @type  url: string
         @keyword url: Elastic URL (default: default cluster URL).
         '''
-        self.url = (url + '/' + idx + '/' + idx_type +
-                    '/_search?size=' + str(size) + '&from='+str(search_from))
+        if search_type is None:
+            self.url = (url + '/' + idx + '/' + idx_type +
+                        '/_search?size=' + str(size) + '&from='+str(search_from))
+        else:
+            self.url = (url + '/' + idx + '/' + idx_type + '/_search?search_type=count')
         if search_query is not None:
             if not isinstance(search_query, ElasticQuery):
                 raise QueryError("not an ElasticQuery")
@@ -65,13 +70,24 @@ class Search:
 
         self.size = size
         self.idx = idx
+        self.idx_type = idx_type
 
     @classmethod
-    def index_exists(cls, idx, url=ElasticSettings.url()):
+    def index_exists(cls, idx, idx_type='', url=ElasticSettings.url()):
         ''' Check if an index exists. '''
-        url += '/' + idx + '/_mapping'
+        url += '/' + idx + '/' + idx_type + '/_mapping'
         response = requests.get(url)
         if "error" in response.json():
+            return False
+        return True
+
+    @classmethod
+    def index_refresh(cls, idx, url=ElasticSettings.url()):
+        ''' Refresh to make all operations performed since the last refresh
+        available for search'''
+        response = requests.post(url + '/' + idx + '/_refresh')
+        if "error" in response.json():
+            logger.warn(response.content.decode("utf-8"))
             return False
         return True
 
@@ -96,18 +112,24 @@ class Search:
         return cls(search_query=query, aggs=aggs, search_from=search_from, size=size, idx=idx)
 
     def get_mapping(self, mapping_type=None):
-        ''' Return the mappings for an index. '''
+        ''' Return the mappings for an index (host:port/{index}/_mapping/{type}). '''
         self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
+        elif self.idx_type is not None:
+            self.mapping_url += '/'+self.idx_type
         response = requests.get(self.mapping_url)
         if response.status_code != 200:
-            return json.dumps({"error": response.status_code})
+            json_err = json.dumps({"error": response.status_code,
+                                   "response": response.content.decode("utf-8"),
+                                   "url": self.mapping_url})
+            logger.warn(json_err)
+            return json_err
         return response.json()
 
     def get_count(self):
         ''' Return the elastic count for a query result '''
-        url = ElasticSettings.url() + '/' + self.idx + '/_count?'
+        url = ElasticSettings.url() + '/' + self.idx + '/' + self.idx_type + '/_count?'
         data = {}
         if hasattr(self, 'query'):
             data = json.dumps(self.query)
@@ -126,7 +148,7 @@ class Search:
         ''' DEPRECATED: use Search.search().
         Return the elastic json result. Note: django template does not
         like underscores (e.g. _type). '''
-        warnings.warn("Search.get_result will be removed, use Search.search()", FutureWarning)
+        warnings.warn("DEPRECATED :: Search.get_result will be removed, use Search.search()!", FutureWarning)
 
         json_response = self.get_json_response()
         context = {"query": self.query}
@@ -155,16 +177,82 @@ class Search:
                       size=self.size, docs=docs, aggs=aggs,
                       idx=self.idx, query=self.query)
 
+
+class ScanAndScroll(object):
+    ''' Use Elastic scan and scroll api. '''
+
     @classmethod
-    def wait_for_load(cls, idx, count=5):
-        ''' Method to allow a wait for index load to complete. '''
-        for _ in range(count):
-            try:
-                if Search(idx=idx).get_count()['count'] > 0:
-                    break
-            except KeyError:
-                continue
-            time.sleep(1)
+    def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=ElasticSettings.url(),
+                        time_to_keep_scoll=1, query=None):
+        ''' Scan and scroll an index and optionally provide a function argument to
+        process the hits. '''
+        url_search_scan = (url + '/' + idx + '/' + idx_type + '/_search?search_type=scan&scroll=' +
+                           str(time_to_keep_scoll) + 'm')
+        if query is None:
+            query = {
+                "query": {"match_all": {}},
+                "size":  1000
+            }
+        else:
+            if not isinstance(query, ElasticQuery):
+                raise QueryError("not a Query")
+            query = query.query
+        response = requests.post(url_search_scan, data=json.dumps(query))
+        _scroll_id = response.json()['_scroll_id']
+        url_scan_scroll = url + '/_search/scroll?scroll=' + str(time_to_keep_scoll) + 'm'
+
+        count = 0
+        while True:
+            response = requests.post(url_scan_scroll, data=_scroll_id)
+            _scroll_id = response.json()['_scroll_id']
+            hits = response.json()['hits']['hits']
+            nhits = len(hits)
+            if nhits == 0:
+                break
+            count += nhits
+            if call_fun is not None:
+                call_fun(response.json())
+        logger.debug("Scanned No. Docs ( "+idx+"/"+idx_type+" ) = "+str(count))
+
+
+class Suggest(object):
+    ''' Suggest handles requests for populating search auto completion. '''
+
+    @classmethod
+    def suggest(cls, term, idx, url=ElasticSettings.url(),
+                name='data', field='suggest', size=5):
+        ''' Auto completion suggestions for a given term. '''
+        url = (url + '/' + idx + '/' + '/_suggest')
+        suggest = {
+            name: {
+                "text": term,
+                "completion": {
+                    "field": field,
+                    "size": size
+                }
+            }
+        }
+        response = requests.post(url, data=json.dumps(suggest))
+        logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(suggest) + "'")
+        if response.status_code != 200:
+            logger.warn("Error: elastic response 200:" + url)
+            logger.warn(response.json())
+        return response.json()
+
+
+class Update(object):
+
+    @classmethod
+    def update_doc(cls, doc, update_field, url=ElasticSettings.url()):
+        url = (url + '/' + doc._meta['_index'] + '/' +
+               doc.type() + '/' + doc._meta['_id'] + '/_update')
+        response = requests.post(url, data=json.dumps(update_field))
+
+        logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(update_field) + "'")
+        if response.status_code != 200:
+            logger.warn("Error: elastic response 200:" + url)
+            logger.warn(response.json())
+        return response.json()
 
 
 class ElasticQuery():
@@ -173,9 +261,9 @@ class ElasticQuery():
 
     I{Advanced options:}
     Sources can be defined to set the fields that operations return (see
-    U{source filtering<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-source-filtering.html>}).
+    U{source filtering<www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html>}).
     Also
-    U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}
+    U{highlighting<www.elastic.co/guide/en/elasticsearch/reference/current/search-request-highlighting.html>}
     can be defined for one or more fields in search results.  '''
 
     def __init__(self, query, sources=None, highlight=None):
@@ -217,7 +305,7 @@ class ElasticQuery():
     @classmethod
     def filtered_bool(cls, query_match, query_bool, sources=None, highlight=None):
         ''' Factory method for creating an elastic
-        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filtered-query.html>}
+        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html>}
         (L{FilteredQuery<elastic_model.FilteredQuery>}) using a Bool filter.
 
         @type  query_bool: Query
@@ -237,7 +325,7 @@ class ElasticQuery():
     @classmethod
     def filtered(cls, query_match, query_filter, sources=None, highlight=None):
         ''' Factory method for creating an elastic
-        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/1.x/query-dsl-filtered-query.html>}
+        U{Filtered Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html>}
         (L{FilteredQuery<elastic_model.FilteredQuery>}).
 
         @type  query_bool: Query
@@ -255,7 +343,24 @@ class ElasticQuery():
         return cls(query, sources, highlight)
 
     @classmethod
-    def query_string(cls, query_term, sources=None, highlight=None, **string_opts):
+    def has_parent(cls, parent_type, query, sources=None, highlight=None):
+        ''' Factory method for creating an elastic
+        U{Has Parent Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-parent-query.html>}.
+
+        @type  parent_type: str
+        @param parent_type: Parent type.
+        @type  query_bool: Query
+        @param query_bool: The query to be used.
+        @type  sources: array of result fields
+        @keyword sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @keyword highlight: Define the highlighting of results (default: None).
+        @return: L{ElasticQuery}
+        '''
+        return cls(HasParentQuery(parent_type, query), sources, highlight)
+
+    @classmethod
+    def query_string(cls, query_term, sources=None, highlight=None, query_filter=None, **string_opts):
         ''' Factory method for creating elastic Query String Query.
 
         @type  query_term: string
@@ -264,9 +369,14 @@ class ElasticQuery():
         @keyword sources: The _source filtering to be used (default: None).
         @type  highlight: Highlight
         @keyword highlight: Define the highlighting of results (default: None).
+        @type query_filter: Filter
+        @keyword query_filter: Optional filter for query.
         @return: L{ElasticQuery}
         '''
-        query = Query.query_string(query_term, **string_opts)
+        if query_filter is None:
+            query = Query.query_string(query_term, **string_opts)
+        else:
+            query = FilteredQuery(Query.query_string(query_term, **string_opts), query_filter)
         return cls(query, sources, highlight)
 
     @classmethod
@@ -291,7 +401,7 @@ class Highlight():
     ''' Used in highlighting search result fields, see
     U{Elastic highlighting docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}.
     '''
-    def __init__(self, fields, pre_tags=None, post_tags=None):
+    def __init__(self, fields, pre_tags=None, post_tags=None, number_of_fragments=None, fragment_size=None):
         ''' Highlight one or more fields in the search results. '''
         if not isinstance(fields, list):
             fields = [fields]
@@ -307,3 +417,7 @@ class Highlight():
             if not isinstance(post_tags, list):
                 post_tags = [post_tags]
             self.highlight["highlight"].update({"post_tags": post_tags})
+        if number_of_fragments is not None:
+            self.highlight["highlight"].update({"number_of_fragments": number_of_fragments})
+        if fragment_size is not None:
+            self.highlight["highlight"].update({"fragment_size": fragment_size})

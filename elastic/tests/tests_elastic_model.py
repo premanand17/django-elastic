@@ -2,16 +2,20 @@
 queries L{elastic_model}. '''
 from django.test import TestCase, override_settings
 from django.core.management import call_command
-from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS
+from elastic.management.loaders.mapping import MappingProperties
+from elastic.management.loaders.loader import Loader
+from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
-from tastypie.test import ResourceTestCase
 from django.core.urlresolvers import reverse
-from elastic.search import Search, ElasticQuery, Highlight
+from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
+from rest_framework.test import APITestCase
+import json
 import requests
+import time
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -21,8 +25,8 @@ def setUpModule():
     call_command('index_search', **IDX['GFF_GENERIC'])
 
     # wait for the elastic load to finish
-    Search.wait_for_load(IDX['MARKER']['indexName'])
-    Search.wait_for_load(IDX['GFF_GENERIC']['indexName'])
+    Search.index_refresh(IDX['MARKER']['indexName'])
+    Search.index_refresh(IDX['GFF_GENERIC']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -32,51 +36,129 @@ def tearDownModule():
     requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
 
 
-@override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
-class TastypieResourceTest(ResourceTestCase):
-    ''' Test Tastypie interface to Elastic indices.
-    Note: Overriding the ROOT_URLCONF to set up test Tastypie api that
-    connects to the test indices set up for the module.
-    '''
+class ServerTest(TestCase):
 
-    def setUp(self):
-        super(TastypieResourceTest, self).setUp()
+    def test_server(self):
+        ''' Test elasticsearch server is running and status '''
+        try:
+            url = ElasticSettings.url() + '/_cluster/health/'
+            resp = requests.get(url)
+            self.assertEqual(resp.status_code, 200, "Health page status code")
+            if resp.json()['status'] == 'red':  # allow status to recover if necessary
+                for _ in range(3):
+                    time.sleep(1)
+                    resp = requests.get(url)
+                    if resp.json()['status'] != 'red':
+                        break
+            self.assertFalse(resp.json()['status'] == 'red', 'Health report - red')
+        except requests.exceptions.Timeout:
+            self.assertTrue(False, 'timeout exception')
+        except requests.exceptions.TooManyRedirects:
+            self.assertTrue(False, 'too many redirects exception')
+        except requests.exceptions.ConnectionError:
+            self.assertTrue(False, 'request connection exception')
+        except requests.exceptions.RequestException:
+            self.assertTrue(False, 'request exception')
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
+class RestFrameworkTest(APITestCase):
+    ''' Test Django rest framework interface to Elastic indices. '''
 
     def test_list(self):
-        ''' Test listing all documents. '''
-        url = reverse('api_dispatch_list',
-                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
-        resp = self.api_client.get(url, format='json')
-        self.assertValidJSONResponse(resp)
-        self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
+        ''' Test retrieving a list via rest. '''
+        url = reverse('rest-router:marker_test-list')
+        resp = self.client.get(url, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp['Content-Type'].startswith('application/json'))
+        self.assertGreater(json.loads(resp.content.decode())['count'], 0, 'Retrieved stored markers')
 
-    def test_list_with_filtering(self):
-        ''' Test getting a document using filtering. '''
-        url = reverse('api_dispatch_list',
-                      kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
-        resp = self.api_client.get(url, format='json', data={'attr__Name': 'rs2664170'})
-        print(self.deserialize(resp))
-        self.assertValidJSONResponse(resp)
-        self.assertEqual(len(self.deserialize(resp)['objects']), 1, 'Retrieved stored markers')
-
-        resp = self.api_client.get(url, format='json', data={'attr__xxx': 'rs2664170'})
-        self.assertKeys(self.deserialize(resp), ['error'])
+    def test_list_filtering(self):
+        ''' Test retrieving a list via rest and filtering. '''
+        url = reverse('rest-router:marker_test-list')
+        resp = self.client.get(url, format='json', data={'id': 'rs2476601'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp['Content-Type'].startswith('application/json'))
+        self.assertEqual(json.loads(resp.content.decode())['count'], 1, 'Retrieved rs2476601')
 
     def test_detail(self):
-        ''' Test getting a document by primary key '''
-        url = reverse('api_dispatch_detail',
-                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test', 'pk': '1'})
-        resp = self.api_client.get(url, format='json')
-        self.assertValidJSONResponse(resp)
-        keys = ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info', 'resource_uri']
-        self.assertKeys(self.deserialize(resp), keys)
+        ''' Test retrieving a single document via rest. '''
+        url = reverse('rest-router:marker_test-detail', kwargs={'pk': '1'})
+        resp = self.client.get(url, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp['Content-Type'].startswith('application/json'))
 
-    def test_schema(self):
-        ''' Test returning the schema '''
-        url = reverse('api_get_schema',
-                      kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
-        resp = self.api_client.get(url, format='json')
-        self.assertValidJSONResponse(resp)
+        res = json.loads(resp.content.decode())
+        expected = ['alt', 'filter', 'id', 'info', 'qual', 'ref', 'seqid', 'start']
+        self.assertEqual(sorted(res.keys()), sorted(expected))
+
+
+# @override_settings(ELASTIC=OVERRIDE_SETTINGS, ROOT_URLCONF='elastic.tests.test_urls')
+# class TastypieResourceTest(ResourceTestCase):
+#     ''' Test Tastypie interface to Elastic indices.
+#     Note: Overriding the ROOT_URLCONF to set up test Tastypie api that
+#     connects to the test indices set up for the module.
+#     '''
+#
+#     def setUp(self):
+#         super(TastypieResourceTest, self).setUp()
+#
+#     def safe_get_request(self, url, data=None):
+#         ''' Routine to allow for TastyPie to intialise if needed. '''
+#         resp = self.api_client.get(url, format='json', data=data)
+#         if len(self.deserialize(resp)['objects']) < 1:
+#             time.sleep(2)
+#             resp = self.api_client.get(url, format='json', data=data)
+#         return resp
+#
+#     def test_list(self):
+#         ''' Test listing all documents. '''
+#         url = reverse('api_dispatch_list',
+#                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
+#         resp = self.safe_get_request(url)
+#         self.assertValidJSONResponse(resp)
+#         self.assertGreater(len(self.deserialize(resp)['objects']), 0, 'Retrieved stored markers')
+#
+#     def test_list_with_filtering(self):
+#         ''' Test getting a document using filtering. '''
+#         url = reverse('api_dispatch_list',
+#                       kwargs={'resource_name': ElasticSettings.idx('GFF_GENES'), 'api_name': 'test'})
+#         resp = self.safe_get_request(url, data={'attr__Name': 'rs2664170'})
+#         self.assertValidJSONResponse(resp)
+#         self.assertEqual(len(self.deserialize(resp)['objects']), 1, 'Retrieved stored markers')
+#
+#         resp = self.api_client.get(url, format='json', data={'attr__xxx': 'rs2664170'})
+#         self.assertKeys(self.deserialize(resp), ['error'])
+#
+#     def test_detail(self):
+#         ''' Test getting a document by primary key '''
+#         url = reverse('api_dispatch_detail',
+#                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test', 'pk': '1'})
+#         resp = self.api_client.get(url, format='json')
+#         self.assertValidJSONResponse(resp)
+#         keys = ['seqid', 'start', 'id', 'ref', 'alt', 'qual', 'filter', 'info', 'resource_uri']
+#         self.assertKeys(self.deserialize(resp), keys)
+#
+#     def test_schema(self):
+#         ''' Test returning the schema '''
+#         url = reverse('api_get_schema',
+#                       kwargs={'resource_name': ElasticSettings.idx('MARKER'), 'api_name': 'test'})
+#         resp = self.api_client.get(url, format='json')
+#         self.assertValidJSONResponse(resp)
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
+class ScanAndScrollTest(TestCase):
+
+    def test_scan_and_scroll(self):
+        ''' Test scan and scroll interface. '''
+        def check_hits(resp_json):
+            self.assertTrue('hits' in resp_json, 'scan and scroll hits')
+            self.assertGreaterEqual(len(resp_json['hits']['hits']), 1)
+
+        ScanAndScroll.scan_and_scroll(ElasticSettings.idx('DEFAULT'), call_fun=check_hits)
+        ScanAndScroll.scan_and_scroll(ElasticSettings.idx('DEFAULT'), call_fun=check_hits,
+                                      query=ElasticQuery.query_string("rs2476601", fields=["id"]))
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -104,16 +186,29 @@ class ElasticModelTest(TestCase):
         mapping = elastic.get_mapping('marker/xx')
         self.assertTrue('error' in mapping, "Database name in mapping result")
 
+    def test_mapping_parent(self):
+        ''' Test creating mapping with parent child relationship. '''
+        gene_mapping = MappingProperties("gene")
+        inta_mapping = MappingProperties("interactions", "gene")
+        load = Loader()
+        idx = "test__mapping__"+SEARCH_SUFFIX
+        options = {"indexName": idx, "shards": 1}
+        status = load.mapping(gene_mapping, "gene", **options)
+        self.assertTrue(status, "mapping genes")
+        status = load.mapping(inta_mapping, "interactions", **options)
+        self.assertTrue(status, "mapping inteactions")
+        requests.delete(ElasticSettings.url() + '/' + idx)
+
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
         query_bool = BoolQuery()
-        query_bool.must([Query.term("id", "rs373328635")]) \
+        query_bool.must([Query.term("id", "rs768019142")]) \
                   .must_not([Query.term("seqid", 2)]) \
                   .should(RangeQuery("start", gte=10054)) \
                   .should([RangeQuery("start", gte=10050)])
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
 
     def test_bool_filtered_query2(self):
         ''' Test building and running a filtered boolean query. '''
@@ -121,10 +216,10 @@ class ElasticModelTest(TestCase):
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
                   .must(Query.term("seqid", 1))
-        query_string = Query.query_string("rs373328635", fields=["id", "seqid"])
+        query_string = Query.query_string("rs768019142", fields=["id", "seqid"])
         query = ElasticQuery.filtered_bool(query_string, query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
 
     def test_bool_filtered_query3(self):
         ''' Test building and running a filtered boolean query. Note:
@@ -132,12 +227,12 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery()
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
-                  .must(Query.query_string("rs373328635", fields=["id", "seqid"]).query_wrap()) \
+                  .must(Query.query_string("rs768019142", fields=["id", "seqid"]).query_wrap()) \
                   .must(Query.term("seqid", 1))
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
 
     def test_bool_filtered_query4(self):
         ''' Test building and running a filtered boolean query.
@@ -145,17 +240,17 @@ class ElasticModelTest(TestCase):
         query_bool = BoolQuery()
         query_bool.should(RangeQuery("start", lte=20000)) \
                   .should(Query.term("seqid", 2)) \
-                  .must(Query.match("id", "rs373328635").query_wrap()) \
+                  .must(Query.match("id", "rs768019142").query_wrap()) \
                   .must(Query.term("seqid", 1))
 
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs373328635)")
+        self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
 
     def test_bool_nested_filter(self):
         ''' Test combined Bool filter '''
         query_bool_nest = BoolQuery()
-        query_bool_nest.must(Query.match("id", "rs373328635").query_wrap()) \
+        query_bool_nest.must(Query.match("id", "rs768019142").query_wrap()) \
                        .must(Query.term("seqid", 1))
 
         query_bool = BoolQuery()
@@ -196,14 +291,29 @@ class ElasticModelTest(TestCase):
 
     def test_term_filtered_query(self):
         ''' Test filtered query with a term filter. '''
-        query = ElasticQuery.filtered(Query.term("seqid", 1), Filter(Query.term("id", "rs373328635")))
+        query = ElasticQuery.filtered(Query.term("seqid", 1), Filter(Query.term("id", "rs768019142")))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker")
 
     def test_terms_filtered_query(self):
         ''' Test filtered query with a terms filter. '''
-        terms_filter = TermsFilter.get_terms_filter("id", ["rs2476601", "rs373328635"])
+        terms_filter = TermsFilter.get_terms_filter("id", ["rs2476601", "rs768019142"])
         query = ElasticQuery.filtered(Query.term("seqid", 1), terms_filter)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_missing_terms_filtered_query(self):
+        ''' Test filtered query with a missing terms filter. '''
+        terms_filter = TermsFilter.get_missing_terms_filter("field", "group_name")
+        query = ElasticQuery.filtered(Query.match_all(), terms_filter)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        docs = elastic.search().docs
+        self.assertTrue(len(docs) == 3, "Elastic string query retrieved all public docs")
+
+    def test_type_filtered_query(self):
+        ''' Test filtered query with a type filter. '''
+        type_filter = Filter(Query.query_type_for_filter("marker"))
+        query = ElasticQuery.filtered(Query.term("seqid", 1), type_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
@@ -239,11 +349,11 @@ class ElasticModelTest(TestCase):
     def test_terms_query(self):
         ''' Test building and running a match query. '''
         highlight = Highlight(["id"])
-        query = ElasticQuery(Query.terms("id", ["rs2476601", "rs373328635"]), highlight=highlight)
+        query = ElasticQuery(Query.terms("id", ["rs2476601", "rs768019142"]), highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         docs = elastic.search().docs
         self.assertTrue(len(docs) == 2,
-                        "Elastic string query retrieved markers (rs2476601, rs373328635)")
+                        "Elastic string query retrieved markers (rs2476601, rs768019142)")
         self.assertTrue(getattr(docs[0], 'seqid'), "Hit attribute found")
         self.assertTrue(docs[0].highlight() is not None, "highlighting found")
 
@@ -251,14 +361,14 @@ class ElasticModelTest(TestCase):
         ''' Test a bool query. '''
         query_bool = BoolQuery()
         highlight = Highlight(["id", "seqid"])
-        query_bool.must(Query.term("id", "rs373328635")) \
+        query_bool.must(Query.term("id", "rs768019142")) \
                   .must(RangeQuery("start", gt=1000)) \
                   .must_not(Query.match("seqid", "2")) \
                   .should(Query.match("seqid", "3")) \
                   .should(Query.match("seqid", "1"))
         query = ElasticQuery.bool(query_bool, highlight=highlight)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        self.assertTrue(len(elastic.search().docs) == 1, "Elastic string query retrieved marker (rs373328635)")
+        self.assertTrue(len(elastic.search().docs) == 1, "Elastic string query retrieved marker (rs768019142)")
 
     def test_string_query_with_wildcard_and_highlight(self):
         highlight = Highlight("id", pre_tags="<strong>", post_tags="</strong>")
@@ -279,7 +389,7 @@ class ElasticModelTest(TestCase):
 
     def test_count_with_query(self):
         ''' Test count the number of documents returned by a query. '''
-        query = ElasticQuery(Query.term("id", "rs373328635"))
+        query = ElasticQuery(Query.term("id", "rs768019142"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
 

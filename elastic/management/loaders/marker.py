@@ -1,5 +1,5 @@
 ''' Loader for marker data (I{e.g.} VCF). '''
-from elastic.management.loaders.loader import DelimeterLoader
+from elastic.management.loaders.loader import DelimeterLoader, Loader
 from elastic.management.loaders.mapping import MappingProperties
 
 
@@ -11,7 +11,7 @@ class MarkerManager(DelimeterLoader):
         idx_type = self.get_index_type('marker', **options)
         map_props = self._create_snp_mapping(idx_type, **options)
         f = self.open_file_to_load('indexSNP', **options)
-        self.load(map_props.get_column_names(), f, idx_name, idx_type, chunk=20000)
+        self.load(map_props.get_column_names()[:-1], f, idx_name, idx_type, chunk=20000)
 
     def _create_snp_mapping(self, idx_type, **options):
         ''' Create the mapping for snp index '''
@@ -23,8 +23,10 @@ class MarkerManager(DelimeterLoader):
              .add_property("alt", "string", index="no") \
              .add_property("qual", "string", index="no") \
              .add_property("filter", "string", index="no") \
-             .add_property("info", "string", index="no")
-        self.mapping(props, idx_type, **options)
+             .add_property("info", "string", index="no") \
+             .add_property("suggest", "completion",
+                           index_analyzer="full_name", search_analyzer="full_name")
+        self.mapping(props, idx_type, analyzer=Loader.KEYWORD_ANALYZER, **options)
         return props
 
 

@@ -26,16 +26,18 @@ class Loader:
             raise LoaderError("not a MappingProperties")
 
         idx_name = self.get_index_name(**options)
+        number_of_shards = self.get_number_of_shards(**options)
         url = ElasticSettings.url() + '/' + idx_name
         resp = requests.get(url)
         if resp.status_code == 200:
             logger.warn('WARNING: '+idx_name + ' index already exists!')
         else:
             # create index
+            idx_settings = {"settings": {"number_of_shards": number_of_shards}}
             if analyzer is not None:
-                resp = requests.put(url, json.dumps({'settings': analyzer}))
-            else:
-                requests.put(url)
+                idx_settings['settings'].update(analyzer)
+
+            resp = requests.put(url, data=json.dumps(idx_settings))
 
         mapping_json = mapping.mapping_properties
         if meta is not None:
@@ -48,6 +50,8 @@ class Loader:
 
         if(resp.status_code != 200):
             logger.warn('WARNING: '+idx_name+' mapping status: '+str(resp.status_code)+' '+str(resp.content))
+            return False
+        return True
 
     def bulk_load(self, idx_name, idx_type, json_data):
         ''' Bulk load documents. '''
@@ -72,6 +76,12 @@ class Loader:
         if options['indexName']:
             return options['indexName'].lower()
         return self.__class__.__name__
+
+    def get_number_of_shards(self, **options):
+        ''' Get number of shards option. '''
+        if options['shards']:
+            return int(options['shards'])
+        return 5
 
     def open_file_to_load(self, file_name, **options):
         ''' Open the given file. '''
@@ -191,13 +201,17 @@ class JSONLoader(Loader):
         ''' Index raw json data '''
         json_data = ''
         line_num = 0
-        auto_num = 1
         try:
             for row in raw_json_data:
-                idx_id = str(auto_num)
-                json_data += '{"index": {"_id": "%s"}}\n' % idx_id
+                row_obj = {"index": {}}
+                if '_id' in row:
+                    row_obj['index'].update({"_id": row['_id']})
+                    del row['_id']
+                if '_parent' in row:
+                    row_obj['index'].update({"parent": row['_parent']})
+                    del row['_parent']
+                json_data += json.dumps(row_obj) + '\n'
                 json_data += json.dumps(row) + '\n'
-                auto_num += 1
                 line_num += 1
 
                 if(line_num > 5000):

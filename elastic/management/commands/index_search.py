@@ -9,6 +9,7 @@ from elastic.management.loaders.gene_target import GeneTargetManager
 from elastic.management.loaders.gff import GFFManager
 from elastic.management.loaders.alias import AliasManager
 from elastic.management.loaders.criteria import CriteriaManager
+from elastic.management.loaders.json import JsonManager
 
 
 # Get an instance of a logger
@@ -109,6 +110,15 @@ class Command(BaseCommand):
         make_option('--indexCriteria',
                     dest='indexCriteria',
                     help='Create and Load Criterias'),
+        ) + (
+        make_option('--indexJson',
+                    dest='indexJson',
+                    help='Load json file'),
+        ) + (
+        make_option('--shards',
+                    dest='shards',
+                    default=5,
+                    help='No. of shards [default: %default]'),
         )
 
     def handle(self, *args, **options):
@@ -146,6 +156,10 @@ class Command(BaseCommand):
         elif options['indexCriteria']:
             criteria = CriteriaManager()
             criteria.create_criteria(**options)
+
+        elif options['indexJson']:
+            json = JsonManager()
+            json.load_json(**options)
 
         else:
             print(help)
