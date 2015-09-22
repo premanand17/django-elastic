@@ -1,9 +1,6 @@
 ''' Test for Elastic authorization & authentication'''
 from django.test import TestCase
 from elastic.elastic_settings import ElasticSettings
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import Group, User, Permission
-from django.shortcuts import get_object_or_404
 from django.conf import settings
 
 
@@ -12,6 +9,7 @@ class ElasticAuthTest(TestCase):
     def setUp(self):
         if 'pydgin_auth' in settings.INSTALLED_APPS:
             from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
+            from django.contrib.auth.models import Group
             # create elastic models
             ElasticPermissionModelFactory.create_dynamic_models()
             # create the default group READ
@@ -21,6 +19,9 @@ class ElasticAuthTest(TestCase):
 
         if 'pydgin_auth' in settings.INSTALLED_APPS:
             from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
+            from django.contrib.contenttypes.models import ContentType
+            from django.contrib.auth.models import Group, User, Permission
+            from django.shortcuts import get_object_or_404
 
             search_props = ElasticSettings.search_props("ALL")
 
