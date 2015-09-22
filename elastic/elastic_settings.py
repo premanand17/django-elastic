@@ -30,8 +30,6 @@ class ElasticSettings:
         if name in idxs:
             if isinstance(idxs[name], dict):
                 idx = idxs[name]['name']
-                if 'idx_type' not in idxs[name]:
-                    raise SettingsError('Index type key (idx_type) not found for '+idx)
                 if idx_type is not None:
                     if idx_type in idxs[name]['idx_type']:
                         return idx+'/'+idxs[name]['idx_type'][idx_type]
@@ -52,26 +50,62 @@ class ElasticSettings:
         return cls.getattr('ELASTIC_URL', cluster=cluster)
 
     @classmethod
-    def idx_props(cls, idx_name='ALL'):
-        ''' Build the search index names, keys and types and return as a dictionary. '''
-        elastic_attrs = ElasticSettings.attrs()
-        search_idx = elastic_attrs.get('SEARCH').get('IDX_TYPES')
-        suggesters = elastic_attrs.get('SEARCH').get('AUTOSUGGEST')
+    def search_props(cls, idx_name='ALL', user=None):
+        ''' Build the search index names, keys, types and suggesters. Return as a dictionary. '''
+        eattrs = ElasticSettings.attrs()
+        search_idx = {key: value for (key, value) in eattrs.get('IDX').items() if 'search_engine' in value}
+        suggesters = eattrs.get('AUTOSUGGEST')
+
+        idx_properties = {}
 
         if idx_name == 'ALL':
-            return {
+            idx_properties = {
                 "idx": ','.join(ElasticSettings.idx(name) for name in search_idx.keys()),
                 "idx_keys": list(search_idx.keys()),
-                "idx_type": ','.join(itype for types in search_idx.values() for itype in types),
+                "idx_type": ','.join(itype for vals in search_idx.values() for itype in vals['search_engine']),
                 "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
             }
         else:
-            return {
+            idx_properties = {
                 "idx": ElasticSettings.idx(idx_name),
                 "idx_keys": [idx_name],
-                "idx_type": ','.join(it for it in search_idx[idx_name]),
+                "idx_type": ','.join(search_idx[idx_name]['search_engine']),
                 "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
             }
+
+        if 'pydgin_auth' in settings.INSTALLED_APPS:
+            return cls.search_props_restricted(idx_properties, user)
+        else:
+            return idx_properties
+
+    @classmethod
+    def search_props_restricted(cls, idx_props, user=None):
+        ''' Get a comma separated list of indices '''
+        if 'pydgin_auth' in settings.INSTALLED_APPS:
+            from pydgin_auth.permissions import check_index_perms
+            from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
+
+            idx_keys, idx_types = ElasticPermissionModelFactory.get_elastic_model_names(as_list=True)
+            idx_names_auth, idx_type_auth = check_index_perms(user, idx_keys, idx_types)
+
+            idx_names_auth = [idx_name.replace(
+                ElasticPermissionModelFactory.PERMISSION_MODEL_SUFFIX, '').upper() for idx_name in idx_names_auth]
+            idx = ','.join(ElasticSettings.idx(name) for name in idx_names_auth)
+
+            idx_types_auth_tmp1 = [idx_type.replace(
+                ElasticPermissionModelFactory.PERMISSION_MODEL_TYPE_SUFFIX, '') for idx_type in idx_type_auth]
+            idx_types_auth_tmp2 = [idx_type.split(
+                ElasticPermissionModelFactory.PERMISSION_MODEL_NAME_TYPE_DELIMITER)[1]
+                for idx_type in idx_types_auth_tmp1]
+            idx_types_auth = ','.join(idx_types_auth_tmp2)
+
+            idx_props['idx'] = idx
+            idx_props['idx_keys'] = idx_names_auth
+            idx_props['idx_type'] = idx_types_auth
+
+            return idx_props
+        else:
+            return idx_props
 
     @classmethod
     def indices_str(cls, cluster='default'):
