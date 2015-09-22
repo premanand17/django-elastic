@@ -90,6 +90,7 @@ class ElasticSettings:
 
             idx_names_auth = [idx_name.replace(
                 ElasticPermissionModelFactory.PERMISSION_MODEL_SUFFIX, '').upper() for idx_name in idx_names_auth]
+            idx_names_auth = [name for name in idx_names_auth if name in idx_props['idx_keys']]
             idx = ','.join(ElasticSettings.idx(name) for name in idx_names_auth)
 
             idx_types_auth_tmp1 = [idx_type.replace(
@@ -97,12 +98,11 @@ class ElasticSettings:
             idx_types_auth_tmp2 = [idx_type.split(
                 ElasticPermissionModelFactory.PERMISSION_MODEL_NAME_TYPE_DELIMITER)[1]
                 for idx_type in idx_types_auth_tmp1]
-            idx_types_auth = ','.join(idx_types_auth_tmp2)
+            idx_types_auth = ','.join(t for t in idx_types_auth_tmp2 if t in idx_props['idx_type'])
 
             idx_props['idx'] = idx
             idx_props['idx_keys'] = idx_names_auth
             idx_props['idx_type'] = idx_types_auth
-
             return idx_props
         else:
             return idx_props
