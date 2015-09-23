@@ -32,7 +32,10 @@ class ElasticSettings:
                 idx = idxs[name]['name']
                 if idx_type is not None:
                     if idx_type in idxs[name]['idx_type']:
-                        return idx+'/'+idxs[name]['idx_type'][idx_type]
+                        if isinstance(idxs[name]['idx_type'][idx_type], dict):
+                            return idx+'/'+idxs[name]['idx_type'][idx_type]['key']
+                        else:
+                            return idx+'/'+idxs[name]['idx_type'][idx_type]
                     else:
                         raise SettingsError('Index type key ('+idx_type+') not found.')
                 else:

@@ -15,6 +15,15 @@ class ElasticAuthTest(TestCase):
             # create the default group READ
             Group.objects.get_or_create(name='READ')
 
+    def tearDown(self):
+        if 'pydgin_auth' in settings.INSTALLED_APPS:
+            from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
+            from django.contrib.auth.models import Group, User, Permission
+
+            Group.objects.filter().delete()
+            User.objects.filter().delete()
+            Permission.objects.filter().delete()
+
     def test_search_props(self):
 
         if 'pydgin_auth' in settings.INSTALLED_APPS:
