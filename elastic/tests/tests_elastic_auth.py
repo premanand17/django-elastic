@@ -17,7 +17,6 @@ class ElasticAuthTest(TestCase):
 
     def tearDown(self):
         if 'pydgin_auth' in settings.INSTALLED_APPS:
-            from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
             from django.contrib.auth.models import Group, User, Permission
 
             Group.objects.filter().delete()
@@ -77,7 +76,6 @@ class ElasticAuthTest(TestCase):
             dil_group.permissions.add(can_read_permission)
             dil_user = get_object_or_404(User, pk=dil_user.id)
             idx_types_visible = ElasticSettings.search_props("ALL", dil_user)["idx_type"]
-            print(idx_types_visible)
             self.assertTrue("rs_merge" in idx_types_visible,  'rs_merge idx type visible now')
 
             # create permission for pathway_genesets
@@ -97,3 +95,7 @@ class ElasticAuthTest(TestCase):
 
             idx_visible = ElasticSettings.search_props("ALL")["idx"]
             self.assertFalse("gene" in idx_visible,  'gene idx not visible')
+
+            idx_type_visible = ElasticSettings.search_props("ALL")["idx_type"]
+            self.assertFalse("gene" in idx_type_visible,  'gene idx type not visible')
+            self.assertFalse("pathway_genesets" in idx_type_visible,  'pathway_genesets idx type not visible')
