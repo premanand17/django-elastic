@@ -88,9 +88,11 @@ class ElasticSettings:
             from pydgin_auth.permissions import check_index_perms
             from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
 
+            # get list of model names (idx_names and idx_types) and check perms
             idx_keys, idx_types = ElasticPermissionModelFactory.get_elastic_model_names(as_list=True)
             idx_names_auth, idx_type_auth = check_index_perms(user, idx_keys, idx_types)
 
+            # the model names are stripped of the suffixes to get back the original name as in settings
             idx_names_auth = [idx_name.replace(
                 ElasticPermissionModelFactory.PERMISSION_MODEL_SUFFIX, '').upper() for idx_name in idx_names_auth]
             idx_names_auth = [name for name in idx_names_auth if name in idx_props['idx_keys']]
