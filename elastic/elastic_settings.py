@@ -33,7 +33,7 @@ class ElasticSettings:
                 if idx_type is not None:
                     if idx_type in idxs[name]['idx_type']:
                         if isinstance(idxs[name]['idx_type'][idx_type], dict):
-                            return idx+'/'+idxs[name]['idx_type'][idx_type]['key']
+                            return idx+'/'+idxs[name]['idx_type'][idx_type]['type']
                         else:
                             return idx+'/'+idxs[name]['idx_type'][idx_type]
                     else:
@@ -56,25 +56,25 @@ class ElasticSettings:
     def search_props(cls, idx_name='ALL', user=None):
         ''' Build the search index names, keys, types and suggesters. Return as a dictionary. '''
         eattrs = ElasticSettings.attrs()
-        search_idx = {key: value for (key, value) in eattrs.get('IDX').items() if 'search_engine' in value}
+
+        search_idx = set()
+        search_types = set()
+        for (key, value) in eattrs.get('IDX').items():
+            if idx_name == 'ALL' or key == idx_name:
+                if 'idx_type' in value:
+                    for _type_key, type_values in value['idx_type'].items():
+                        if 'search' in type_values:
+                            search_idx.add(key)
+                            search_types.add(type_values['type'])
+
         suggesters = eattrs.get('AUTOSUGGEST')
 
-        idx_properties = {}
-
-        if idx_name == 'ALL':
-            idx_properties = {
-                "idx": ','.join(ElasticSettings.idx(name) for name in search_idx.keys()),
-                "idx_keys": list(search_idx.keys()),
-                "idx_type": ','.join(itype for vals in search_idx.values() for itype in vals['search_engine']),
+        idx_properties = {
+                "idx": ','.join(ElasticSettings.idx(name) for name in search_idx),
+                "idx_keys": list(search_idx),
+                "idx_type": ','.join(itype for itype in search_types),
                 "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
-            }
-        else:
-            idx_properties = {
-                "idx": ElasticSettings.idx(idx_name),
-                "idx_keys": [idx_name],
-                "idx_type": ','.join(search_idx[idx_name]['search_engine']),
-                "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
-            }
+        }
 
         if 'pydgin_auth' in settings.INSTALLED_APPS:
             return cls.search_props_restricted(idx_properties, user)
