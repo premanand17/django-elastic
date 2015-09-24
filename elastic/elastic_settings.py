@@ -56,24 +56,24 @@ class ElasticSettings:
     def search_props(cls, idx_name='ALL', user=None):
         ''' Build the search index names, keys, types and suggesters. Return as a dictionary. '''
         eattrs = ElasticSettings.attrs()
-
         search_idx = set()
         search_types = set()
-        for (key, value) in eattrs.get('IDX').items():
-            if idx_name == 'ALL' or key == idx_name:
-                if 'idx_type' in value:
-                    for _type_key, type_values in value['idx_type'].items():
+        suggester_idx = []
+        for (idx_key, idx_values) in eattrs.get('IDX').items():
+            if idx_name == 'ALL' or idx_key == idx_name:
+                if 'idx_type' in idx_values:
+                    for _type_key, type_values in idx_values['idx_type'].items():
                         if 'search' in type_values:
-                            search_idx.add(key)
+                            search_idx.add(idx_key)
                             search_types.add(type_values['type'])
-
-        suggesters = eattrs.get('AUTOSUGGEST')
+                if 'suggester' in idx_values:
+                    suggester_idx.append(idx_key)
 
         idx_properties = {
                 "idx": ','.join(ElasticSettings.idx(name) for name in search_idx),
                 "idx_keys": list(search_idx),
                 "idx_type": ','.join(itype for itype in search_types),
-                "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
+                "suggester_keys": suggester_idx
         }
 
         if 'pydgin_auth' in settings.INSTALLED_APPS:
@@ -106,6 +106,7 @@ class ElasticSettings:
             idx_props['idx'] = idx
             idx_props['idx_keys'] = idx_names_auth
             idx_props['idx_type'] = idx_types_auth
+            idx_props['suggester_keys'] = [k for k in idx_names_auth if k in idx_props['suggester_keys']]
             return idx_props
         else:
             return idx_props
@@ -121,3 +122,25 @@ class ElasticSettings:
             else:
                 s.add(v)
         return ','.join(str(e) for e in s)
+
+    @classmethod
+    def get_idx_key_by_name(cls, val):
+        ''' Get the index key from the name in the dictionary.
+        @type  val: value
+        @param val: A value in the dictionary.
+        '''
+        for k, v in ElasticSettings.attrs().get('IDX').items():
+            if isinstance(v, str) and v == val:
+                return k
+            elif isinstance(v, dict) and v['name'] == val:
+                return k
+
+    @classmethod
+    def get_label(cls, idx, idx_type=None, label='label'):
+        ''' Get an index or index type label. '''
+        try:
+            if idx_type is not None:
+                return ElasticSettings.attrs().get('IDX')[idx]['idx_type'][idx_type][label]
+            return ElasticSettings.attrs().get('IDX')[idx][label]
+        except KeyError:
+            raise SettingsError('Label not found in '+idx)

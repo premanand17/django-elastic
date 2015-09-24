@@ -64,3 +64,16 @@ OVERRIDE_SETTINGS2 = \
                  {'MARKER': IDX['MARKER']['indexName'],
                   'DEFAULT': IDX['MARKER']['indexName']},
                  'ELASTIC_URL': ElasticSettings.url()}}
+
+OVERRIDE_SETTINGS3 = \
+   {'default': {
+        'IDX': {
+            'MARKER': {
+                'name': 'dbsnp144',
+                'idx_type': {
+                    'MARKER': {'type': 'marker', 'description': 'dbsnp', 'search': True},
+                },
+                'suggester': True,
+                'label': 'marker storage'
+            }
+        }}}
