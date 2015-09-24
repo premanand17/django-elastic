@@ -17,7 +17,6 @@ class ElasticAuthTest(TestCase):
 
     def tearDown(self):
         if 'pydgin_auth' in settings.INSTALLED_APPS:
-            from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
             from django.contrib.auth.models import Group, User, Permission
 
             Group.objects.filter().delete()
