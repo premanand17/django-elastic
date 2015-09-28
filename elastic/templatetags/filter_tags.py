@@ -25,9 +25,15 @@ def doc_attr_str(doc, arg):
     if isinstance(attr, str):
         return attr
     elif isinstance(attr, list):
-        return ', '.join(attr)
+        return '; '.join(attr)
     else:
         return attr
+
+
+@register.filter
+def get_item(dictionary, key):
+    ''' Get an item from the dictionary. '''
+    return dictionary.get(key)
 
 
 @register.filter
