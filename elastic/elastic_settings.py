@@ -21,31 +21,44 @@ class ElasticSettings:
 
     @classmethod
     def idx(cls, name='DEFAULT', idx_type=None, cluster='default'):
-        ''' Given the index name and optionally a type get the index URL path.
-        If 'DEFAULT' is requested but not defined return the random index. '''
+        ''' Given the index key and optionally a type get the index URL path.
+        If 'DEFAULT' is requested but not defined return a random index. '''
+        (idx, idx_type) = cls.idx_names(idx_key=name, idx_type=idx_type, cluster=cluster)
+        if idx is not None:
+            if idx_type is None:
+                return idx
+            else:
+                return idx + '/' + idx_type
+        return None
+
+    @classmethod
+    def idx_names(cls, idx_key='DEFAULT', idx_type=None, cluster='default'):
+        ''' Given the index key and optionally type key return a tuple of
+        their names. If 'DEFAULT' is requested but not defined in the settings
+        return a random index. '''
         idxs = cls.getattr('IDX', cluster=cluster)
         if idxs is None:
             logger.warn('No indexes defined')
-            return
-        if name in idxs:
-            if isinstance(idxs[name], dict):
-                idx = idxs[name]['name']
+            return (None, None)
+        if idx_key in idxs:
+            if isinstance(idxs[idx_key], dict):
+                idx = idxs[idx_key]['name']
                 if idx_type is not None:
-                    if idx_type in idxs[name]['idx_type']:
-                        if isinstance(idxs[name]['idx_type'][idx_type], dict):
-                            return idx+'/'+idxs[name]['idx_type'][idx_type]['type']
+                    if idx_type in idxs[idx_key]['idx_type']:
+                        if isinstance(idxs[idx_key]['idx_type'][idx_type], dict):
+                            return (idx, idxs[idx_key]['idx_type'][idx_type]['type'])
                         else:
-                            return idx+'/'+idxs[name]['idx_type'][idx_type]
+                            return (idx, idxs[idx_key]['idx_type'][idx_type])
                     else:
                         raise SettingsError('Index type key ('+idx_type+') not found.')
                 else:
-                    return idx
-            return idxs[name]
+                    return (idx, None)
+            return (idxs[idx_key], None)
         else:
-            if name == 'DEFAULT':
-                name = list(idxs.keys())[0]
-                return ElasticSettings.idx(name=name, idx_type=idx_type, cluster=cluster)
-        return None
+            if idx_key == 'DEFAULT':
+                idx_key = list(idxs.keys())[0]
+                return ElasticSettings.idx_names(idx_key=idx_key, idx_type=idx_type, cluster=cluster)
+        return (None, None)
 
     @classmethod
     def url(cls, cluster='default'):
@@ -62,54 +75,26 @@ class ElasticSettings:
         for (idx_key, idx_values) in eattrs.get('IDX').items():
             if idx_name == 'ALL' or idx_key == idx_name:
                 if 'idx_type' in idx_values:
-                    for _type_key, type_values in idx_values['idx_type'].items():
+                    for type_key, type_values in idx_values['idx_type'].items():
                         if 'search' in type_values:
                             search_idx.add(idx_key)
-                            search_types.add(type_values['type'])
+                            search_types.add(idx_key+'.'+type_key)
                 if 'suggester' in idx_values:
                     suggester_idx.append(idx_key)
 
+        if 'pydgin_auth' in settings.INSTALLED_APPS:
+            from pydgin_auth.permissions import get_authenticated_idx_and_idx_types
+            search_idx, search_types = get_authenticated_idx_and_idx_types(user, search_idx, search_types)
+            suggester_idx = get_authenticated_idx_and_idx_types(user, suggester_idx)[0]
+
         idx_properties = {
-                "idx": ','.join(ElasticSettings.idx(name) for name in search_idx),
-                "idx_keys": list(search_idx),
-                "idx_type": ','.join(itype for itype in search_types),
-                "suggester_keys": suggester_idx
+            "idx": ','.join(ElasticSettings.idx(name) for name in search_idx),
+            "idx_keys": list(search_idx),
+            "idx_type": ','.join(ElasticSettings.idx_names(ty.split('.', 1)[0], idx_type=ty.split('.', 1)[1])[1]
+                                 for ty in search_types),
+            "suggester_keys": suggester_idx
         }
-
-        if 'pydgin_auth' in settings.INSTALLED_APPS:
-            return cls.search_props_restricted(idx_properties, user)
-        else:
-            return idx_properties
-
-    @classmethod
-    def search_props_restricted(cls, idx_props, user=None):
-        ''' Get a comma separated list of indices '''
-        if 'pydgin_auth' in settings.INSTALLED_APPS:
-            from pydgin_auth.permissions import check_index_perms
-            from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
-
-            idx_keys, idx_types = ElasticPermissionModelFactory.get_elastic_model_names(as_list=True)
-            idx_names_auth, idx_type_auth = check_index_perms(user, idx_keys, idx_types)
-
-            idx_names_auth = [idx_name.replace(
-                ElasticPermissionModelFactory.PERMISSION_MODEL_SUFFIX, '').upper() for idx_name in idx_names_auth]
-            idx_names_auth = [name for name in idx_names_auth if name in idx_props['idx_keys']]
-            idx = ','.join(ElasticSettings.idx(name) for name in idx_names_auth)
-
-            idx_types_auth_tmp1 = [idx_type.replace(
-                ElasticPermissionModelFactory.PERMISSION_MODEL_TYPE_SUFFIX, '') for idx_type in idx_type_auth]
-            idx_types_auth_tmp2 = [idx_type.split(
-                ElasticPermissionModelFactory.PERMISSION_MODEL_NAME_TYPE_DELIMITER)[1]
-                for idx_type in idx_types_auth_tmp1]
-            idx_types_auth = ','.join(t for t in idx_types_auth_tmp2 if t in idx_props['idx_type'])
-
-            idx_props['idx'] = idx
-            idx_props['idx_keys'] = idx_names_auth
-            idx_props['idx_type'] = idx_types_auth
-            idx_props['suggester_keys'] = [k for k in idx_names_auth if k in idx_props['suggester_keys']]
-            return idx_props
-        else:
-            return idx_props
+        return idx_properties
 
     @classmethod
     def indices_str(cls, cluster='default'):
