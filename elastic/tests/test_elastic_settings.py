@@ -1,5 +1,5 @@
 from django.test import TestCase
-from elastic.elastic_settings import ElasticSettings
+from elastic.elastic_settings import ElasticSettings, ElasticUrl
 from elastic.exceptions import SettingsError
 from django.test.utils import override_settings
 from elastic.tests.settings_idx import OVERRIDE_SETTINGS, OVERRIDE_SETTINGS3, OVERRIDE_SETTINGS4,\
@@ -39,3 +39,4 @@ class ElasticSettingsTest(TestCase):
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker")
         Search.index_exists('test', 'test2')
+        ElasticUrl.URL_INDEX = 0  # reset
