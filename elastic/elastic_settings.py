@@ -2,7 +2,6 @@
 from django.conf import settings
 from elastic.exceptions import SettingsError
 import logging
-from elastic import elastic_settings
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -132,18 +131,16 @@ class ElasticSettings:
             raise SettingsError('Label not found in '+idx)
 
 
-URL_INDEX = 0
-
-
 class ElasticUrl(object):
     ''' Manage elastic urls settings. '''
+    URL_INDEX = 0
 
     @classmethod
     def get_url(cls, cluster='default'):
         urls = ElasticSettings.getattr('ELASTIC_URL', cluster=cluster)
         if isinstance(urls, str):
             return urls
-        return urls[elastic_settings.URL_INDEX]
+        return urls[ElasticUrl.URL_INDEX]
 
     @classmethod
     def rotate_url(cls, cluster='default'):
@@ -153,9 +150,9 @@ class ElasticUrl(object):
             logger.warn("Just one elastic url (ELASTIC_URL) defined.")
             return
 
-        logger.debug("Rotate old HOST_INDEX = "+str(elastic_settings.URL_INDEX))
-        if len(urls) <= (elastic_settings.URL_INDEX+1):
-            elastic_settings.URL_INDEX = 0
+        logger.debug("Rotate old HOST_INDEX = "+str(ElasticUrl.URL_INDEX))
+        if len(urls) <= (ElasticUrl.URL_INDEX+1):
+            ElasticUrl.URL_INDEX = 0
         else:
-            elastic_settings.URL_INDEX += 1
-        logger.debug("Rotate new HOST_INDEX = "+str(elastic_settings.URL_INDEX))
+            ElasticUrl.URL_INDEX += 1
+        logger.debug("Rotate new HOST_INDEX = "+str(ElasticUrl.URL_INDEX))
