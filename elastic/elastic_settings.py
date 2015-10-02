@@ -140,7 +140,11 @@ class ElasticUrl(object):
         urls = ElasticSettings.getattr('ELASTIC_URL', cluster=cluster)
         if isinstance(urls, str):
             return urls
-        return urls[ElasticUrl.URL_INDEX]
+        try:
+            return urls[ElasticUrl.URL_INDEX]
+        except IndexError:
+            ElasticUrl.URL_INDEX = 0
+            return urls[ElasticUrl.URL_INDEX]
 
     @classmethod
     def rotate_url(cls, cluster='default'):
