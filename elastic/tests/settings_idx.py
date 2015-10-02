@@ -84,4 +84,7 @@ OVERRIDE_SETTINGS4 = \
         'IDX': {'MARKER': IDX['MARKER']['indexName']}}
      }
 
-OVERRIDE_SETTINGS4['default']['ELASTIC_URL'].extend(ElasticSettings.getattr('ELASTIC_URL'))
+if isinstance(ElasticSettings.getattr('ELASTIC_URL'), str):
+    OVERRIDE_SETTINGS4['default']['ELASTIC_URL'].append(ElasticSettings.getattr('ELASTIC_URL'))
+else:
+    OVERRIDE_SETTINGS4['default']['ELASTIC_URL'].extend(ElasticSettings.getattr('ELASTIC_URL'))
