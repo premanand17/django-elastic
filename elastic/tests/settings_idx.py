@@ -77,3 +77,11 @@ OVERRIDE_SETTINGS3 = \
                 'label': 'marker storage'
             }
         }}}
+
+OVERRIDE_SETTINGS4 = \
+    {'default': {
+        'ELASTIC_URL': ['http://xxx:9200/'],
+        'IDX': {'MARKER': IDX['MARKER']['indexName']}}
+     }
+
+OVERRIDE_SETTINGS4['default']['ELASTIC_URL'].extend(ElasticSettings.getattr('ELASTIC_URL'))
