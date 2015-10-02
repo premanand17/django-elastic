@@ -2,6 +2,7 @@
 from django.conf import settings
 from elastic.exceptions import SettingsError
 import logging
+from elastic import elastic_settings
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ class ElasticSettings:
     @classmethod
     def url(cls, cluster='default'):
         ''' Return the Elastic URL '''
-        return cls.getattr('ELASTIC_URL', cluster=cluster)
+        return ElasticUrl.get_url(cluster='default')
 
     @classmethod
     def search_props(cls, idx_name='ALL', user=None):
@@ -129,3 +130,32 @@ class ElasticSettings:
             return ElasticSettings.attrs().get('IDX')[idx][label]
         except KeyError:
             raise SettingsError('Label not found in '+idx)
+
+
+URL_INDEX = 0
+
+
+class ElasticUrl(object):
+    ''' Manage elastic urls settings. '''
+
+    @classmethod
+    def get_url(cls, cluster='default'):
+        urls = ElasticSettings.getattr('ELASTIC_URL', cluster=cluster)
+        if isinstance(urls, str):
+            return urls
+        return urls[elastic_settings.URL_INDEX]
+
+    @classmethod
+    def rotate_url(cls, cluster='default'):
+        ''' Rotate the host used in an array of elastic urls. '''
+        urls = ElasticSettings.getattr('ELASTIC_URL', cluster=cluster)
+        if isinstance(urls, str):
+            logger.warn("Just one elastic url (ELASTIC_URL) defined.")
+            return
+
+        logger.debug("Rotate old HOST_INDEX = "+str(elastic_settings.URL_INDEX))
+        if len(urls) <= (elastic_settings.URL_INDEX+1):
+            elastic_settings.URL_INDEX = 0
+        else:
+            elastic_settings.URL_INDEX += 1
+        logger.debug("Rotate new HOST_INDEX = "+str(elastic_settings.URL_INDEX))
