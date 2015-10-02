@@ -63,7 +63,7 @@ class ElasticSettings:
     @classmethod
     def url(cls, cluster='default'):
         ''' Return the Elastic URL '''
-        return cls.getattr('ELASTIC_URL', cluster=cluster)
+        return ElasticUrl.get_url(cluster='default')
 
     @classmethod
     def search_props(cls, idx_name='ALL', user=None):
@@ -129,3 +129,34 @@ class ElasticSettings:
             return ElasticSettings.attrs().get('IDX')[idx][label]
         except KeyError:
             raise SettingsError('Label not found in '+idx)
+
+
+class ElasticUrl(object):
+    ''' Manage elastic urls settings. '''
+    URL_INDEX = 0
+
+    @classmethod
+    def get_url(cls, cluster='default'):
+        urls = ElasticSettings.getattr('ELASTIC_URL', cluster=cluster)
+        if isinstance(urls, str):
+            return urls
+        try:
+            return urls[ElasticUrl.URL_INDEX]
+        except IndexError:
+            ElasticUrl.URL_INDEX = 0
+            return urls[ElasticUrl.URL_INDEX]
+
+    @classmethod
+    def rotate_url(cls, cluster='default'):
+        ''' Rotate the host used in an array of elastic urls. '''
+        urls = ElasticSettings.getattr('ELASTIC_URL', cluster=cluster)
+        if isinstance(urls, str):
+            logger.warn("Just one elastic url (ELASTIC_URL) defined.")
+            return
+
+        logger.debug("Rotate old HOST_INDEX = "+str(ElasticUrl.URL_INDEX))
+        if len(urls) <= (ElasticUrl.URL_INDEX+1):
+            ElasticUrl.URL_INDEX = 0
+        else:
+            ElasticUrl.URL_INDEX += 1
+        logger.debug("Rotate new HOST_INDEX = "+str(ElasticUrl.URL_INDEX))
