@@ -53,19 +53,16 @@ IDX_UPDATE = {'GENE_UPDATE': {'indexName': 'test__gene_'+SEARCH_SUFFIX, 'build':
               }
 
 OVERRIDE_SETTINGS = \
-    {'default': {'IDX':
-                 {'MARKER': IDX['MARKER']['indexName'],
-                  'DEFAULT': IDX['MARKER']['indexName'],
-                  'GFF_GENES': IDX['GFF_GENERIC']['indexName']},
-                 'ELASTIC_URL': ElasticSettings.url()}}
+    {'default':
+        {'IDX':
+            {'MARKER': IDX['MARKER']['indexName'],
+             'DEFAULT': IDX['MARKER']['indexName'],
+             'GFF_GENES': IDX['GFF_GENERIC']['indexName']
+             },
+         'ELASTIC_URL': ElasticSettings.url()}
+     }
 
 OVERRIDE_SETTINGS2 = \
-    {'default': {'IDX':
-                 {'MARKER': IDX['MARKER']['indexName'],
-                  'DEFAULT': IDX['MARKER']['indexName']},
-                 'ELASTIC_URL': ElasticSettings.url()}}
-
-OVERRIDE_SETTINGS3 = \
    {'default': {
         'IDX': {
             'MARKER': {
@@ -73,18 +70,18 @@ OVERRIDE_SETTINGS3 = \
                 'idx_type': {
                     'MARKER': {'type': 'marker', 'description': 'dbsnp', 'search': True},
                 },
-                'suggester': True,
                 'label': 'marker storage'
             }
-        }}}
+        }}
+    }
 
-OVERRIDE_SETTINGS4 = \
+OVERRIDE_SETTINGS3 = \
     {'default': {
         'ELASTIC_URL': ['http://xxx:9200/'],
         'IDX': {'MARKER': IDX['MARKER']['indexName']}}
      }
 
 if isinstance(ElasticSettings.getattr('ELASTIC_URL'), str):
-    OVERRIDE_SETTINGS4['default']['ELASTIC_URL'].append(ElasticSettings.getattr('ELASTIC_URL'))
+    OVERRIDE_SETTINGS3['default']['ELASTIC_URL'].append(ElasticSettings.getattr('ELASTIC_URL'))
 else:
-    OVERRIDE_SETTINGS4['default']['ELASTIC_URL'].extend(ElasticSettings.getattr('ELASTIC_URL'))
+    OVERRIDE_SETTINGS3['default']['ELASTIC_URL'].extend(ElasticSettings.getattr('ELASTIC_URL'))
