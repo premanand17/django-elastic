@@ -21,91 +21,80 @@ class ElasticSettings:
 
     @classmethod
     def idx(cls, name='DEFAULT', idx_type=None, cluster='default'):
-        ''' Given the index name and optionally a type get the index URL path.
-        If 'DEFAULT' is requested but not defined return the random index. '''
+        ''' Given the index key and optionally a type get the index URL path.
+        If 'DEFAULT' is requested but not defined return a random index. '''
+        (idx, idx_type) = cls.idx_names(idx_key=name, idx_type=idx_type, cluster=cluster)
+        if idx is not None:
+            if idx_type is None:
+                return idx
+            else:
+                return idx + '/' + idx_type
+        return None
+
+    @classmethod
+    def idx_names(cls, idx_key='DEFAULT', idx_type=None, cluster='default'):
+        ''' Given the index key and optionally type key return a tuple of
+        their names. If 'DEFAULT' is requested but not defined in the settings
+        return a random index. '''
         idxs = cls.getattr('IDX', cluster=cluster)
         if idxs is None:
             logger.warn('No indexes defined')
-            return
-        if name in idxs:
-            if isinstance(idxs[name], dict):
-                idx = idxs[name]['name']
+            return (None, None)
+        if idx_key in idxs:
+            if isinstance(idxs[idx_key], dict):
+                idx = idxs[idx_key]['name']
                 if idx_type is not None:
-                    if idx_type in idxs[name]['idx_type']:
-                        return idx+'/'+idxs[name]['idx_type'][idx_type]
+                    if idx_type in idxs[idx_key]['idx_type']:
+                        if isinstance(idxs[idx_key]['idx_type'][idx_type], dict):
+                            return (idx, idxs[idx_key]['idx_type'][idx_type]['type'])
+                        else:
+                            return (idx, idxs[idx_key]['idx_type'][idx_type])
                     else:
                         raise SettingsError('Index type key ('+idx_type+') not found.')
                 else:
-                    return idx
-            return idxs[name]
+                    return (idx, None)
+            return (idxs[idx_key], None)
         else:
-            if name == 'DEFAULT':
-                name = list(idxs.keys())[0]
-                return ElasticSettings.idx(name=name, idx_type=idx_type, cluster=cluster)
-        return None
+            if idx_key == 'DEFAULT':
+                idx_key = list(idxs.keys())[0]
+                return ElasticSettings.idx_names(idx_key=idx_key, idx_type=idx_type, cluster=cluster)
+        return (None, None)
 
     @classmethod
     def url(cls, cluster='default'):
         ''' Return the Elastic URL '''
-        return cls.getattr('ELASTIC_URL', cluster=cluster)
+        return ElasticUrl.get_url(cluster='default')
 
     @classmethod
     def search_props(cls, idx_name='ALL', user=None):
         ''' Build the search index names, keys, types and suggesters. Return as a dictionary. '''
         eattrs = ElasticSettings.attrs()
-        search_idx = {key: value for (key, value) in eattrs.get('IDX').items() if 'search_engine' in value}
-        suggesters = eattrs.get('AUTOSUGGEST')
-
-        idx_properties = {}
-
-        if idx_name == 'ALL':
-            idx_properties = {
-                "idx": ','.join(ElasticSettings.idx(name) for name in search_idx.keys()),
-                "idx_keys": list(search_idx.keys()),
-                "idx_type": ','.join(itype for vals in search_idx.values() for itype in vals['search_engine']),
-                "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
-            }
-        else:
-            idx_properties = {
-                "idx": ElasticSettings.idx(idx_name),
-                "idx_keys": [idx_name],
-                "idx_type": ','.join(search_idx[idx_name]['search_engine']),
-                "suggesters": ','.join(ElasticSettings.idx(name) for name in suggesters)
-            }
+        search_idx = set()
+        search_types = set()
+        suggester_idx = []
+        for (idx_key, idx_values) in eattrs.get('IDX').items():
+            if idx_name == 'ALL' or idx_key == idx_name:
+                if 'idx_type' in idx_values:
+                    for type_key, type_values in idx_values['idx_type'].items():
+                        if 'search' in type_values:
+                            search_idx.add(idx_key)
+                            search_types.add(idx_key+'.'+type_key)
+                if 'suggester' in idx_values:
+                    suggester_idx.append(idx_key)
 
         if 'pydgin_auth' in settings.INSTALLED_APPS:
-            return cls.search_props_restricted(idx_properties, user)
-        else:
-            return idx_properties
+            from pydgin_auth.permissions import get_authenticated_idx_and_idx_types
+            search_idx, search_types = get_authenticated_idx_and_idx_types(user, search_idx, search_types)
+            suggester_idx = get_authenticated_idx_and_idx_types(user, suggester_idx)[0]
 
-    @classmethod
-    def search_props_restricted(cls, idx_props, user=None):
-        ''' Get a comma separated list of indices '''
-        if 'pydgin_auth' in settings.INSTALLED_APPS:
-            from pydgin_auth.permissions import check_index_perms
-            from pydgin_auth.elastic_model_factory import ElasticPermissionModelFactory
-
-            idx_keys, idx_types = ElasticPermissionModelFactory.get_elastic_model_names(as_list=True)
-            idx_names_auth, idx_type_auth = check_index_perms(user, idx_keys, idx_types)
-
-            idx_names_auth = [idx_name.replace(
-                ElasticPermissionModelFactory.PERMISSION_MODEL_SUFFIX, '').upper() for idx_name in idx_names_auth]
-            idx = ','.join(ElasticSettings.idx(name) for name in idx_names_auth)
-
-            idx_types_auth_tmp1 = [idx_type.replace(
-                ElasticPermissionModelFactory.PERMISSION_MODEL_TYPE_SUFFIX, '') for idx_type in idx_type_auth]
-            idx_types_auth_tmp2 = [idx_type.split(
-                ElasticPermissionModelFactory.PERMISSION_MODEL_NAME_TYPE_DELIMITER)[1]
-                for idx_type in idx_types_auth_tmp1]
-            idx_types_auth = ','.join(idx_types_auth_tmp2)
-
-            idx_props['idx'] = idx
-            idx_props['idx_keys'] = idx_names_auth
-            idx_props['idx_type'] = idx_types_auth
-
-            return idx_props
-        else:
-            return idx_props
+        idx_properties = {
+            "idx": ','.join(ElasticSettings.idx(name) for name in search_idx),
+            "idx_keys": list(search_idx),
+            "idx_type": ','.join(ElasticSettings.idx_names(ty.split('.', 1)[0], idx_type=ty.split('.', 1)[1])[1]
+                                 for ty in search_types),
+            "suggester_keys": suggester_idx
+        }
+        return idx_properties
 
     @classmethod
     def indices_str(cls, cluster='default'):
@@ -118,3 +107,56 @@ class ElasticSettings:
             else:
                 s.add(v)
         return ','.join(str(e) for e in s)
+
+    @classmethod
+    def get_idx_key_by_name(cls, val):
+        ''' Get the index key from the name in the dictionary.
+        @type  val: value
+        @param val: A value in the dictionary.
+        '''
+        for k, v in ElasticSettings.attrs().get('IDX').items():
+            if isinstance(v, str) and v == val:
+                return k
+            elif isinstance(v, dict) and v['name'] == val:
+                return k
+
+    @classmethod
+    def get_label(cls, idx, idx_type=None, label='label'):
+        ''' Get an index or index type label. '''
+        try:
+            if idx_type is not None:
+                return ElasticSettings.attrs().get('IDX')[idx]['idx_type'][idx_type][label]
+            return ElasticSettings.attrs().get('IDX')[idx][label]
+        except KeyError:
+            raise SettingsError('Label not found in '+idx)
+
+
+class ElasticUrl(object):
+    ''' Manage elastic urls settings. '''
+    URL_INDEX = 0
+
+    @classmethod
+    def get_url(cls, cluster='default'):
+        urls = ElasticSettings.getattr('ELASTIC_URL', cluster=cluster)
+        if isinstance(urls, str):
+            return urls
+        try:
+            return urls[ElasticUrl.URL_INDEX]
+        except IndexError:
+            ElasticUrl.URL_INDEX = 0
+            return urls[ElasticUrl.URL_INDEX]
+
+    @classmethod
+    def rotate_url(cls, cluster='default'):
+        ''' Rotate the host used in an array of elastic urls. '''
+        urls = ElasticSettings.getattr('ELASTIC_URL', cluster=cluster)
+        if isinstance(urls, str):
+            logger.warn("Just one elastic url (ELASTIC_URL) defined.")
+            return
+
+        logger.debug("Rotate old HOST_INDEX = "+str(ElasticUrl.URL_INDEX))
+        if len(urls) <= (ElasticUrl.URL_INDEX+1):
+            ElasticUrl.URL_INDEX = 0
+        else:
+            ElasticUrl.URL_INDEX += 1
+        logger.debug("Rotate new HOST_INDEX = "+str(ElasticUrl.URL_INDEX))

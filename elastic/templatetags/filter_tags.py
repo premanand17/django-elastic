@@ -3,7 +3,6 @@ from django import template
 from django.conf import settings
 from elastic.result import Document
 from elastic.elastic_settings import ElasticSettings
-import re
 import collections
 
 register = template.Library()
@@ -17,6 +16,24 @@ def doc_attr(doc, arg):
     if arg not in doc.__dict__:
         return None
     return getattr(doc, arg)
+
+
+@register.filter
+def doc_attr_str(doc, arg):
+    ''' Gets attribute of an object dynamically from a string name '''
+    attr = doc_attr(doc, arg)
+    if isinstance(attr, str):
+        return attr
+    elif isinstance(attr, list):
+        return '; '.join(attr)
+    else:
+        return attr
+
+
+@register.filter
+def get_item(dictionary, key):
+    ''' Get an item from the dictionary. '''
+    return dictionary.get(key)
 
 
 @register.filter

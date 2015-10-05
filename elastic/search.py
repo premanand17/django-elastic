@@ -19,7 +19,7 @@ import json
 import requests
 import logging
 from elastic.result import Document, Result, Aggregation
-from elastic.elastic_settings import ElasticSettings
+from elastic.elastic_settings import ElasticSettings, ElasticUrl
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
     Filter, OrFilter, HasParentQuery
 import warnings
@@ -34,7 +34,7 @@ class Search:
 
     def __init__(self, search_query=None, aggs=None, search_from=0, size=20,
                  search_type=None, idx=ElasticSettings.idx('DEFAULT'), idx_type='',
-                 url=ElasticSettings.url()):
+                 elastic_url=None):
         ''' Set up parameters to use in the search. L{ElasticQuery} is used to
         define a search query.
         @type  search_query: L{ElasticQuery}
@@ -52,11 +52,6 @@ class Search:
         @type  url: string
         @keyword url: Elastic URL (default: default cluster URL).
         '''
-        if search_type is None:
-            self.url = (url + '/' + idx + '/' + idx_type +
-                        '/_search?size=' + str(size) + '&from='+str(search_from))
-        else:
-            self.url = (url + '/' + idx + '/' + idx_type + '/_search?search_type=count')
         if search_query is not None:
             if not isinstance(search_query, ElasticQuery):
                 raise QueryError("not an ElasticQuery")
@@ -68,24 +63,58 @@ class Search:
             else:
                 self.query = aggs.aggs
 
+        if elastic_url is None:
+            elastic_url = ElasticSettings.url()
+
         self.size = size
+        self.search_from = search_from
+        self.search_type = search_type
         self.idx = idx
         self.idx_type = idx_type
+        self.elastic_url = elastic_url
+        if self.search_type is None:
+            self.url = (self.idx + '/' + self.idx_type +
+                        '/_search?size=' + str(self.size) + '&from='+str(self.search_from))
+        else:
+            self.url = (self.idx + '/' + self.idx_type + '/_search?search_type=count')
 
     @classmethod
-    def index_exists(cls, idx, idx_type='', url=ElasticSettings.url()):
+    def elastic_request(cls, elastic_url, url, data=None, is_post=True):
+        ''' Make GET/POST request and return response from elastic server. '''
+        try:
+            if is_post:
+                response = requests.post(elastic_url + '/' + url, data=data)
+            else:
+                response = requests.get(elastic_url + '/' + url)
+        except requests.exceptions.ConnectionError:
+            logger.error('ConnectionError ' + elastic_url)
+            ElasticUrl.rotate_url()
+            elastic_url = ElasticUrl.get_url()
+            if is_post:
+                response = requests.post(elastic_url + '/' + url, data=data)
+            else:
+                response = requests.get(elastic_url + '/' + url)
+        return response
+
+    @classmethod
+    def index_exists(cls, idx, idx_type='', url=None):
         ''' Check if an index exists. '''
-        url += '/' + idx + '/' + idx_type + '/_mapping'
-        response = requests.get(url)
+        if url is None:
+            elastic_url = ElasticSettings.url()
+        url = idx + '/' + idx_type + '/_mapping'
+        response = Search.elastic_request(elastic_url, url, is_post=False)
         if "error" in response.json():
+            logger.warn(response.json())
             return False
         return True
 
     @classmethod
-    def index_refresh(cls, idx, url=ElasticSettings.url()):
+    def index_refresh(cls, idx, url=None):
         ''' Refresh to make all operations performed since the last refresh
         available for search'''
-        response = requests.post(url + '/' + idx + '/_refresh')
+        if url is None:
+            elastic_url = ElasticSettings.url()
+        response = Search.elastic_request(elastic_url, idx + '/_refresh')
         if "error" in response.json():
             logger.warn(response.content.decode("utf-8"))
             return False
@@ -113,12 +142,12 @@ class Search:
 
     def get_mapping(self, mapping_type=None):
         ''' Return the mappings for an index (host:port/{index}/_mapping/{type}). '''
-        self.mapping_url = (ElasticSettings.url() + '/' + self.idx + '/_mapping')
+        self.mapping_url = (self.idx + '/_mapping')
         if mapping_type is not None:
             self.mapping_url += '/'+mapping_type
         elif self.idx_type is not None:
             self.mapping_url += '/'+self.idx_type
-        response = requests.get(self.mapping_url)
+        response = Search.elastic_request(ElasticSettings.url(), self.mapping_url, is_post=False)
         if response.status_code != 200:
             json_err = json.dumps({"error": response.status_code,
                                    "response": response.content.decode("utf-8"),
@@ -129,17 +158,17 @@ class Search:
 
     def get_count(self):
         ''' Return the elastic count for a query result '''
-        url = ElasticSettings.url() + '/' + self.idx + '/' + self.idx_type + '/_count?'
+        url = self.idx + '/' + self.idx_type + '/_count?'
         data = {}
         if hasattr(self, 'query'):
             data = json.dumps(self.query)
-        response = requests.post(url, data=data)
+        response = Search.elastic_request(ElasticSettings.url(), url, data=data)
         return response.json()
 
     def get_json_response(self):
         ''' Return the elastic json response '''
-        response = requests.post(self.url, data=json.dumps(self.query))
-        logger.debug("curl '" + self.url + "&pretty' -d '" + json.dumps(self.query) + "'")
+        response = Search.elastic_request(self.elastic_url, self.url, data=json.dumps(self.query))
+        logger.debug("curl '" + self.elastic_url + '/' + self.url + "&pretty' -d '" + json.dumps(self.query) + "'")
         if response.status_code != 200:
             logger.warn("Error: elastic response 200:" + self.url)
         return response.json()
@@ -182,11 +211,14 @@ class ScanAndScroll(object):
     ''' Use Elastic scan and scroll api. '''
 
     @classmethod
-    def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=ElasticSettings.url(),
+    def scan_and_scroll(self, idx, call_fun=None, idx_type='', url=None,
                         time_to_keep_scoll=1, query=None):
         ''' Scan and scroll an index and optionally provide a function argument to
         process the hits. '''
-        url_search_scan = (url + '/' + idx + '/' + idx_type + '/_search?search_type=scan&scroll=' +
+        if url is None:
+            url = ElasticSettings.url()
+
+        url_search_scan = (idx + '/' + idx_type + '/_search?search_type=scan&scroll=' +
                            str(time_to_keep_scoll) + 'm')
         if query is None:
             query = {
@@ -197,13 +229,14 @@ class ScanAndScroll(object):
             if not isinstance(query, ElasticQuery):
                 raise QueryError("not a Query")
             query = query.query
-        response = requests.post(url_search_scan, data=json.dumps(query))
+
+        response = Search.elastic_request(url, url_search_scan, data=json.dumps(query))
         _scroll_id = response.json()['_scroll_id']
-        url_scan_scroll = url + '/_search/scroll?scroll=' + str(time_to_keep_scoll) + 'm'
+        url_scan_scroll = '_search/scroll?scroll=' + str(time_to_keep_scoll) + 'm'
 
         count = 0
         while True:
-            response = requests.post(url_scan_scroll, data=_scroll_id)
+            response = Search.elastic_request(url, url_scan_scroll, data=_scroll_id)
             _scroll_id = response.json()['_scroll_id']
             hits = response.json()['hits']['hits']
             nhits = len(hits)
@@ -219,10 +252,13 @@ class Suggest(object):
     ''' Suggest handles requests for populating search auto completion. '''
 
     @classmethod
-    def suggest(cls, term, idx, url=ElasticSettings.url(),
+    def suggest(cls, term, idx, elastic_url=ElasticSettings.url(),
                 name='data', field='suggest', size=5):
         ''' Auto completion suggestions for a given term. '''
-        url = (url + '/' + idx + '/' + '/_suggest')
+        if elastic_url is None:
+            elastic_url = ElasticSettings.url()
+
+        url = (idx + '/' + '/_suggest')
         suggest = {
             name: {
                 "text": term,
@@ -232,7 +268,7 @@ class Suggest(object):
                 }
             }
         }
-        response = requests.post(url, data=json.dumps(suggest))
+        response = Search.elastic_request(elastic_url, url, data=json.dumps(suggest))
         logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(suggest) + "'")
         if response.status_code != 200:
             logger.warn("Error: elastic response 200:" + url)
@@ -243,10 +279,12 @@ class Suggest(object):
 class Update(object):
 
     @classmethod
-    def update_doc(cls, doc, update_field, url=ElasticSettings.url()):
-        url = (url + '/' + doc._meta['_index'] + '/' +
+    def update_doc(cls, doc, update_field, elastic_url=None):
+        if elastic_url is None:
+            elastic_url = ElasticSettings.url()
+        url = (doc._meta['_index'] + '/' +
                doc.type() + '/' + doc._meta['_id'] + '/_update')
-        response = requests.post(url, data=json.dumps(update_field))
+        response = Search.elastic_request(elastic_url, url, data=json.dumps(update_field))
 
         logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(update_field) + "'")
         if response.status_code != 200:
@@ -398,8 +436,8 @@ class ElasticQuery():
 
 
 class Highlight():
-    ''' Used in highlighting search result fields, see
-    U{Elastic highlighting docs<www.elastic.co/guide/en/elasticsearch/reference/1.x/search-request-highlighting.html>}.
+    ''' Used in highlighting search result fields, see U{Elastic highlighting docs
+    <www.elastic.co/guide/en/elasticsearch/reference/current/search-request-highlighting.html>}.
     '''
     def __init__(self, fields, pre_tags=None, post_tags=None, number_of_fragments=None, fragment_size=None):
         ''' Highlight one or more fields in the search results. '''
