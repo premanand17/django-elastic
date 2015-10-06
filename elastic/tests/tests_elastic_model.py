@@ -484,6 +484,15 @@ class AggregationsTest(TestCase):
         hits = search.search().aggs['test_top_hits'].get_hits()
         self.assertTrue(len(hits) == 1, "returned the top hit")
 
+    def test_top_hits_sub_agg(self):
+        sub_agg = Agg('idx_top_hits', 'top_hits', {"size": 1})
+        aggs = Aggs([Agg("idxs", "terms", {"field": "_index"}, sub_agg=sub_agg),
+                     Agg("categories", "terms", {"field": "_type", "size": 0})])
+        search = Search(aggs=aggs, idx=ElasticSettings.idx('DEFAULT'))
+        buckets = search.search().aggs['idxs'].get_docs_in_buckets()
+        self.assertEqual(buckets[ElasticSettings.idx('DEFAULT')]['doc_count'], 3)
+        self.assertEqual(len(buckets[ElasticSettings.idx('DEFAULT')]['docs']), 1)
+
     def test_filters(self):
         ''' Filters Aggregation '''
         filters = {'filters': {'start_gt': RangeQuery('start', gt='1000'),
