@@ -158,6 +158,76 @@ class Query:
         return str_arr
 
 
+class ScoreFunction:
+    ''' U{Function Score Query
+     <www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-function-score-query.html#score-functions>}
+     '''
+    SCORE_FUNCTION = {
+        'script_score': {"script": str, "params": dict, "lang": str},
+        'weight': float,
+        'random_score': {"seed": float},
+        'field_value_factor': {
+            "field": str,
+            "factor": float,
+            "modifier": str,
+            "missing": float
+        }
+    }
+
+    def __init__(self, score_funtion, function_filter=None, weight=None):
+        self.score_funtion = score_funtion
+        if function_filter is not None:
+            self.score_funtion.update(function_filter)
+        if weight is not None:
+            self.score_funtion.update(weight)
+
+    @classmethod
+    def create_score_function(cls, score_funtion_type, *args, function_filter=None, weight=None, **kwargs):
+        SCORE_FUNCTION = ScoreFunction.SCORE_FUNCTION
+        if score_funtion_type not in SCORE_FUNCTION:
+            raise QueryError("not a defined score function type")
+
+        if score_funtion_type == 'weight':
+            return ScoreFunction({'weight': args[0]}, function_filter=function_filter, weight=weight)
+
+        score_function = {score_funtion_type: {}}
+        for k, v in kwargs.items():
+            if k not in SCORE_FUNCTION[score_funtion_type]:
+                raise QueryError(k+" is not a defined parameter")
+            if not isinstance(v, SCORE_FUNCTION[score_funtion_type][k]):
+                raise QueryError(v+" incorrect type for "+k)
+            score_function[score_funtion_type][k] = v
+        return ScoreFunction(score_function, function_filter=function_filter, weight=weight)
+
+
+class FunctionScoreQuery(Query):
+
+    def __init__(self, query_or_filter, score_functions, score_mode=None,
+                 boost_mode=None, max_boost=None, min_score=None):
+        ''' Construct a function score query '''
+        if isinstance(query_or_filter, Query):
+            self.query = {"function_score": {"query": query_or_filter.query}}
+        elif isinstance(query_or_filter, Filter):
+            self.query = {"function_score": query_or_filter.filter}
+        else:
+            raise QueryError("not a Query or Filter")
+
+        self.query["function_score"]["functions"] = []
+        for sf in score_functions:
+            if not isinstance(sf, ScoreFunction):
+                raise QueryError("not a ScoreFunction")
+            self.query["function_score"]["functions"].append(sf.score_funtion)
+
+        if score_mode is not None and isinstance(score_mode, str):
+            self.query["function_score"]['score_mode'] = score_mode
+        if boost_mode is not None and isinstance(boost_mode, str):
+            self.query["function_score"]['boost_mode'] = boost_mode
+        if max_boost is not None and isinstance(max_boost, float):
+            self.query["function_score"]['max_boost'] = max_boost
+        if min_score is not None and isinstance(min_score, float):
+            self.query["function_score"]['min_score'] = min_score
+
+
 class FilteredQuery(Query):
     ''' Filtered Query - used to combine a query and a filter. '''
     def __init__(self, query, query_filter):

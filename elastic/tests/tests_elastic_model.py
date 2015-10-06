@@ -9,13 +9,14 @@ from elastic.elastic_settings import ElasticSettings
 from django.core.urlresolvers import reverse
 from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
-    AndFilter, NotFilter, OrFilter
+    AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
 from rest_framework.test import APITestCase
 import json
 import requests
 import time
+import sys
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -198,6 +199,37 @@ class ElasticModelTest(TestCase):
         status = load.mapping(inta_mapping, "interactions", **options)
         self.assertTrue(status, "mapping inteactions")
         requests.delete(ElasticSettings.url() + '/' + idx)
+
+    def test_function_score_query(self):
+        ''' Test a function score query with a query (using the start position as the score). '''
+        query_string = Query.query_string("rs*", fields=["id", "seqid"])
+        score_function = ScoreFunction.create_score_function('field_value_factor', field='start', modifier='reciprocal')
+        query = ElasticQuery(FunctionScoreQuery(query_string, [score_function], boost_mode='replace'))
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        docs = elastic.search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = 0
+        for doc in docs:
+            start = getattr(doc, 'start')
+            self.assertLess(last_start, start)
+            last_start = start
+
+    def test_function_score_filter(self):
+        ''' Test a function score query with a filter. '''
+        score_function = ScoreFunction.create_score_function('field_value_factor', field='start')
+        bool_filter = Filter(BoolQuery(must_arr=[RangeQuery("start", lte=50000)]))
+        qfilter = FunctionScoreQuery(bool_filter, [score_function], boost_mode='replace')
+        query = ElasticQuery(qfilter)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        docs = elastic.search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = sys.maxsize
+        for doc in docs:
+            start = getattr(doc, 'start')
+            # test that the start is equal to the score
+            self.assertEqual(start, int(doc.__dict__['_meta']['_score']))
+            self.assertGreater(last_start, start)
+            last_start = start
 
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
