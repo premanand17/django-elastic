@@ -493,6 +493,16 @@ class AggregationsTest(TestCase):
         self.assertEqual(buckets[ElasticSettings.idx('DEFAULT')]['doc_count'], 3)
         self.assertEqual(len(buckets[ElasticSettings.idx('DEFAULT')]['docs']), 1)
 
+    def test_terms_avg_order(self):
+        ''' Test average and order. '''
+        agg_name = "test"
+        sub_agg = Agg('avg_start', 'avg', {"field": "start"})
+        agg = Agg(agg_name, "terms", {"field": "seqid", "size": 0, "order": [{"avg_start": "desc"}]}, sub_agg=sub_agg)
+        search = Search(aggs=Aggs(agg), idx=ElasticSettings.idx('DEFAULT'))
+        r_aggs = search.search().aggs
+        self.assertTrue(agg_name in r_aggs, "returned test aggregations")
+        self.assertGreater(r_aggs['test'].get_buckets()[0]['doc_count'], 1)
+
     def test_filters(self):
         ''' Filters Aggregation '''
         filters = {'filters': {'start_gt': RangeQuery('start', gt='1000'),
