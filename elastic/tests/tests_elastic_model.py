@@ -497,7 +497,7 @@ class AggregationsTest(TestCase):
         ''' Test average and order. '''
         agg_name = "test"
         sub_agg = Agg('avg_start', 'avg', {"field": "start"})
-        agg = Agg(agg_name, "terms", {"field": "seqid", "size": 0, "order": [{"avg_start": "desc"}]}, sub_agg=sub_agg)
+        agg = Agg(agg_name, "terms", {"field": "seqid", "size": 0, "order": {"avg_start": "desc"}}, sub_agg=sub_agg)
         search = Search(aggs=Aggs(agg), idx=ElasticSettings.idx('DEFAULT'))
         r_aggs = search.search().aggs
         self.assertTrue(agg_name in r_aggs, "returned test aggregations")
