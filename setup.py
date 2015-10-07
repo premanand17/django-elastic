@@ -23,7 +23,7 @@ setup(
     url='http://github.com/D-I-L/django-elastic',
     description='A Django app to run and view Elastic elastic queries.',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
-    install_requires=["requests>=2.7.0", "Django>=1.8.4", "djangorestframework>=3.2.2",
+    install_requires=["requests>=2.7.0", "Django>=1.8.4", "djangorestframework>=3.2.4",
                       "markdown>=2.6.2", "django-filter>=0.11.0", "django-rest-swagger>=0.3.4"],
     classifiers=[
         'Environment :: Web Environment',
