@@ -195,7 +195,7 @@ class ScoreFunction:
             if k not in SCORE_FUNCTION[score_funtion_type]:
                 raise QueryError(k+" is not a defined parameter")
             if not isinstance(v, SCORE_FUNCTION[score_funtion_type][k]):
-                raise QueryError(v+" incorrect type for "+k)
+                raise QueryError(str(v)+" incorrect type for "+k)
             score_function[score_funtion_type][k] = v
         return ScoreFunction(score_function, function_filter=function_filter, weight=weight)
 
