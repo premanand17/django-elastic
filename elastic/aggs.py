@@ -37,7 +37,7 @@ class Agg:
         "filter": {"type": Query},
         "filters": {"type": dict, "dict_type": Query},
         "missing": {"type": dict, "params": {"field": str}},
-        "terms": {"type": dict, "params": {"field": str, "size": int}},
+        "terms": {"type": dict, "params": {"field": str, "size": int, "order": (dict, list)}},
         "significant_terms": {"type": dict, "params": {"field": str}},
         "range": {"type": dict, "params": {"field": str, 'ranges': list}}
     }
