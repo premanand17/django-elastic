@@ -34,7 +34,7 @@ class Search:
 
     def __init__(self, search_query=None, aggs=None, search_from=0, size=20,
                  search_type=None, idx=ElasticSettings.idx('DEFAULT'), idx_type='',
-                 elastic_url=None):
+                 qsort=None, elastic_url=None):
         ''' Set up parameters to use in the search. L{ElasticQuery} is used to
         define a search query.
         @type  search_query: L{ElasticQuery}
@@ -49,6 +49,8 @@ class Search:
         @keyword idx: index to search (default: default index defined in settings).
         @type  idx_type: string
         @keyword idx_type: index type (default: '').
+        @type  qsort: list
+        @keyword qsort: defines sorting for the query.
         @type  url: string
         @keyword url: Elastic URL (default: default cluster URL).
         '''
@@ -62,6 +64,12 @@ class Search:
                 self.query.update(aggs.aggs)
             else:
                 self.query = aggs.aggs
+
+        if qsort is not None:
+            if hasattr(self, 'query'):
+                self.query.update(qsort)
+            else:
+                logger.error("no query to sort")
 
         if elastic_url is None:
             elastic_url = ElasticSettings.url()
