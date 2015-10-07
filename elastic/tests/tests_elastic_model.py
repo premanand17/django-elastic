@@ -9,7 +9,7 @@ from elastic.elastic_settings import ElasticSettings
 from django.core.urlresolvers import reverse
 from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
-    AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery
+    AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery, ExistsFilter
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
 from rest_framework.test import APITestCase
@@ -325,6 +325,13 @@ class ElasticModelTest(TestCase):
         ''' Test building and running a filtered query. '''
         not_filter = NotFilter(RangeQuery("start", lte=10000))
         query = ElasticQuery.filtered(Query.term("seqid", 1), not_filter)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_exists_filtered_query(self):
+        ''' Test building and running a filtered query. '''
+        exists_filter = ExistsFilter("start")
+        query = ElasticQuery.filtered(Query.term("seqid", 1), exists_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 
