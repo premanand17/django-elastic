@@ -200,6 +200,13 @@ class ElasticModelTest(TestCase):
         self.assertTrue(status, "mapping inteactions")
         requests.delete(ElasticSettings.url() + '/' + idx)
 
+    def test_sort_query(self):
+        ''' Test sorting for a query. '''
+        query = ElasticQuery(Query.match_all())
+        qsort = {"sort": [{"start": {"order": "asc"}}, "_score"]}
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), qsort=qsort)
+        self.assertTrue(elastic.search().hits_total >= 1, "Nested bool filter query")
+
     def test_function_score_query(self):
         ''' Test a function score query with a query (using the start position as the score). '''
         query_string = Query.query_string("rs*", fields=["id", "seqid"])
