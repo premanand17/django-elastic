@@ -49,7 +49,7 @@ class Search:
         @keyword idx: index to search (default: default index defined in settings).
         @type  idx_type: string
         @keyword idx_type: index type (default: '').
-        @type  qsort: list
+        @type  qsort: Sort
         @keyword qsort: defines sorting for the query.
         @type  url: string
         @keyword url: Elastic URL (default: default cluster URL).
@@ -66,8 +66,10 @@ class Search:
                 self.query = aggs.aggs
 
         if qsort is not None:
+            if not isinstance(qsort, Sort):
+                raise QueryError("not a Sort")
             if hasattr(self, 'query'):
-                self.query.update(qsort)
+                self.query.update(qsort.qsort)
             else:
                 logger.error("no query to sort")
 
@@ -213,6 +215,33 @@ class Search:
                       hits_total=json_response['hits']['total'],
                       size=self.size, docs=docs, aggs=aggs,
                       idx=self.idx, query=self.query)
+
+
+class Sort():
+    ''' Specify the sorting by specific fields. e.g. Sort('_score'), Sort('seq:desc').
+    U{Sort<https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html>}
+    '''
+    def __init__(self, sort_by):
+        ''' Given a comma separate string of field names, create the sort. Default
+        sort is desc but can be assigned e.g. Sort('seq:asc,start). Alternatively
+        more complex sorts can be constructed by providing a dictionary.  '''
+        if isinstance(sort_by, str):
+            if ',' in sort_by:
+                sort_list = sort_by.split(',')
+            else:
+                sort_list = [sort_by]
+            expanded_sort = {"sort": []}
+            for s in sort_list:
+                if ':' in s:
+                    sort_parts = s.split(':')
+                    expanded_sort["sort"].append({sort_parts[0]: sort_parts[1]})
+                else:
+                    expanded_sort["sort"].append(s)
+            self.qsort = expanded_sort
+        elif isinstance(sort_by, dict):
+            self.qsort = sort_by
+        else:
+            raise QueryError("sort by option not recognised: " + str(sort_by))
 
 
 class ScanAndScroll(object):

@@ -7,7 +7,7 @@ from elastic.management.loaders.loader import Loader
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
 from django.core.urlresolvers import reverse
-from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll
+from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll, Sort
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery, ExistsFilter
 from elastic.exceptions import AggregationError
@@ -203,9 +203,15 @@ class ElasticModelTest(TestCase):
     def test_sort_query(self):
         ''' Test sorting for a query. '''
         query = ElasticQuery(Query.match_all())
-        qsort = {"sort": [{"start": {"order": "asc"}}, "_score"]}
+        qsort = Sort('start:asc,_score')
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), qsort=qsort)
-        self.assertTrue(elastic.search().hits_total >= 1, "Nested bool filter query")
+        docs = elastic.search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = 0
+        for doc in docs:
+            start = getattr(doc, 'start')
+            self.assertLess(last_start, start)
+            last_start = start
 
     def test_function_score_query(self):
         ''' Test a function score query with a query (using the start position as the score). '''
