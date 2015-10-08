@@ -7,9 +7,9 @@ from elastic.management.loaders.loader import Loader
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
 from django.core.urlresolvers import reverse
-from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll
+from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll, Sort
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
-    AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery
+    AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery, ExistsFilter
 from elastic.exceptions import AggregationError
 from elastic.aggs import Agg, Aggs
 from rest_framework.test import APITestCase
@@ -200,6 +200,19 @@ class ElasticModelTest(TestCase):
         self.assertTrue(status, "mapping inteactions")
         requests.delete(ElasticSettings.url() + '/' + idx)
 
+    def test_sort_query(self):
+        ''' Test sorting for a query. '''
+        query = ElasticQuery(Query.match_all())
+        qsort = Sort('start:asc,_score')
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), qsort=qsort)
+        docs = elastic.search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = 0
+        for doc in docs:
+            start = getattr(doc, 'start')
+            self.assertLess(last_start, start)
+            last_start = start
+
     def test_function_score_query(self):
         ''' Test a function score query with a query (using the start position as the score). '''
         query_string = Query.query_string("rs*", fields=["id", "seqid"])
@@ -318,6 +331,13 @@ class ElasticModelTest(TestCase):
         ''' Test building and running a filtered query. '''
         not_filter = NotFilter(RangeQuery("start", lte=10000))
         query = ElasticQuery.filtered(Query.term("seqid", 1), not_filter)
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
+        self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
+
+    def test_exists_filtered_query(self):
+        ''' Test building and running a filtered query. '''
+        exists_filter = ExistsFilter("start")
+        query = ElasticQuery.filtered(Query.term("seqid", 1), exists_filter)
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total >= 1, "Elastic filtered query retrieved marker(s)")
 

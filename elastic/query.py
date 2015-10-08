@@ -380,3 +380,10 @@ class NotFilter(Filter):
         if not isinstance(query, Query):
             raise FilterError("not a Query")
         self.filter = {"filter": {"not": query.query}}
+
+
+class ExistsFilter(Filter):
+    ''' Returns documents that have at least one non-null value in the original field. '''
+    def __init__(self, field):
+        ''' And Filter based on the Query object(s) passed in the constructor '''
+        self.filter = {"filter": {"exists": {"field": field}}}

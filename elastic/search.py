@@ -34,7 +34,7 @@ class Search:
 
     def __init__(self, search_query=None, aggs=None, search_from=0, size=20,
                  search_type=None, idx=ElasticSettings.idx('DEFAULT'), idx_type='',
-                 elastic_url=None):
+                 qsort=None, elastic_url=None):
         ''' Set up parameters to use in the search. L{ElasticQuery} is used to
         define a search query.
         @type  search_query: L{ElasticQuery}
@@ -49,6 +49,8 @@ class Search:
         @keyword idx: index to search (default: default index defined in settings).
         @type  idx_type: string
         @keyword idx_type: index type (default: '').
+        @type  qsort: Sort
+        @keyword qsort: defines sorting for the query.
         @type  url: string
         @keyword url: Elastic URL (default: default cluster URL).
         '''
@@ -62,6 +64,14 @@ class Search:
                 self.query.update(aggs.aggs)
             else:
                 self.query = aggs.aggs
+
+        if qsort is not None:
+            if not isinstance(qsort, Sort):
+                raise QueryError("not a Sort")
+            if hasattr(self, 'query'):
+                self.query.update(qsort.qsort)
+            else:
+                logger.error("no query to sort")
 
         if elastic_url is None:
             elastic_url = ElasticSettings.url()
@@ -205,6 +215,33 @@ class Search:
                       hits_total=json_response['hits']['total'],
                       size=self.size, docs=docs, aggs=aggs,
                       idx=self.idx, query=self.query)
+
+
+class Sort():
+    ''' Specify the sorting by specific fields. e.g. Sort('_score'), Sort('seq:desc').
+    U{Sort<https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html>}
+    '''
+    def __init__(self, sort_by):
+        ''' Given a comma separate string of field names, create the sort. Default
+        sort is desc but can be assigned e.g. Sort('seq:asc,start). Alternatively
+        more complex sorts can be constructed by providing a dictionary.  '''
+        if isinstance(sort_by, str):
+            if ',' in sort_by:
+                sort_list = sort_by.split(',')
+            else:
+                sort_list = [sort_by]
+            expanded_sort = {"sort": []}
+            for s in sort_list:
+                if ':' in s:
+                    sort_parts = s.split(':')
+                    expanded_sort["sort"].append({sort_parts[0]: sort_parts[1]})
+                else:
+                    expanded_sort["sort"].append(s)
+            self.qsort = expanded_sort
+        elif isinstance(sort_by, dict):
+            self.qsort = sort_by
+        else:
+            raise QueryError("sort by option not recognised: " + str(sort_by))
 
 
 class ScanAndScroll(object):
