@@ -26,6 +26,9 @@ class MarkerManager(DelimeterLoader):
              .add_property("info", "string", index="no") \
              .add_property("suggest", "completion",
                            index_analyzer="full_name", search_analyzer="full_name")
+        tags = MappingProperties("tags")
+        tags.add_property("weight", "integer", index="no")
+        props.add_properties(tags)
         self.mapping(props, idx_type, analyzer=Loader.KEYWORD_ANALYZER, **options)
         return props
 
