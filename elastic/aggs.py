@@ -79,7 +79,11 @@ class Agg:
             raise AggregationError('aggregation type unknown: '+agg_type)
 
         if sub_agg is not None:
-            self.agg[agg_name]['aggs'] = sub_agg.agg
+            self.agg[agg_name].update({"aggs": {}})
+            if not isinstance(sub_agg, list):
+                sub_agg = [sub_agg]
+            for sub in sub_agg:
+                self.agg[agg_name]['aggs'].update(sub.agg)
 
     def _update_dict(self, qdict):
         for k, v in qdict.items():
