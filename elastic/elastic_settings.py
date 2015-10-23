@@ -66,6 +66,14 @@ class ElasticSettings:
         return ElasticUrl.get_url(cluster='default')
 
     @classmethod
+    def get_idx_types(cls, idx_name='DEFAULT', cluster='default', user=None):
+        idxs = cls.getattr('IDX', cluster=cluster)
+        if idxs is None:
+            return None
+        if idx_name in idxs:
+            return idxs[idx_name]['idx_type']
+
+    @classmethod
     def search_props(cls, idx_name='ALL', user=None):
         ''' Build the search index names, keys, types and suggesters. Return as a dictionary. '''
         eattrs = ElasticSettings.attrs()
@@ -128,7 +136,7 @@ class ElasticSettings:
                 return ElasticSettings.attrs().get('IDX')[idx]['idx_type'][idx_type][label]
             return ElasticSettings.attrs().get('IDX')[idx][label]
         except KeyError:
-            raise SettingsError('Label not found in '+idx)
+            raise SettingsError(label+' not found in '+idx)
 
 
 class ElasticUrl(object):
