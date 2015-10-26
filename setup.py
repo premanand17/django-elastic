@@ -14,6 +14,7 @@ setup(
     packages=find_packages(),
     package_data={'elastic': ['tests/data/*gz',
                               'tests/data/*json',
+                              'tests/data/*bed',
                               'tests/data/alias_test_dir/gene_alias/*',
                               'tests/data/alias_test_dir/locus_alias/*',
                               'tests/data/alias_test_dir/marker_alias/*',
