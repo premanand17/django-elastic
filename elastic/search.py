@@ -306,7 +306,7 @@ class Suggest(object):
             }
         }
         response = Search.elastic_request(elastic_url, url, data=json.dumps(suggest))
-        logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(suggest) + "'")
+        logger.debug("curl -XPOST '" + elastic_url + '/' + url + "' -d '" + json.dumps(suggest) + "'")
         if response.status_code != 200:
             logger.warn("Error: elastic response 200:" + url)
             logger.warn(response.json())
