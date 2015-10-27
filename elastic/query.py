@@ -114,6 +114,23 @@ class Query:
         return cls({"match": {match_id: match_str}})
 
     @classmethod
+    def nested(cls, path, query, score_mode=None):
+        ''' Factory method for Nested query.
+        @type  path: string
+        @param path: nested object path.
+        @type  query: Query
+        @param query: query.
+        @type  score_mode: string
+        @param score_mode: how inner children matching affects scoring of parent (e.g. avg, sum, max and none).
+        '''
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
+        if score_mode is not None:
+            return cls({"nested": {"path": path, "query": query.query, "score_mode": score_mode}})
+        else:
+            return cls({"nested": {"path": path, "query": query.query}})
+
+    @classmethod
     def query_string(cls, query_term, **kwargs):
         ''' Factory method for
         U{Query String Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html>}
