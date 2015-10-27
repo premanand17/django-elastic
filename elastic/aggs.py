@@ -39,7 +39,9 @@ class Agg:
         "missing": {"type": dict, "params": {"field": str}},
         "terms": {"type": dict, "params": {"field": str, "size": int, "order": (dict, list)}},
         "significant_terms": {"type": dict, "params": {"field": str}},
-        "range": {"type": dict, "params": {"field": str, 'ranges': list}}
+        "range": {"type": dict, "params": {"field": str, 'ranges': list}},
+        "nested": {"type": dict, "params": {"path": str}},
+        "reverse_nested": {"type": dict, "params": {"path": str}}
     }
 
     def __init__(self, agg_name, agg_type, agg_body, sub_agg=None):
@@ -79,7 +81,11 @@ class Agg:
             raise AggregationError('aggregation type unknown: '+agg_type)
 
         if sub_agg is not None:
-            self.agg[agg_name]['aggs'] = sub_agg.agg
+            self.agg[agg_name].update({"aggs": {}})
+            if not isinstance(sub_agg, list):
+                sub_agg = [sub_agg]
+            for sub in sub_agg:
+                self.agg[agg_name]['aggs'].update(sub.agg)
 
     def _update_dict(self, qdict):
         for k, v in qdict.items():
