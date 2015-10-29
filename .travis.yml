@@ -1,0 +1,14 @@
+language: python
+python:
+ - "3.4"
+ - "3.5"
+# command to install dependencies
+env:
+  - DJANGO_VERSION=1.8.5
+install: 
+  - pip install -q Django==$DJANGO_VERSION
+  - python setup.py -q install
+before_script:
+  - django-admin startproject chicp
+# command to run tests
+script: 
