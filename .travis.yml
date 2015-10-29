@@ -5,11 +5,14 @@ python:
 # command to install dependencies
 env:
   - DJANGO_VERSION=1.8.5
+services:
+  - elasticsearch
 install: 
   - pip install -q Django==$DJANGO_VERSION
   - python setup.py -q install
 before_script:
-  - django-admin startproject elastic-test
+  - django-admin startproject elastic_test
+  - sleep 10
 # command to run tests
 script: 
   - time 
