@@ -12,4 +12,4 @@ before_script:
   - django-admin startproject elastic-test
 # command to run tests
 script: 
-  - time
+  - time 
