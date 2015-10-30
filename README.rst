@@ -1,15 +1,14 @@
-.. image:: https://travis-ci.org/tcarver/django-elastic.svg
-    :target: https://travis-ci.org/tcarver/django-elastic
 
-.. image:: https://coveralls.io/repos/tcarver/django-elastic/badge.svg?branch=master&service=github
-  :target: https://coveralls.io/github/tcarver/django-elastic?branch=master
-
+D-I-L/master:
 .. image:: https://travis-ci.org/D-I-L/django-elastic.svg
     :target: https://travis-ci.org/D-I-L/django-elastic
 
 .. image:: https://coveralls.io/repos/D-I-L/django-elastic/badge.svg?branch=master&service=github
   :target: https://coveralls.io/github/D-I-L/django-elastic?branch=master
 
+D-I-L/develop:
+.. image:: https://travis-ci.org/D-I-L/django-elastic.svg
+    :target: https://travis-ci.org/D-I-L/django-elastic
 
 ======
 Elastic
