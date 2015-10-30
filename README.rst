@@ -1,5 +1,6 @@
 
 D-I-L/master::
+
 .. image:: https://travis-ci.org/D-I-L/django-elastic.svg
     :target: https://travis-ci.org/D-I-L/django-elastic
 
@@ -7,6 +8,7 @@ D-I-L/master::
   :target: https://coveralls.io/github/D-I-L/django-elastic?branch=master
 
 D-I-L/develop::
+
 .. image:: https://travis-ci.org/D-I-L/django-elastic.svg
     :target: https://travis-ci.org/D-I-L/django-elastic
 
