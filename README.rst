@@ -3,6 +3,10 @@
 
 .. image:: https://coveralls.io/repos/tcarver/django-elastic/badge.svg?branch=master&service=github
   :target: https://coveralls.io/github/tcarver/django-elastic?branch=master
+
+.. image:: https://travis-ci.org/D-I-L/django-elastic.svg
+    :target: https://travis-ci.org/D-I-L/django-elastic
+
 ======
 Elastic
 ======
