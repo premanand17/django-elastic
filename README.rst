@@ -1,19 +1,25 @@
-======
-Elastic
-======
 
-D-I-L/master
+**D-I-L/master**
 
 .. image:: https://travis-ci.org/D-I-L/django-elastic.svg
     :target: https://travis-ci.org/D-I-L/django-elastic
+
 
 .. image:: https://coveralls.io/repos/D-I-L/django-elastic/badge.svg?branch=master&service=github
   :target: https://coveralls.io/github/D-I-L/django-elastic?branch=master
 
-D-I-L/develop
+**D-I-L/develop**
 
 .. image:: https://travis-ci.org/D-I-L/django-elastic.svg
     :target: https://travis-ci.org/D-I-L/django-elastic
+
+.. image:: https://coveralls.io/repos/D-I-L/django-elastic/badge.svg?branch=develop&service=github
+  :target: https://coveralls.io/github/D-I-L/django-elastic?branch=develop
+
+======
+Elastic
+======
+
 
 Search is a Django app to run Elastic search queries.
 
