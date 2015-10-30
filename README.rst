@@ -5,6 +5,11 @@ Elastic
 .. image:: https://travis-ci.org/tcarver/django-elastic.svg
     :target: https://travis-ci.org/tcarver/django-elastic
 
+
+.. image:: https://coveralls.io/repos/tcarver/django-elastic/badge.svg?branch=master&service=github
+  :target: https://coveralls.io/github/tcarver/django-elastic?branch=master
+
+
 Search is a Django app to run Elastic search queries.
 
 Quick start
