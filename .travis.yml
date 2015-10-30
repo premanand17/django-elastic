@@ -11,7 +11,7 @@ before_install:
   - sudo service elasticsearch stop
   - curl -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.3.deb && sudo dpkg -i --force-confnew elasticsearch-1.7.3.deb
   -  ls -l /etc/elasticsearch/elasticsearch.yml
-  - sudo sed -e "\$apath.repo':' [\"/tmp/test_snapshot/\"]"
+  - sudo sed -e "\$apath.repo':' [\"/tmp/test_snapshot/\"]" /etc/elasticsearch/elasticsearch.yml
   - sudo service elasticsearch restart
 install: 
   - pip install -q Django==$DJANGO_VERSION
