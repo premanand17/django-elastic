@@ -2,7 +2,8 @@
 Elastic
 ======
 
-[![Build Status](https://travis-ci.org/tcarver/django-elastic.svg)](https://travis-ci.org/tcarver/django-elastic)
+.. image:: https://travis-ci.org/tcarver/django-elastic.svg
+    :target: https://travis-ci.org/tcarver/django-elastic
 
 Search is a Django app to run Elastic search queries.
 
