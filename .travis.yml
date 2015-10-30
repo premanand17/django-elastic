@@ -23,7 +23,7 @@ before_script:
   - echo "urlpatterns += [url(r'^search/', include('elastic.urls', namespace='elastic')),]" >> elastic_test/elastic_test/urls.py  
   - sleep 10
   - 'command ps -ef | grep elastic'
-   - elastic_test/manage.py repository my_backup
+  - elastic_test/manage.py repository my_backup
 # command to run tests
 script: 
   - elastic_test/manage.py test elastic.tests -v3 --noinput
