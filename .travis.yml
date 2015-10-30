@@ -25,5 +25,5 @@ before_script:
   - 'command ps -ef | grep elastic'
 # command to run tests
 script: 
-  - elastic_test/manage.py repository my_backup
+  - elastic_test/manage.py repository my_backup --dir /tmp/test_snapshot/
   - elastic_test/manage.py test elastic.tests -v3 --noinput
