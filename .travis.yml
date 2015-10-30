@@ -8,6 +8,7 @@ env:
 services:
   - elasticsearch
 before_install:
+  - sudo service elasticsearch stop
   - curl -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.3.deb && sudo dpkg -i --force-confnew elasticsearch-1.7.3.deb && sudo service elasticsearch restart
 install: 
   - pip install -q Django==$DJANGO_VERSION
