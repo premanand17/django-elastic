@@ -31,7 +31,6 @@ before_script:
 # command to run tests
 script: 
   - elastic_test/manage.py repository my_backup --dir /tmp/test_snapshot/
-  - coverage run elastic_test/manage.py test elastic.tests -v3 --noinput
+  - coverage run --source=elastic elastic_test/manage.py test elastic.tests -v3 --noinput
 after_success:
-  - coverage report --include="*/elastic/*"
   - coveralls
