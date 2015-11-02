@@ -18,7 +18,7 @@ class MarkerManager(DelimeterLoader):
         props = MappingProperties(idx_type)
         props.add_property("seqid", "string", index="not_analyzed") \
              .add_property("start", "integer", index="not_analyzed") \
-             .add_property("id", "string", index="not_analyzed") \
+             .add_property("id", "string", analyzer="full_name") \
              .add_property("ref", "string", index="no") \
              .add_property("alt", "string", index="no") \
              .add_property("qual", "string", index="no") \
