@@ -194,10 +194,13 @@ class ElasticModelTest(TestCase):
         load = Loader()
         idx = "test__mapping__"+SEARCH_SUFFIX
         options = {"indexName": idx, "shards": 1}
-        status = load.mapping(gene_mapping, "gene", **options)
-        self.assertTrue(status, "mapping genes")
+        requests.delete(ElasticSettings.url() + '/' + idx)
+
+        # add child mappings first
         status = load.mapping(inta_mapping, "interactions", **options)
         self.assertTrue(status, "mapping inteactions")
+        status = load.mapping(gene_mapping, "gene", **options)
+        self.assertTrue(status, "mapping genes")
         requests.delete(ElasticSettings.url() + '/' + idx)
 
     def test_sort_query(self):
