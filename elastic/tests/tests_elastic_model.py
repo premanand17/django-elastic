@@ -24,10 +24,12 @@ def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     call_command('index_search', **IDX['GFF_GENERIC'])
+    call_command('index_search', **IDX['JSON_NESTED'])
 
     # wait for the elastic load to finish
     Search.index_refresh(IDX['MARKER']['indexName'])
     Search.index_refresh(IDX['GFF_GENERIC']['indexName'])
+    Search.index_refresh(IDX['JSON_NESTED']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -35,6 +37,7 @@ def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
     requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
+    requests.delete(ElasticSettings.url() + '/' + IDX['JSON_NESTED']['indexName'])
 
 
 class ServerTest(TestCase):
@@ -294,6 +297,29 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
+
+    def test_nested_query(self):
+        ''' Test nested query with aggregations. '''
+        qnested = ElasticQuery(Query.nested('build_info', Query.term("build_info.build", "38")))
+
+        diseases_by_seqid = Agg('diseases_by_seqid', 'terms', {"size": 0, "field": "disease"})
+        disease_hits = Agg('disease_hits', 'reverse_nested', {}, sub_agg=diseases_by_seqid)
+        seq_hits = Agg('seq_hits', 'terms', {'field': 'build_info.seqid', 'size': 0}, sub_agg=disease_hits)
+        build_info = Agg('build_info', 'nested', {"path": 'build_info'}, sub_agg=[seq_hits])
+
+        elastic = Search(qnested, idx=IDX['JSON_NESTED']['indexName'], aggs=Aggs(build_info))
+        res = elastic.search()
+
+        # returns just build 38 hits
+        self.assertEqual(len(res.docs), 2)
+
+        seq_hits = getattr(res.aggs['build_info'], 'seq_hits')['buckets']
+        # two seq ids
+        self.assertEqual(len(seq_hits), 2)
+        for seq in seq_hits:
+            disease_hits = seq['disease_hits']
+            # one disease found on the sequence
+            self.assertEqual(len(disease_hits['diseases_by_seqid']['buckets']), 1)
 
     def test_bool_nested_filter(self):
         ''' Test combined Bool filter '''
