@@ -70,9 +70,11 @@ OVERRIDE_SETTINGS2 = \
             'MARKER': {
                 'name': 'dbsnp144',
                 'idx_type': {
-                    'MARKER': {'type': 'marker', 'description': 'dbsnp', 'search': True},
+                    'MARKER': {'type': 'marker', 'description': 'dbsnp', 'search': True, 'auth_public': True},
                 },
-                'label': 'marker storage'
+                'label': 'marker storage',
+                'auth_public': True,
+                'suggester': True
             }
         }}
     }
