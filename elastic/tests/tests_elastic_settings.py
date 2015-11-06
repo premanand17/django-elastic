@@ -8,6 +8,7 @@ from django.core.management import call_command
 from elastic.search import Search, ElasticQuery
 import requests
 from elastic.query import Query, Filter
+import json
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -24,6 +25,29 @@ def tearDownModule():
 
 
 class ElasticSettingsTest(TestCase):
+
+    @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
+    def test_search_props(self):
+        ''' Test call for search props. '''
+        self.assertJSONEqual(json.dumps(ElasticSettings.search_props()),
+                             json.dumps({'idx_keys': ['MARKER'], 'idx_type': 'marker',
+                                         'idx': 'dbsnp144', 'suggester_keys': ['MARKER']}))
+
+    @override_settings(ELASTIC=OVERRIDE_SETTINGS)
+    def test_indices_str(self):
+        idx_str = ElasticSettings.indices_str()
+        self.assertTrue(idx_str in [IDX['GFF_GENERIC']['indexName']+','+IDX['MARKER']['indexName'],
+                                    IDX['MARKER']['indexName']+','+IDX['GFF_GENERIC']['indexName']])
+
+    @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
+    def test_get_idx_types(self):
+        self.assertJSONEqual(json.dumps(ElasticSettings.get_idx_types('MARKER')),
+                             json.dumps({'MARKER': {'type': 'marker', 'description': 'dbsnp',
+                                                    'search': True, 'auth_public': True}}))
+
+    @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
+    def test_get_idx_key_by_name(self):
+        self.assertEquals(ElasticSettings.get_idx_key_by_name('dbsnp144'), 'MARKER')
 
     @override_settings(ELASTIC=OVERRIDE_SETTINGS2)
     def test_get_label(self):

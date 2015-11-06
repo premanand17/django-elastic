@@ -330,6 +330,46 @@ class Update(object):
         return response.json()
 
 
+class Delete(object):
+
+    @classmethod
+    def docs_by_query(cls, idx, idx_type='', query=Query.match_all()):
+        query = ElasticQuery(query, sources='_id')
+        chunk_size = 1000
+        search_from = 0
+        hits_total = 10
+        while search_from < hits_total:
+            res = Search(query, idx=idx, idx_type=idx_type, size=chunk_size, search_from=search_from).search()
+            hits_total = res.hits_total
+            search_from += chunk_size
+            docs = res.docs
+            json_data = ''
+            for doc in docs:
+                json_data += '{"delete": {"_index": "%s", "_type": "%s", "_id": "%s"}}\n' % \
+                             (doc.index(), doc.type(), doc.doc_id())
+            Bulk.load(idx, idx_type, json_data)
+
+
+class Bulk(object):
+
+    @classmethod
+    def load(self, idx, idx_type, json_data):
+        ''' Bulk load documents. '''
+        resp = requests.put(ElasticSettings.url()+'/' + idx+'/' + idx_type +
+                            '/_bulk', data=json_data)
+        if(resp.status_code != 200):
+            logger.error('ERROR: '+idx+' load status: '+str(resp.status_code)+' '+str(resp.content))
+
+        # report errors found during loading
+        if 'errors' in resp.json() and resp.json()['errors']:
+            logger.error("ERROR: bulk load error found")
+            for item in resp.json()['items']:
+                for key in item.keys():
+                    if 'error' in item[key]:
+                        logger.error("ERROR LOADING:")
+                        logger.error(item)
+
+
 class ElasticQuery():
     ''' Takes a Query to be used to construct Elastic query which can be
     used in L{Search<elastic_model.Search>}.
