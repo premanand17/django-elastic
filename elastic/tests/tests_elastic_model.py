@@ -7,7 +7,8 @@ from elastic.management.loaders.loader import Loader
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
 from django.core.urlresolvers import reverse
-from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll, Sort
+from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll, Sort,\
+    Suggest
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery, ExistsFilter
 from elastic.exceptions import AggregationError
@@ -166,6 +167,15 @@ class ScanAndScrollTest(TestCase):
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
+class SuggestTest(TestCase):
+
+    def test_suggest(self):
+        ''' Test completion type for suggesting terms. '''
+        resp = Suggest.suggest('XA', IDX['JSON_NESTED']['indexName'], name='suggest', size=1)['suggest']
+        self.assertTrue(resp[0]['options'][0]['text'], 'XAB')
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
 class ElasticModelTest(TestCase):
 
     def test_idx_exists(self):
@@ -205,6 +215,12 @@ class ElasticModelTest(TestCase):
         status = load.mapping(gene_mapping, "gene", **options)
         self.assertTrue(status, "mapping genes")
         requests.delete(ElasticSettings.url() + '/' + idx)
+
+    def test_range_query(self):
+        ''' Test range overlap django-elastic function. '''
+        elastic = Search.range_overlap_query(seqid='chr1', start_range=1, end_range=206770620,
+                                             idx=IDX['GFF_GENERIC']['indexName'], field_list=['start', 'end'])
+        self.assertEquals(len(elastic.search().docs), 4)
 
     def test_sort_query(self):
         ''' Test sorting for a query. '''
