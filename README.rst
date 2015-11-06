@@ -10,7 +10,7 @@
 
 **D-I-L/develop**
 
-.. image:: https://travis-ci.org/D-I-L/django-elastic.svg
+.. image:: https://travis-ci.org/D-I-L/django-elastic.svg?branch=develop
     :target: https://travis-ci.org/D-I-L/django-elastic
 
 .. image:: https://coveralls.io/repos/D-I-L/django-elastic/badge.svg?branch=develop&service=github
