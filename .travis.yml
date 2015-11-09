@@ -25,7 +25,7 @@ install:
 before_script:
   - django-admin startproject elastic_test
   - sed -i "s|INSTALLED_APPS = (|INSTALLED_APPS = ('elastic',|" elastic_test/elastic_test/settings.py
-  - 'command echo ''ELASTIC = {"default": { "ELASTIC_URL": "http://127.0.0.1:9200/", "IDX": {"MARKER": {"name": "dbsnp142", "idx_type": {"MARKER": "marker"}}, "DEFAULT": "dbsnp142",},"TEST": "test_django_elastic_tc", "TEST_REPO_DIR": "/tmp/test_snapshot/", "REPOSITORY": "my_backup",}}'' >> elastic_test/elastic_test/settings.py'
+  - 'command echo ''ELASTIC = {"default": { "ELASTIC_URL": "http://127.0.0.1:9200/", "VERSION": {"major": 1}, "IDX": {"MARKER": {"name": "dbsnp142", "idx_type": {"MARKER": "marker"}}, "DEFAULT": "dbsnp142",},"TEST": "test_django_elastic_tc", "TEST_REPO_DIR": "/tmp/test_snapshot/", "REPOSITORY": "my_backup",}}'' >> elastic_test/elastic_test/settings.py'
   - echo "urlpatterns += [url(r'^search/', include('elastic.urls', namespace='elastic')),]" >> elastic_test/elastic_test/urls.py  
   - sleep 10
   - 'command ps -ef | grep elastic'
