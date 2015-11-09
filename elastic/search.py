@@ -86,7 +86,7 @@ class Search:
             self.url = (self.idx + '/' + self.idx_type +
                         '/_search?size=' + str(self.size) + '&from='+str(self.search_from))
         else:
-            self.url = (self.idx + '/' + self.idx_type + '/_search?search_type=count')
+            self.url = (self.idx + '/' + self.idx_type + '/_search?search_type='+search_type)
 
     @classmethod
     def elastic_request(cls, elastic_url, url, data=None, is_post=True):
