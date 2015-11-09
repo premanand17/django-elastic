@@ -57,7 +57,7 @@ class BulkApiTest(TestCase):
         resp = Bulk.load(idx, '', json_data)
         self.assertNotEquals(resp.status_code, 200)
 
-        # nore: needs a trailing line return to work
+        # note: needs a trailing line return to work
         Bulk.load(idx, '', json_data + '\n')
         Search.index_refresh(idx)
         hits_total2 = elastic.get_count()['count']
