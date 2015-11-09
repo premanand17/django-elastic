@@ -15,9 +15,14 @@ class ElasticSettings:
         return getattr(settings, 'ELASTIC').get(cluster, None)
 
     @classmethod
-    def getattr(cls, name, cluster='default'):
+    def getattr(cls, name, cluster='default', default=None):
         ''' Get a named attribute '''
-        return cls.attrs(cluster).get(name, None)
+        return cls.attrs(cluster).get(name, default)
+
+    @classmethod
+    def version(cls, cluster='default'):
+        ''' Return the elastic version as a dictionary of major, minor keys. '''
+        return cls.getattr('VERSION', cluster=cluster, default={'major': 2})
 
     @classmethod
     def idx(cls, name='DEFAULT', idx_type=None, cluster='default'):
