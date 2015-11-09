@@ -85,3 +85,9 @@ class BulkApiTest(TestCase):
         Search.index_refresh(idx)
         hits_total2 = elastic.get_count()['count']
         self.assertEquals(hits_total2, hits_total1+1, "contains documents")
+
+        # produce errors updating doc id that doesn't exist
+        json_data += '{"delete": {"_index": "%s", "_type": "%s", "_id": "%s"}}\n' % \
+                     (idx, 'marker', 'XYZ')
+        resp = Bulk.load(idx, '', json_data)
+        self.assertTrue('errors' in resp.json() and resp.json()['errors'])
