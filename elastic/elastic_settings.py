@@ -93,7 +93,7 @@ class ElasticSettings:
         if 'pydgin_auth' in settings.INSTALLED_APPS:
             from pydgin_auth.permissions import get_authenticated_idx_and_idx_types
             search_idx, search_types = get_authenticated_idx_and_idx_types(user, search_idx, search_types)
-            suggester_idx = get_authenticated_idx_and_idx_types(user, idx_keys=suggester_idx, idx_type_keys=[])[0]
+            suggester_idx = get_authenticated_idx_and_idx_types(user, idx_keys=suggester_idx)[0]
 
         idx_properties = {
             "idx": ','.join(ElasticSettings.idx(name) for name in search_idx),
