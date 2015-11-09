@@ -252,7 +252,6 @@ class FilteredQuery(Query):
             raise QueryError("not a Query")
         if not isinstance(query_filter, Filter):
             raise QueryError("not a Filter")
-        print(ElasticSettings.version)
 
         if ElasticSettings.version()['major'] < 2:
             logger.warn('USING DEPRECATED FILTERED QUERY')
