@@ -368,6 +368,7 @@ class Bulk(object):
                     if 'error' in item[key]:
                         logger.error("ERROR LOADING:")
                         logger.error(item)
+        return resp
 
 
 class ElasticQuery():
