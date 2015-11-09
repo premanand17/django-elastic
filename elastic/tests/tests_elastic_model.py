@@ -11,7 +11,7 @@ from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll, Sort,
     Suggest
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery, ExistsFilter
-from elastic.exceptions import AggregationError
+from elastic.exceptions import AggregationError, QueryError
 from elastic.aggs import Agg, Aggs
 from rest_framework.test import APITestCase
 import json
@@ -225,9 +225,14 @@ class ElasticModelTest(TestCase):
     def test_sort_query(self):
         ''' Test sorting for a query. '''
         query = ElasticQuery(Query.match_all())
-        qsort = Sort('start:asc,_score')
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), qsort=Sort('start:asc,_score'))
+        self._check_sort_order(elastic.search().docs)
+        qsort = Sort({"sort": [{"start": {"order": "asc", "mode": "avg"}}]})
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), qsort=qsort)
-        docs = elastic.search().docs
+        self._check_sort_order(elastic.search().docs)
+        self.assertRaises(QueryError, Sort, 1)
+
+    def _check_sort_order(self, docs):
         self.assertGreater(len(docs), 1, str(len(docs)))
         last_start = 0
         for doc in docs:
