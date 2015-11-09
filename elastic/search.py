@@ -314,16 +314,18 @@ class Suggest(object):
 
 
 class Update(object):
+    ''' Update API. '''
 
     @classmethod
-    def update_doc(cls, doc, update_field, elastic_url=None):
+    def update_doc(cls, doc, part_doc, elastic_url=None):
+        ''' Update a document with a partial document.  '''
         if elastic_url is None:
             elastic_url = ElasticSettings.url()
         url = (doc._meta['_index'] + '/' +
                doc.type() + '/' + doc._meta['_id'] + '/_update')
-        response = Search.elastic_request(elastic_url, url, data=json.dumps(update_field))
+        response = Search.elastic_request(elastic_url, url, data=json.dumps(part_doc))
 
-        logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(update_field) + "'")
+        logger.debug("curl -XPOST '" + elastic_url + url + "' -d '" + json.dumps(part_doc) + "'")
         if response.status_code != 200:
             logger.warn("Error: elastic response 200:" + url)
             logger.warn(response.json())
@@ -334,6 +336,7 @@ class Delete(object):
 
     @classmethod
     def docs_by_query(cls, idx, idx_type='', query=Query.match_all()):
+        ''' Delete all documents specified by a Query. '''
         query = ElasticQuery(query, sources='_id')
         chunk_size = 1000
         search_from = 0
@@ -351,10 +354,13 @@ class Delete(object):
 
 
 class Bulk(object):
+    ''' Bulk API. '''
 
     @classmethod
-    def load(self, idx, idx_type, json_data):
+    def load(self, idx, idx_type, json_data, elastic_url=None):
         ''' Bulk load documents. '''
+        if elastic_url is None:
+            elastic_url = ElasticSettings.url()
         resp = requests.put(ElasticSettings.url()+'/' + idx+'/' + idx_type +
                             '/_bulk', data=json_data)
         if(resp.status_code != 200):
