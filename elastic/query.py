@@ -1,5 +1,10 @@
 ''' Define L{Query} and L{Filter} to be used in an L{ElasticQuery} '''
 from elastic.exceptions import QueryError, FilterError
+from elastic.elastic_settings import ElasticSettings
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class Query:
@@ -71,21 +76,15 @@ class Query:
         return cls({"term": {name: {"value": value, "boost": boost}}})
 
     @classmethod
-    def terms(cls, name, arr, minimum_should_match=1):
+    def terms(cls, name, arr):
         ''' Factory method for Terms Query.
         @type  name: name
         @param name: The name of the field.
         @type  arr: array
         @param arr: The terms to match.
-        @type  minimum_should_match: integer, percentage
-        @keyword minimum_should_match:
-        U{minimum_should_match<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-minimum-should-match.html>}
         @return: L{Query}
         '''
-        if minimum_should_match != 0:
-            query = {"terms": {name: arr, "minimum_should_match": minimum_should_match}}
-        else:
-            query = {"terms": {name: arr}}
+        query = {"terms": {name: arr}}
         return cls(query)
 
     @classmethod
@@ -253,8 +252,16 @@ class FilteredQuery(Query):
             raise QueryError("not a Query")
         if not isinstance(query_filter, Filter):
             raise QueryError("not a Filter")
-        self.query = {"filtered": {"query": query.query}}
-        self.query["filtered"].update(query_filter.filter)
+        print(ElasticSettings.version)
+
+        if ElasticSettings.version()['major'] < 2:
+            logger.warn('USING DEPRECATED FILTERED QUERY')
+            self.query = {"filtered": {"query": query.query}}
+            self.query["filtered"].update(query_filter.filter)
+        else:
+            if 'match_all' in query.query:
+                query.query_wrap()
+            self.query = BoolQuery(must_arr=query, b_filter=query_filter).query
 
 
 class HasParentQuery(Query):
@@ -268,7 +275,7 @@ class HasParentQuery(Query):
 class BoolQuery(Query):
     ''' Bool Query - a query that matches documents matching boolean
     combinations of other queries'''
-    def __init__(self, must_arr=None, must_not_arr=None, should_arr=None):
+    def __init__(self, must_arr=None, must_not_arr=None, should_arr=None, b_filter=None):
         ''' Bool query '''
         self.query = {"bool": {}}
         if must_arr is not None:
@@ -277,6 +284,13 @@ class BoolQuery(Query):
             self.must_not(must_not_arr)
         if should_arr is not None:
             self.should(should_arr)
+        if b_filter is not None:
+            self.filter(b_filter)
+
+    def filter(self, b_filter):
+        if not isinstance(b_filter, Filter):
+            raise QueryError("not a Filter")
+        self.query["bool"].update(b_filter.filter)
 
     def must(self, must_arr):
         return self._update("must", must_arr)
@@ -355,7 +369,7 @@ class TermsFilter(Filter):
 
     @classmethod
     def get_terms_filter(cls, name, arr):
-        return cls(Query.terms(name, arr, minimum_should_match=0))
+        return cls(Query.terms(name, arr))
 
     @classmethod
     def get_missing_terms_filter(cls, name, arr):
