@@ -89,5 +89,8 @@ class BulkApiTest(TestCase):
         # produce errors updating doc id that doesn't exist
         json_data += '{"delete": {"_index": "%s", "_type": "%s", "_id": "%s"}}\n' % \
                      (idx, 'marker', 'XYZ')
+        json_data += '{"update": {"_index": "%s", "_type": "%s", "_id": "%s"}}\n' % \
+                     (idx, 'marker', 'XYZ')
+        json_data += '{"doc": {"start": 100, "end": 200}}\n'
         resp = Bulk.load(idx, '', json_data)
         self.assertTrue('errors' in resp.json() and resp.json()['errors'])
