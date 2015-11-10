@@ -21,7 +21,7 @@ import logging
 from elastic.result import Document, Result, Aggregation
 from elastic.elastic_settings import ElasticSettings, ElasticUrl
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
-    Filter, OrFilter, HasParentQuery
+    Filter, OrFilter, HasParentQuery, HasChildQuery
 import warnings
 from builtins import classmethod
 
@@ -480,6 +480,23 @@ class ElasticQuery():
         @return: L{ElasticQuery}
         '''
         return cls(HasParentQuery(parent_type, query), sources, highlight)
+
+    @classmethod
+    def has_child(cls, child_type, query, sources=None, highlight=None):
+        ''' Factory method for creating an elastic
+        U{Has Child Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-child-query.html>}.
+
+        @type  parent_type: str
+        @param parent_type: Child type.
+        @type  query_bool: Query
+        @param query_bool: The query to be used.
+        @type  sources: array of result fields
+        @keyword sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @keyword highlight: Define the highlighting of results (default: None).
+        @return: L{ElasticQuery}
+        '''
+        return cls(HasChildQuery(child_type, query), sources, highlight)
 
     @classmethod
     def query_string(cls, query_term, sources=None, highlight=None, query_filter=None, **string_opts):
