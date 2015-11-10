@@ -240,37 +240,6 @@ class ElasticModelTest(TestCase):
             self.assertLess(last_start, start)
             last_start = start
 
-    def test_function_score_query(self):
-        ''' Test a function score query with a query (using the start position as the score). '''
-        query_string = Query.query_string("rs*", fields=["id", "seqid"])
-        score_function = ScoreFunction.create_score_function('field_value_factor', field='start', modifier='reciprocal')
-        query = ElasticQuery(FunctionScoreQuery(query_string, [score_function], boost_mode='replace'))
-        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        docs = elastic.search().docs
-        self.assertGreater(len(docs), 1, str(len(docs)))
-        last_start = 0
-        for doc in docs:
-            start = getattr(doc, 'start')
-            self.assertLess(last_start, start)
-            last_start = start
-
-    def test_function_score_filter(self):
-        ''' Test a function score query with a filter. '''
-        score_function = ScoreFunction.create_score_function('field_value_factor', field='start')
-        bool_filter = Filter(BoolQuery(must_arr=[RangeQuery("start", lte=50000)]))
-        qfilter = FunctionScoreQuery(bool_filter, [score_function], boost_mode='replace')
-        query = ElasticQuery(qfilter)
-        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        docs = elastic.search().docs
-        self.assertGreater(len(docs), 1, str(len(docs)))
-        last_start = sys.maxsize
-        for doc in docs:
-            start = getattr(doc, 'start')
-            # test that the start is equal to the score
-            self.assertEqual(start, int(doc.__dict__['_meta']['_score']))
-            self.assertGreater(last_start, start)
-            last_start = start
-
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
         query_bool = BoolQuery()
@@ -494,6 +463,63 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery(Query.term("id", "rs768019142"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
+class FunctionScoreQueryTest(TestCase):
+
+    def test_function_score_query(self):
+        ''' Test a function score query with a query (using the start position as the score). '''
+        score_function = ScoreFunction.create_score_function('field_value_factor', field='start', modifier='reciprocal')
+        query_string = Query.query_string("rs*", fields=["id", "seqid"])
+        query = ElasticQuery(FunctionScoreQuery(query_string, [score_function], boost_mode='replace'))
+        docs = Search(query, idx=ElasticSettings.idx('DEFAULT')).search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = 0
+        for doc in docs:
+            start = getattr(doc, 'start')
+            self.assertLess(last_start, start)
+            last_start = start
+
+    def test_function_score_query2(self):
+        ''' Test multiple function score query with a query. '''
+        score_function1 = ScoreFunction.create_score_function('field_value_factor', field='start')
+        score_function2 = ScoreFunction.create_score_function('field_value_factor', field='start')
+        query_string = Query.query_string("rs*", fields=["id"])
+        query = ElasticQuery(FunctionScoreQuery(query_string, [score_function1, score_function2],
+                                                score_mode='sum', boost_mode='replace', min_score=1.,
+                                                max_boost=100000000.),
+                             sources=['start'])
+        docs = Search(query, idx=ElasticSettings.idx('DEFAULT')).search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = sys.maxsize
+        for doc in docs:
+            start = getattr(doc, 'start')
+            self.assertGreater(last_start, start)
+            last_start = start
+
+    def test_function_score_filter(self):
+        ''' Test a function score query with a filter. '''
+        score_function = ScoreFunction.create_score_function('field_value_factor', field='start')
+        bool_filter = Filter(BoolQuery(must_arr=[RangeQuery("start", lte=50000)]))
+        query = ElasticQuery(FunctionScoreQuery(bool_filter, [score_function], boost_mode='replace'))
+        docs = Search(query, idx=ElasticSettings.idx('DEFAULT')).search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = sys.maxsize
+        for doc in docs:
+            start = getattr(doc, 'start')
+            # test that the start is equal to the score
+            self.assertEqual(start, int(doc.__dict__['_meta']['_score']))
+            self.assertGreater(last_start, start)
+            last_start = start
+
+    def test_error(self):
+        score_function = ScoreFunction.create_score_function('field_value_factor', field='start')
+        self.assertRaises(QueryError, FunctionScoreQuery, 'test_not_query', [score_function])
+        self.assertRaises(QueryError, FunctionScoreQuery, Query.match_all(), ['test_not_function_score'])
+        self.assertRaises(QueryError, ScoreFunction.create_score_function, 'blah')
+        self.assertRaises(QueryError, ScoreFunction.create_score_function, 'field_value_factor', random_scoress='val')
+        self.assertRaises(QueryError, ScoreFunction.create_score_function, 'field_value_factor', field=10)
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
