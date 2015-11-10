@@ -225,7 +225,9 @@ class ElasticModelTest(TestCase):
         Search.index_refresh(idx)
         query = ElasticQuery.has_parent('gene', Query.match('symbol', 'PAX1'))
         elastic = Search(query, idx=idx, idx_type='publication', size=500)
-        self.assertEquals(len(elastic.search().docs), 1)
+        docs = elastic.search().docs
+        self.assertEquals(len(docs), 1)
+        self.assertEquals(getattr(docs[0], 'pubmed'), 1234)
         requests.delete(ElasticSettings.url() + '/' + idx)
 
     def test_range_query(self):
