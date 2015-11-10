@@ -409,6 +409,7 @@ class ElasticModelTest(TestCase):
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         docs = elastic.search()
         self.assertTrue(len(docs.docs) == 1, "Elastic string query retrieved marker (rs2476601)")
+        self.assertRaises(QueryError, ElasticQuery.query_string, "rs2476601", fieldssss=["id"])
 
     def test_string_query_with_wildcard(self):
         query = ElasticQuery.query_string("rs*", fields=["id"])
