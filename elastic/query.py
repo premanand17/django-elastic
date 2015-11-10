@@ -271,6 +271,16 @@ class HasParentQuery(Query):
         self.query = {"has_parent": {"type": parent_type, "query": query.query}}
 
 
+class HasChildQuery(Query):
+    ''' Has Child Query. The has_child filter accepts a query and the child type
+    to run against, and results in parent documents that have child docs matching
+    the query. '''
+    def __init__(self, child_type, query):
+        if not isinstance(query, Query):
+            raise QueryError("not a Query")
+        self.query = {"has_child": {"type": child_type, "query": query.query}}
+
+
 class BoolQuery(Query):
     ''' Bool Query - a query that matches documents matching boolean
     combinations of other queries'''
