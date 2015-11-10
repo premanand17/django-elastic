@@ -200,7 +200,7 @@ class ElasticModelTest(TestCase):
         mapping = elastic.get_mapping('marker/xx')
         self.assertTrue('error' in mapping, "Database name in mapping result")
 
-    def test_mapping_parent(self):
+    def test_mapping_parent_child(self):
         ''' Test creating mapping with parent child relationship. '''
         gene_mapping = MappingProperties("gene")
         gene_mapping.add_property("symbol", "string", analyzer="full_name")
@@ -216,7 +216,7 @@ class ElasticModelTest(TestCase):
         status = load.mapping(gene_mapping, "gene", analyzer=Loader.KEYWORD_ANALYZER, **options)
         self.assertTrue(status, "mapping genes")
 
-        ''' test has parent query'''
+        ''' load docs and test has parent query'''
         json_data = '{"index": {"_index": "%s", "_type": "gene", "_id" : "1"}}\n' % idx
         json_data += json.dumps({"symbol": "PAX1"}) + '\n'
         json_data += '{"index": {"_index": "%s", "_type": "publication", "_id" : "2", "parent": "1"}}\n' % idx
@@ -229,6 +229,13 @@ class ElasticModelTest(TestCase):
         self.assertEquals(len(docs), 1)
         self.assertEquals(getattr(docs[0], 'pubmed'), 1234)
         self.assertRaises(QueryError, ElasticQuery.has_parent, 'gene', 'xxxxx')
+
+        ''' test has child query '''
+        query = ElasticQuery.has_child('publication', Query.match('pubmed', 1234))
+        elastic = Search(query, idx=idx, idx_type='gene', size=500)
+        docs = elastic.search().docs
+        self.assertEquals(len(docs), 1)
+        self.assertEquals(getattr(docs[0], 'symbol'), 'PAX1')
         requests.delete(ElasticSettings.url() + '/' + idx)
 
     def test_range_query(self):
