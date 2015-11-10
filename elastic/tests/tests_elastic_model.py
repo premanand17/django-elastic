@@ -8,7 +8,7 @@ from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
 from django.core.urlresolvers import reverse
 from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll, Sort,\
-    Suggest
+    Suggest, Bulk
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery, ExistsFilter
 from elastic.exceptions import AggregationError, QueryError
@@ -203,17 +203,29 @@ class ElasticModelTest(TestCase):
     def test_mapping_parent(self):
         ''' Test creating mapping with parent child relationship. '''
         gene_mapping = MappingProperties("gene")
-        inta_mapping = MappingProperties("interactions", "gene")
+        gene_mapping.add_property("symbol", "string", analyzer="full_name")
+        inta_mapping = MappingProperties("publication", "gene")
         load = Loader()
         idx = "test__mapping__"+SEARCH_SUFFIX
         options = {"indexName": idx, "shards": 1}
         requests.delete(ElasticSettings.url() + '/' + idx)
 
         # add child mappings first
-        status = load.mapping(inta_mapping, "interactions", **options)
+        status = load.mapping(inta_mapping, "publication", analyzer=Loader.KEYWORD_ANALYZER, **options)
         self.assertTrue(status, "mapping inteactions")
-        status = load.mapping(gene_mapping, "gene", **options)
+        status = load.mapping(gene_mapping, "gene", analyzer=Loader.KEYWORD_ANALYZER, **options)
         self.assertTrue(status, "mapping genes")
+
+        ''' test has parent query'''
+        json_data = '{"index": {"_index": "%s", "_type": "gene", "_id" : "1"}}\n' % idx
+        json_data += json.dumps({"symbol": "PAX1"}) + '\n'
+        json_data += '{"index": {"_index": "%s", "_type": "publication", "_id" : "2", "parent": "1"}}\n' % idx
+        json_data += json.dumps({"pubmed": 1234}) + '\n'
+        Bulk.load(idx, '', json_data)
+        Search.index_refresh(idx)
+        query = ElasticQuery.has_parent('gene', Query.match('symbol', 'PAX1'))
+        elastic = Search(query, idx=idx, idx_type='publication', size=500)
+        self.assertEquals(len(elastic.search().docs), 1)
         requests.delete(ElasticSettings.url() + '/' + idx)
 
     def test_range_query(self):
