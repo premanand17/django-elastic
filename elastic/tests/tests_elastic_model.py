@@ -304,6 +304,7 @@ class ElasticModelTest(TestCase):
 
     def test_nested_query(self):
         ''' Test nested query with aggregations. '''
+        self.assertRaises(QueryError, Query.nested, 'build_info', 'xxxx')
         qnested = ElasticQuery(Query.nested('build_info', Query.term("build_info.build", "38")))
 
         diseases_by_seqid = Agg('diseases_by_seqid', 'terms', {"size": 0, "field": "disease"})
