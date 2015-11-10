@@ -228,6 +228,7 @@ class ElasticModelTest(TestCase):
         docs = elastic.search().docs
         self.assertEquals(len(docs), 1)
         self.assertEquals(getattr(docs[0], 'pubmed'), 1234)
+        self.assertRaises(QueryError, ElasticQuery.has_parent, 'gene', 'xxxxx')
         requests.delete(ElasticSettings.url() + '/' + idx)
 
     def test_range_query(self):
@@ -256,11 +257,10 @@ class ElasticModelTest(TestCase):
 
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
-        query_bool = BoolQuery()
+        query_bool = BoolQuery(must_not_arr=[Query.term("seqid", 2)],
+                               should_arr=[RangeQuery("start", gte=10050)])
         query_bool.must([Query.term("id", "rs768019142")]) \
-                  .must_not([Query.term("seqid", 2)]) \
-                  .should(RangeQuery("start", gte=10054)) \
-                  .should([RangeQuery("start", gte=10050)])
+                  .should(RangeQuery("start", gte=10054))
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
