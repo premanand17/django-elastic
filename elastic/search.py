@@ -2,10 +2,9 @@
 Used to build Elastic queries and filters to run searches.
 
 An L{ElasticQuery} is used to build a L{Search} object.
-L{Search.get_json_response()} runs the search request and returns
-the elastic JSON results. Alternatively L{Search.get_result()}
-can be used to return a processed form of the results without
-leading underscores (I{e.g.} _type) which django template does not like.
+L{Search.search()} runs the search request and returns
+the elastic documents and aggregation as a L(Result). Alternatively
+L{Search.get_json_response()} returns the JSON response.
 
 An L{ElasticQuery} object can be built from L{Query} and L{Filter}
 objects. There are factory methods within L{ElasticQuery} and L{Query}
@@ -22,7 +21,6 @@ from elastic.result import Document, Result, Aggregation
 from elastic.elastic_settings import ElasticSettings, ElasticUrl
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
     Filter, OrFilter, HasParentQuery, HasChildQuery
-import warnings
 from builtins import classmethod
 
 # Get an instance of a logger
@@ -182,27 +180,6 @@ class Search:
         if response.status_code != 200:
             logger.warn("Error: elastic response 200:" + self.url)
         return response.json()
-
-    def get_result(self):
-        ''' DEPRECATED: use Search.search().
-        Return the elastic json result. Note: django template does not
-        like underscores (e.g. _type). '''
-        warnings.warn("DEPRECATED :: Search.get_result will be removed, use Search.search()!", FutureWarning)
-
-        json_response = self.get_json_response()
-        context = {"query": self.query}
-        content = []
-        for hit in json_response['hits']['hits']:
-            hit['_source']['idx_type'] = hit['_type']
-            hit['_source']['idx_id'] = hit['_id']
-            if 'highlight' in hit:
-                hit['_source']['highlight'] = hit['highlight']
-            content.append(hit['_source'])
-
-        context["data"] = content
-        context["total"] = json_response['hits']['total']
-        context["size"] = self.size
-        return context
 
     def search(self):
         ''' Run the search and return a L{Result} that stores the
