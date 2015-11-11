@@ -245,7 +245,9 @@ class FunctionScoreQuery(Query):
 
 
 class FilteredQuery(Query):
-    ''' Filtered Query - used to combine a query and a filter. '''
+    ''' Filtered Query - used to combine a query and a filter.
+    Deprecated in elasticsearch 2.0.0 so this now combines into a Bool Query
+    with a filter. '''
     def __init__(self, query, query_filter):
         ''' Construct a filtered query '''
         if not isinstance(query, Query):
