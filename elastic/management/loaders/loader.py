@@ -3,7 +3,7 @@ import gzip
 import json
 import requests
 import re
-from elastic.search import Search, ElasticSettings
+from elastic.search import Search, ElasticSettings, Bulk
 import logging
 from elastic.management.loaders.mapping import MappingProperties
 from elastic.management.loaders.analysis import Analyzer
@@ -55,21 +55,7 @@ class Loader:
 
     def bulk_load(self, idx_name, idx_type, json_data):
         ''' Bulk load documents. '''
-#         nb = sys.getsizeof(json_data)
-#         print(str(nb))
-        resp = requests.put(ElasticSettings.url()+'/' + idx_name+'/' + idx_type +
-                            '/_bulk', data=json_data)
-        if(resp.status_code != 200):
-            logger.error('ERROR: '+idx_name+' load status: '+str(resp.status_code)+' '+str(resp.content))
-
-        # report errors found during loading
-        if 'errors' in resp.json() and resp.json()['errors']:
-            logger.error("ERROR: bulk load error found")
-            for item in resp.json()['items']:
-                for key in item.keys():
-                    if 'error' in item[key]:
-                        logger.error("ERROR LOADING:")
-                        logger.error(item)
+        Bulk.load(idx_name, idx_type, json_data)
 
     def get_index_name(self, **options):
         ''' Get indexName option. '''
