@@ -78,7 +78,8 @@ OVERRIDE_SETTINGS2 = \
                 'auth_public': True,
                 'suggester': True
             }
-        }}
+        },
+        'ELASTIC_URL': ElasticSettings.url()}
     }
 
 OVERRIDE_SETTINGS3 = \
