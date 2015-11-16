@@ -2,10 +2,9 @@
 Used to build Elastic queries and filters to run searches.
 
 An L{ElasticQuery} is used to build a L{Search} object.
-L{Search.get_json_response()} runs the search request and returns
-the elastic JSON results. Alternatively L{Search.get_result()}
-can be used to return a processed form of the results without
-leading underscores (I{e.g.} _type) which django template does not like.
+L{Search.search()} runs the search request and returns
+the elastic documents and aggregation as a L(Result). Alternatively
+L{Search.get_json_response()} returns the JSON response.
 
 An L{ElasticQuery} object can be built from L{Query} and L{Filter}
 objects. There are factory methods within L{ElasticQuery} and L{Query}
@@ -21,8 +20,7 @@ import logging
 from elastic.result import Document, Result, Aggregation
 from elastic.elastic_settings import ElasticSettings, ElasticUrl
 from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
-    Filter, OrFilter, HasParentQuery
-import warnings
+    Filter, OrFilter, HasParentQuery, HasChildQuery
 from builtins import classmethod
 
 # Get an instance of a logger
@@ -86,7 +84,7 @@ class Search:
             self.url = (self.idx + '/' + self.idx_type +
                         '/_search?size=' + str(self.size) + '&from='+str(self.search_from))
         else:
-            self.url = (self.idx + '/' + self.idx_type + '/_search?search_type=count')
+            self.url = (self.idx + '/' + self.idx_type + '/_search?search_type='+search_type)
 
     @classmethod
     def elastic_request(cls, elastic_url, url, data=None, is_post=True):
@@ -182,27 +180,6 @@ class Search:
         if response.status_code != 200:
             logger.warn("Error: elastic response 200:" + self.url)
         return response.json()
-
-    def get_result(self):
-        ''' DEPRECATED: use Search.search().
-        Return the elastic json result. Note: django template does not
-        like underscores (e.g. _type). '''
-        warnings.warn("DEPRECATED :: Search.get_result will be removed, use Search.search()!", FutureWarning)
-
-        json_response = self.get_json_response()
-        context = {"query": self.query}
-        content = []
-        for hit in json_response['hits']['hits']:
-            hit['_source']['idx_type'] = hit['_type']
-            hit['_source']['idx_id'] = hit['_id']
-            if 'highlight' in hit:
-                hit['_source']['highlight'] = hit['highlight']
-            content.append(hit['_source'])
-
-        context["data"] = content
-        context["total"] = json_response['hits']['total']
-        context["size"] = self.size
-        return context
 
     def search(self):
         ''' Run the search and return a L{Result} that stores the
@@ -314,20 +291,67 @@ class Suggest(object):
 
 
 class Update(object):
+    ''' Update API. '''
 
     @classmethod
-    def update_doc(cls, doc, update_field, elastic_url=None):
+    def update_doc(cls, doc, part_doc, elastic_url=None):
+        ''' Update a document with a partial document.  '''
         if elastic_url is None:
             elastic_url = ElasticSettings.url()
         url = (doc._meta['_index'] + '/' +
                doc.type() + '/' + doc._meta['_id'] + '/_update')
-        response = Search.elastic_request(elastic_url, url, data=json.dumps(update_field))
+        response = Search.elastic_request(elastic_url, url, data=json.dumps(part_doc))
 
-        logger.debug("curl -XPOST '" + url + "' -d '" + json.dumps(update_field) + "'")
+        logger.debug("curl -XPOST '" + elastic_url + url + "' -d '" + json.dumps(part_doc) + "'")
         if response.status_code != 200:
             logger.warn("Error: elastic response 200:" + url)
             logger.warn(response.json())
         return response.json()
+
+
+class Delete(object):
+
+    @classmethod
+    def docs_by_query(cls, idx, idx_type='', query=Query.match_all()):
+        ''' Delete all documents specified by a Query. '''
+        query = ElasticQuery(query, sources='_id')
+        chunk_size = 1000
+        search_from = 0
+        hits_total = 10
+        while search_from < hits_total:
+            res = Search(query, idx=idx, idx_type=idx_type, size=chunk_size, search_from=search_from).search()
+            hits_total = res.hits_total
+            search_from += chunk_size
+            docs = res.docs
+            json_data = ''
+            for doc in docs:
+                json_data += '{"delete": {"_index": "%s", "_type": "%s", "_id": "%s"}}\n' % \
+                             (doc.index(), doc.type(), doc.doc_id())
+            Bulk.load(idx, idx_type, json_data)
+
+
+class Bulk(object):
+    ''' Bulk API. '''
+
+    @classmethod
+    def load(self, idx, idx_type, json_data, elastic_url=None):
+        ''' Bulk load documents. '''
+        if elastic_url is None:
+            elastic_url = ElasticSettings.url()
+        resp = requests.put(ElasticSettings.url()+'/' + idx+'/' + idx_type +
+                            '/_bulk', data=json_data)
+        if(resp.status_code != 200):
+            logger.error('ERROR: '+idx+' load status: '+str(resp.status_code)+' '+str(resp.content))
+
+        # report errors found during loading
+        if 'errors' in resp.json() and resp.json()['errors']:
+            logger.error("ERROR: bulk load error found")
+            for item in resp.json()['items']:
+                for key in item.keys():
+                    if 'error' in item[key]:
+                        logger.error("ERROR LOADING:")
+                        logger.error(item)
+        return resp
 
 
 class ElasticQuery():
@@ -433,6 +457,23 @@ class ElasticQuery():
         @return: L{ElasticQuery}
         '''
         return cls(HasParentQuery(parent_type, query), sources, highlight)
+
+    @classmethod
+    def has_child(cls, child_type, query, sources=None, highlight=None):
+        ''' Factory method for creating an elastic
+        U{Has Child Query<www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-child-query.html>}.
+
+        @type  parent_type: str
+        @param parent_type: Child type.
+        @type  query_bool: Query
+        @param query_bool: The query to be used.
+        @type  sources: array of result fields
+        @keyword sources: The _source filtering to be used (default: None).
+        @type  highlight: Highlight
+        @keyword highlight: Define the highlighting of results (default: None).
+        @return: L{ElasticQuery}
+        '''
+        return cls(HasChildQuery(child_type, query), sources, highlight)
 
     @classmethod
     def query_string(cls, query_term, sources=None, highlight=None, query_filter=None, **string_opts):

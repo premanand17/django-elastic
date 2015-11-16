@@ -1,0 +1,5 @@
+{"mapping":{"properties":{"suggest":{"type":"completion"},"build_info":{"type":"nested","properties":{"build":{"type":"integer"},"end":{"type":"integer"},"seqid":{"type":"string"},"start":{"type":"integer"}}},"disease":{"type":"string","index":"not_analyzed"}}},
+"docs":[
+{"suggest":{"input":["XAA"],"weight":5},"disease":"XAA","build_info":[{"seqid":"17","end":6973167,"build":38,"start":6789439},{"seqid":"17","end":5050533,"build":37,"start":4866805},{"seqid":"17","end":2405532,"build":36,"start":2221965}]},
+{"suggest":{"input":["XAA"],"weight":5},"disease":"XAA","build_info":[{"seqid":"1","end":5533,"build":37,"start":4805}]},
+{"suggest":{"input":["XAB"],"weight":15},"disease":"XAB","build_info":[{"seqid":"1","end":3167,"build":38,"start":2439},{"seqid":"1","end":1533,"build":37,"start":805},{"seqid":"1","end":5532,"build":36,"start":1965}]}]}

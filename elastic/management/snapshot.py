@@ -81,7 +81,7 @@ class Snapshot():
                 }
         resp = requests.put(url, data=json.dumps(data))
         if resp.status_code != 200:
-            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + resp.json()["error"])
+            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + str(resp.json()["error"]))
         return True
 
     @classmethod
@@ -89,7 +89,7 @@ class Snapshot():
         url = ElasticSettings.url() + '/_snapshot/' + repo
         resp = requests.delete(url)
         if resp.status_code != 200:
-            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + resp.json()["error"])
+            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + str(resp.json()["error"]))
             return False
         return True
 
@@ -108,7 +108,7 @@ class Snapshot():
             data = {"indices": indices}
         resp = requests.put(url, data=json.dumps(data))
         if resp.status_code != 200:
-            logger.error("Snapshot "+snapshot+" create error! :: " + resp.json()["error"])
+            logger.error("Snapshot "+snapshot+" create error! :: " + str(resp.json()["error"]))
         return True
 
     @classmethod
@@ -116,7 +116,7 @@ class Snapshot():
         url = ElasticSettings.url() + '/_snapshot/' + repo + '/' + snapshot
         resp = requests.delete(url)
         if resp.status_code != 200:
-            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + resp.json()["error"])
+            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + str(resp.json()["error"]))
 
     @classmethod
     def restore_snapshot(cls, repo, snapshot, url, indices):
@@ -126,4 +126,4 @@ class Snapshot():
             data = {"indices": indices}
         resp = requests.post(url, data=json.dumps(data))
         if resp.status_code != 200:
-            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + resp.json()["error"])
+            logger.error("Status ("+url+"): "+str(resp.status_code) + " :: " + str(resp.json()["error"]))

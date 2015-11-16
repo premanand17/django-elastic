@@ -7,10 +7,11 @@ from elastic.management.loaders.loader import Loader
 from elastic.tests.settings_idx import IDX, OVERRIDE_SETTINGS, SEARCH_SUFFIX
 from elastic.elastic_settings import ElasticSettings
 from django.core.urlresolvers import reverse
-from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll, Sort
+from elastic.search import Search, ElasticQuery, Highlight, ScanAndScroll, Sort,\
+    Suggest, Bulk
 from elastic.query import Query, BoolQuery, RangeQuery, Filter, TermsFilter,\
     AndFilter, NotFilter, OrFilter, ScoreFunction, FunctionScoreQuery, ExistsFilter
-from elastic.exceptions import AggregationError
+from elastic.exceptions import AggregationError, QueryError
 from elastic.aggs import Agg, Aggs
 from rest_framework.test import APITestCase
 import json
@@ -24,10 +25,12 @@ def setUpModule():
     ''' Load test indices (marker) '''
     call_command('index_search', **IDX['MARKER'])
     call_command('index_search', **IDX['GFF_GENERIC'])
+    call_command('index_search', **IDX['JSON_NESTED'])
 
     # wait for the elastic load to finish
     Search.index_refresh(IDX['MARKER']['indexName'])
     Search.index_refresh(IDX['GFF_GENERIC']['indexName'])
+    Search.index_refresh(IDX['JSON_NESTED']['indexName'])
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
@@ -35,6 +38,7 @@ def tearDownModule():
     ''' Remove test indices '''
     requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
     requests.delete(ElasticSettings.url() + '/' + IDX['GFF_GENERIC']['indexName'])
+    requests.delete(ElasticSettings.url() + '/' + IDX['JSON_NESTED']['indexName'])
 
 
 class ServerTest(TestCase):
@@ -163,6 +167,15 @@ class ScanAndScrollTest(TestCase):
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)
+class SuggestTest(TestCase):
+
+    def test_suggest(self):
+        ''' Test completion type for suggesting terms. '''
+        resp = Suggest.suggest('XA', IDX['JSON_NESTED']['indexName'], name='suggest', size=1)['suggest']
+        self.assertTrue(resp[0]['options'][0]['text'], 'XAB')
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
 class ElasticModelTest(TestCase):
 
     def test_idx_exists(self):
@@ -187,70 +200,74 @@ class ElasticModelTest(TestCase):
         mapping = elastic.get_mapping('marker/xx')
         self.assertTrue('error' in mapping, "Database name in mapping result")
 
-    def test_mapping_parent(self):
+    def test_mapping_parent_child(self):
         ''' Test creating mapping with parent child relationship. '''
         gene_mapping = MappingProperties("gene")
-        inta_mapping = MappingProperties("interactions", "gene")
+        gene_mapping.add_property("symbol", "string", analyzer="full_name")
+        inta_mapping = MappingProperties("publication", "gene")
         load = Loader()
         idx = "test__mapping__"+SEARCH_SUFFIX
         options = {"indexName": idx, "shards": 1}
-        status = load.mapping(gene_mapping, "gene", **options)
-        self.assertTrue(status, "mapping genes")
-        status = load.mapping(inta_mapping, "interactions", **options)
-        self.assertTrue(status, "mapping inteactions")
         requests.delete(ElasticSettings.url() + '/' + idx)
+
+        # add child mappings first
+        status = load.mapping(inta_mapping, "publication", analyzer=Loader.KEYWORD_ANALYZER, **options)
+        self.assertTrue(status, "mapping inteactions")
+        status = load.mapping(gene_mapping, "gene", analyzer=Loader.KEYWORD_ANALYZER, **options)
+        self.assertTrue(status, "mapping genes")
+
+        ''' load docs and test has parent query'''
+        json_data = '{"index": {"_index": "%s", "_type": "gene", "_id" : "1"}}\n' % idx
+        json_data += json.dumps({"symbol": "PAX1"}) + '\n'
+        json_data += '{"index": {"_index": "%s", "_type": "publication", "_id" : "2", "parent": "1"}}\n' % idx
+        json_data += json.dumps({"pubmed": 1234}) + '\n'
+        Bulk.load(idx, '', json_data)
+        Search.index_refresh(idx)
+        query = ElasticQuery.has_parent('gene', Query.match('symbol', 'PAX1'))
+        elastic = Search(query, idx=idx, idx_type='publication', size=500)
+        docs = elastic.search().docs
+        self.assertEquals(len(docs), 1)
+        self.assertEquals(getattr(docs[0], 'pubmed'), 1234)
+        self.assertRaises(QueryError, ElasticQuery.has_parent, 'gene', 'xxxxx')
+
+        ''' test has child query '''
+        query = ElasticQuery.has_child('publication', Query.match('pubmed', 1234))
+        elastic = Search(query, idx=idx, idx_type='gene', size=500)
+        docs = elastic.search().docs
+        self.assertEquals(len(docs), 1)
+        self.assertEquals(getattr(docs[0], 'symbol'), 'PAX1')
+        requests.delete(ElasticSettings.url() + '/' + idx)
+
+    def test_range_query(self):
+        ''' Test range overlap django-elastic function. '''
+        elastic = Search.range_overlap_query(seqid='chr1', start_range=1, end_range=206770620,
+                                             idx=IDX['GFF_GENERIC']['indexName'], field_list=['start', 'end'])
+        self.assertEquals(len(elastic.search().docs), 4)
 
     def test_sort_query(self):
         ''' Test sorting for a query. '''
         query = ElasticQuery(Query.match_all())
-        qsort = Sort('start:asc,_score')
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), qsort=Sort('start:asc,_score'))
+        self._check_sort_order(elastic.search().docs)
+        qsort = Sort({"sort": [{"start": {"order": "asc", "mode": "avg"}}]})
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), qsort=qsort)
-        docs = elastic.search().docs
+        self._check_sort_order(elastic.search().docs)
+        self.assertRaises(QueryError, Sort, 1)
+
+    def _check_sort_order(self, docs):
         self.assertGreater(len(docs), 1, str(len(docs)))
         last_start = 0
         for doc in docs:
             start = getattr(doc, 'start')
             self.assertLess(last_start, start)
-            last_start = start
-
-    def test_function_score_query(self):
-        ''' Test a function score query with a query (using the start position as the score). '''
-        query_string = Query.query_string("rs*", fields=["id", "seqid"])
-        score_function = ScoreFunction.create_score_function('field_value_factor', field='start', modifier='reciprocal')
-        query = ElasticQuery(FunctionScoreQuery(query_string, [score_function], boost_mode='replace'))
-        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        docs = elastic.search().docs
-        self.assertGreater(len(docs), 1, str(len(docs)))
-        last_start = 0
-        for doc in docs:
-            start = getattr(doc, 'start')
-            self.assertLess(last_start, start)
-            last_start = start
-
-    def test_function_score_filter(self):
-        ''' Test a function score query with a filter. '''
-        score_function = ScoreFunction.create_score_function('field_value_factor', field='start')
-        bool_filter = Filter(BoolQuery(must_arr=[RangeQuery("start", lte=50000)]))
-        qfilter = FunctionScoreQuery(bool_filter, [score_function], boost_mode='replace')
-        query = ElasticQuery(qfilter)
-        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
-        docs = elastic.search().docs
-        self.assertGreater(len(docs), 1, str(len(docs)))
-        last_start = sys.maxsize
-        for doc in docs:
-            start = getattr(doc, 'start')
-            # test that the start is equal to the score
-            self.assertEqual(start, int(doc.__dict__['_meta']['_score']))
-            self.assertGreater(last_start, start)
             last_start = start
 
     def test_bool_filtered_query(self):
         ''' Test building and running a filtered boolean query. '''
-        query_bool = BoolQuery()
+        query_bool = BoolQuery(must_not_arr=[Query.term("seqid", 2)],
+                               should_arr=[RangeQuery("start", gte=10050)])
         query_bool.must([Query.term("id", "rs768019142")]) \
-                  .must_not([Query.term("seqid", 2)]) \
-                  .should(RangeQuery("start", gte=10054)) \
-                  .should([RangeQuery("start", gte=10050)])
+                  .should(RangeQuery("start", gte=10054))
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
@@ -291,6 +308,30 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery.filtered_bool(Query.match_all(), query_bool, sources=["id", "seqid", "start"])
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.search().hits_total == 1, "Elastic filtered query retrieved marker (rs768019142)")
+
+    def test_nested_query(self):
+        ''' Test nested query with aggregations. '''
+        self.assertRaises(QueryError, Query.nested, 'build_info', 'xxxx')
+        qnested = ElasticQuery(Query.nested('build_info', Query.term("build_info.build", "38")))
+
+        diseases_by_seqid = Agg('diseases_by_seqid', 'terms', {"size": 0, "field": "disease"})
+        disease_hits = Agg('disease_hits', 'reverse_nested', {}, sub_agg=diseases_by_seqid)
+        seq_hits = Agg('seq_hits', 'terms', {'field': 'build_info.seqid', 'size': 0}, sub_agg=disease_hits)
+        build_info = Agg('build_info', 'nested', {"path": 'build_info'}, sub_agg=[seq_hits])
+
+        elastic = Search(qnested, idx=IDX['JSON_NESTED']['indexName'], aggs=Aggs(build_info))
+        res = elastic.search()
+
+        # returns just build 38 hits
+        self.assertEqual(len(res.docs), 2)
+
+        seq_hits = getattr(res.aggs['build_info'], 'seq_hits')['buckets']
+        # two seq ids
+        self.assertEqual(len(seq_hits), 2)
+        for seq in seq_hits:
+            disease_hits = seq['disease_hits']
+            # one disease found on the sequence
+            self.assertEqual(len(disease_hits['diseases_by_seqid']['buckets']), 1)
 
     def test_bool_nested_filter(self):
         ''' Test combined Bool filter '''
@@ -375,6 +416,7 @@ class ElasticModelTest(TestCase):
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         docs = elastic.search()
         self.assertTrue(len(docs.docs) == 1, "Elastic string query retrieved marker (rs2476601)")
+        self.assertRaises(QueryError, ElasticQuery.query_string, "rs2476601", fieldssss=["id"])
 
     def test_string_query_with_wildcard(self):
         query = ElasticQuery.query_string("rs*", fields=["id"])
@@ -432,7 +474,13 @@ class ElasticModelTest(TestCase):
         ''' Test by query ids. '''
         query = ElasticQuery(Query.ids(['1', '2']))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
-        self.assertTrue(len(elastic.search().docs) == 2, "Elastic string query retrieved marker (rs*)")
+        docs = elastic.search().docs
+        self.assertTrue(len(docs) == 2, "Elastic string query retrieved marker (rs*)")
+        idx_type = docs[0].type()
+        query = ElasticQuery(Query.ids('2', types=idx_type))
+        elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'), size=5)
+        docs = elastic.search().docs
+        self.assertTrue(len(docs) == 1, "Elastic string query retrieved marker (rs*)")
 
     def test_count(self):
         ''' Test count the number of documents in an index. '''
@@ -444,6 +492,63 @@ class ElasticModelTest(TestCase):
         query = ElasticQuery(Query.term("id", "rs768019142"))
         elastic = Search(query, idx=ElasticSettings.idx('DEFAULT'))
         self.assertTrue(elastic.get_count()['count'] == 1, "Elastic count with a query")
+
+
+@override_settings(ELASTIC=OVERRIDE_SETTINGS)
+class FunctionScoreQueryTest(TestCase):
+
+    def test_function_score_query(self):
+        ''' Test a function score query with a query (using the start position as the score). '''
+        score_function = ScoreFunction.create_score_function('field_value_factor', field='start', modifier='reciprocal')
+        query_string = Query.query_string("rs*", fields=["id", "seqid"])
+        query = ElasticQuery(FunctionScoreQuery(query_string, [score_function], boost_mode='replace'))
+        docs = Search(query, idx=ElasticSettings.idx('DEFAULT')).search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = 0
+        for doc in docs:
+            start = getattr(doc, 'start')
+            self.assertLess(last_start, start)
+            last_start = start
+
+    def test_function_score_query2(self):
+        ''' Test multiple function score query with a query. '''
+        score_function1 = ScoreFunction.create_score_function('field_value_factor', field='start')
+        score_function2 = ScoreFunction.create_score_function('field_value_factor', field='start')
+        query_string = Query.query_string("rs*", fields=["id"])
+        query = ElasticQuery(FunctionScoreQuery(query_string, [score_function1, score_function2],
+                                                score_mode='sum', boost_mode='replace', min_score=1.,
+                                                max_boost=100000000.),
+                             sources=['start'])
+        docs = Search(query, idx=ElasticSettings.idx('DEFAULT')).search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = sys.maxsize
+        for doc in docs:
+            start = getattr(doc, 'start')
+            self.assertGreater(last_start, start)
+            last_start = start
+
+    def test_function_score_filter(self):
+        ''' Test a function score query with a filter. '''
+        score_function = ScoreFunction.create_score_function('field_value_factor', field='start')
+        bool_filter = Filter(BoolQuery(must_arr=[RangeQuery("start", lte=50000)]))
+        query = ElasticQuery(FunctionScoreQuery(bool_filter, [score_function], boost_mode='replace'))
+        docs = Search(query, idx=ElasticSettings.idx('DEFAULT')).search().docs
+        self.assertGreater(len(docs), 1, str(len(docs)))
+        last_start = sys.maxsize
+        for doc in docs:
+            start = getattr(doc, 'start')
+            # test that the start is equal to the score
+            self.assertEqual(start, int(doc.__dict__['_meta']['_score']))
+            self.assertGreater(last_start, start)
+            last_start = start
+
+    def test_error(self):
+        score_function = ScoreFunction.create_score_function('field_value_factor', field='start')
+        self.assertRaises(QueryError, FunctionScoreQuery, 'test_not_query', [score_function])
+        self.assertRaises(QueryError, FunctionScoreQuery, Query.match_all(), ['test_not_function_score'])
+        self.assertRaises(QueryError, ScoreFunction.create_score_function, 'blah')
+        self.assertRaises(QueryError, ScoreFunction.create_score_function, 'field_value_factor', random_scoress='val')
+        self.assertRaises(QueryError, ScoreFunction.create_score_function, 'field_value_factor', field=10)
 
 
 @override_settings(ELASTIC=OVERRIDE_SETTINGS)

@@ -20,6 +20,8 @@ IDX = {'GENE': {'indexName': 'test__gene_'+SEARCH_SUFFIX,
                              'indexSNPMerge': SEARCH_TEST_DATA_PATH+'rs_merge_test.gz', 'shards': NUMBER_OF_SHARDS},
        'JSON': {'indexName': 'test__json_'+SEARCH_SUFFIX, 'indexType': 't1d',
                 'indexJson': SEARCH_TEST_DATA_PATH+'publications.json', 'shards': NUMBER_OF_SHARDS},
+       'JSON_NESTED': {'indexName': 'test__json_nested_'+SEARCH_SUFFIX, 'indexType': 'hits',
+                       'indexJson': SEARCH_TEST_DATA_PATH+'nested.json', 'shards': NUMBER_OF_SHARDS},
        'BED_GENERIC': {'indexName': 'test__bed_'+SEARCH_SUFFIX, 'indexType': 'bed',
                        'indexBED': SEARCH_TEST_DATA_PATH+'test.bed', 'shards': NUMBER_OF_SHARDS},
        'GFF_GENERIC': {'indexName': 'test__gff_'+SEARCH_SUFFIX, 'indexType': 'gff',
@@ -70,11 +72,14 @@ OVERRIDE_SETTINGS2 = \
             'MARKER': {
                 'name': 'dbsnp144',
                 'idx_type': {
-                    'MARKER': {'type': 'marker', 'description': 'dbsnp', 'search': True},
+                    'MARKER': {'type': 'marker', 'description': 'dbsnp', 'search': True, 'auth_public': True},
                 },
-                'label': 'marker storage'
+                'label': 'marker storage',
+                'auth_public': True,
+                'suggester': True
             }
-        }}
+        },
+        'ELASTIC_URL': ElasticSettings.url()}
     }
 
 OVERRIDE_SETTINGS3 = \
