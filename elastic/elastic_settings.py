@@ -15,9 +15,14 @@ class ElasticSettings:
         return getattr(settings, 'ELASTIC').get(cluster, None)
 
     @classmethod
-    def getattr(cls, name, cluster='default'):
+    def getattr(cls, name, cluster='default', default=None):
         ''' Get a named attribute '''
-        return cls.attrs(cluster).get(name, None)
+        return cls.attrs(cluster).get(name, default)
+
+    @classmethod
+    def version(cls, cluster='default'):
+        ''' Return the elastic version as a dictionary of major, minor keys. '''
+        return cls.getattr('VERSION', cluster=cluster, default={'major': 1})
 
     @classmethod
     def idx(cls, name='DEFAULT', idx_type=None, cluster='default'):
@@ -93,7 +98,7 @@ class ElasticSettings:
         if 'pydgin_auth' in settings.INSTALLED_APPS:
             from pydgin_auth.permissions import get_authenticated_idx_and_idx_types
             search_idx, search_types = get_authenticated_idx_and_idx_types(user, search_idx, search_types)
-            suggester_idx = get_authenticated_idx_and_idx_types(user, suggester_idx)[0]
+            suggester_idx = get_authenticated_idx_and_idx_types(user, idx_keys=suggester_idx)[0]
 
         idx_properties = {
             "idx": ','.join(ElasticSettings.idx(name) for name in search_idx),

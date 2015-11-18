@@ -39,7 +39,9 @@ class Agg:
         "missing": {"type": dict, "params": {"field": str}},
         "terms": {"type": dict, "params": {"field": str, "size": int, "order": (dict, list)}},
         "significant_terms": {"type": dict, "params": {"field": str}},
-        "range": {"type": dict, "params": {"field": str, 'ranges': list}}
+        "range": {"type": dict, "params": {"field": str, 'ranges': list}},
+        "nested": {"type": dict, "params": {"path": str}},
+        "reverse_nested": {"type": dict, "params": {"path": str}}
     }
 
     def __init__(self, agg_name, agg_type, agg_body, sub_agg=None):
