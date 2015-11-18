@@ -112,6 +112,7 @@ class DelimeterLoader(Loader):
                 parts = re.split(delim, line)
                 if len(parts) != len(column_names):
                     logger.warn("WARNING: unexpected number of columns: ["+str(line_num+1)+'] '+line)
+                    line_num += 1
                     continue
 
                 idx_id = str(auto_num)
