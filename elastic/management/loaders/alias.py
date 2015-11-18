@@ -85,8 +85,8 @@ class AliasManager(DelimeterLoader):
         elif(re.search(r'locus', object_type)):
                 index_types.extend(self.get_diseases_enabled())
         elif(re.search(r'study', object_type)):
-                # index_types.extend(["ImmunoBase", "T1DBase"])
-                index_types.extend(["immunobase", "t1dbase"])
+                index_types.extend(["ImmunoBase", "T1DBase"])
+                #index_types.extend(["immunobase", "t1dbase"])
         return index_types
 
     def get_diseases_enabled(self):
