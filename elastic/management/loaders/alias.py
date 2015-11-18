@@ -45,17 +45,18 @@ class AliasManager(DelimeterLoader):
                     idx_file = root_dir + idx_dir + '/' + type_ + '.tsv'
                 else:
                     idx_file = root_dir + '/' + idx_dir + '/' + type_ + '.tsv'
-                    if (os.path.exists(root_dir) and os.path.exists(idx_file)):
-                        options['indexAlias'] = idx_file
-                        options['indexType'] = type_
-                        options['indexName'] = idx_name_cur
-                        self._create_alias_mapping(type_, **options)
-                        f = self.open_file_to_load('indexAlias', **options)
-                        column_names = ["internal_id", "alias", "preferred_name", "type"]
-                        self.load(column_names, f, idx_name_cur, type_)
-                        logger.warn('Index created for ' + type_ + ' with index name ' + idx_name_cur)
-                    else:
-                        logger.warn(idx_file + ' Does not Exists ..... Proceeding to quit')
+
+                if (os.path.exists(root_dir) and os.path.exists(idx_file)):
+                    options['indexAlias'] = idx_file
+                    options['indexType'] = type_
+                    options['indexName'] = idx_name_cur
+                    self._create_alias_mapping(type_, **options)
+                    f = self.open_file_to_load('indexAlias', **options)
+                    column_names = ["internal_id", "alias", "preferred_name", "type"]
+                    self.load(column_names, f, idx_name_cur, type_)
+                    logger.warn('Index created for ' + type_ + ' with index name ' + idx_name_cur)
+                else:
+                    logger.warn(idx_file + ' Does not Exists ..... Proceeding to quit')
 
     def _create_alias_mapping(self, idx_alias_type, **options):
         ''' Create the mapping for alias indexing '''
@@ -85,6 +86,7 @@ class AliasManager(DelimeterLoader):
                 index_types.extend(self.get_diseases_enabled())
         elif(re.search(r'study', object_type)):
                 index_types.extend(["ImmunoBase", "T1DBase"])
+                #index_types.extend(["immunobase", "t1dbase"])
         return index_types
 
     def get_diseases_enabled(self):
