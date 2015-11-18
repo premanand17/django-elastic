@@ -165,7 +165,7 @@ class ScoreFunction:
     SCORE_FUNCTION = {
         'script_score': {"script": str, "params": dict, "lang": str},
         'weight': float,
-        'random_score': {"seed": float},
+        'random_score': {"seed": int},
         'field_value_factor': {
             "field": str,
             "factor": float,
