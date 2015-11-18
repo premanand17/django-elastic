@@ -32,7 +32,7 @@ class DiseaseManager(Loader):
                     }
             data['suggest'] = {}
             data['suggest']["input"] = [parts[2].lower(), parts[0]]
-            data['suggest']["weight"] = 50
+            data['suggest']["weight"] = 250
             resp = requests.put(ElasticSettings.url()+'/' +
                                 index_name+'/disease/'+parts[2].lower(),
                                 data=json.dumps(data))
@@ -49,6 +49,9 @@ class DiseaseManager(Loader):
              .add_property("description", "string", index="not_analyzed") \
              .add_property("colour", "string", index="not_analyzed") \
              .add_property("tier", "integer", index="not_analyzed") \
-             .add_property("suggest", "completion",
-                           index_analyzer="full_name", search_analyzer="full_name")
+             .add_property("suggest", "completion", analyzer="full_name")
+
+        tags = MappingProperties("tags")
+        tags.add_property("weight", "integer", index="not_analyzed")
+        props.add_properties(tags)
         self.mapping(props, 'disease', analyzer=Loader.KEYWORD_ANALYZER, **options)

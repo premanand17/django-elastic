@@ -10,6 +10,9 @@ from elastic.management.snapshot import Snapshot
 from elastic.search import Search
 import time
 import logging
+from elastic.management.loaders.loader import Loader
+from elastic.management.loaders.exceptions import LoaderError, MappingError
+from elastic.management.loaders.mapping import MappingProperties
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -118,6 +121,10 @@ class ElasticLoadersTest(TestCase):
         self.assertTrue('mappings' in mapping_json[idx], 'Found mappings.')
         seqid = mapping_json[idx]['mappings']['gff']['properties']['seqid']
         self.assertTrue('not_analyzed' == seqid['index'], 'seqid in GFF is not_analyzed')
+
+    def test_mapping_error(self):
+        self.assertRaises(LoaderError, Loader().mapping, 'MappingProperties', '')
+        self.assertRaises(MappingError, MappingProperties('').add_properties, 'MappingProperties')
 
     def test_utils(self):
         ''' Test gff utils. '''

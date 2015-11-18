@@ -163,7 +163,19 @@ class GeneManager(Loader):
         ''' Call elasticsearch '''
         elastic = Search.field_search_query(name, fields=fields, search_from=0,
                                             size=20, idx=indexName)
-        return elastic.get_result()
+        json_response = elastic.get_json_response()
+        context = {}
+        content = []
+        for hit in json_response['hits']['hits']:
+            hit['_source']['idx_type'] = hit['_type']
+            hit['_source']['idx_id'] = hit['_id']
+            if 'highlight' in hit:
+                hit['_source']['highlight'] = hit['highlight']
+            content.append(hit['_source'])
+
+        context["data"] = content
+        context["total"] = json_response['hits']['total']
+        return context
 
     def _create_mapping(self, **options):
         ''' Create the mapping for gene names indexing '''

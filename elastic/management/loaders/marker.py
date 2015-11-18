@@ -18,14 +18,16 @@ class MarkerManager(DelimeterLoader):
         props = MappingProperties(idx_type)
         props.add_property("seqid", "string", index="not_analyzed") \
              .add_property("start", "integer", index="not_analyzed") \
-             .add_property("id", "string", index="not_analyzed") \
+             .add_property("id", "string", analyzer="full_name") \
              .add_property("ref", "string", index="no") \
              .add_property("alt", "string", index="no") \
              .add_property("qual", "string", index="no") \
              .add_property("filter", "string", index="no") \
              .add_property("info", "string", index="no") \
-             .add_property("suggest", "completion",
-                           index_analyzer="full_name", search_analyzer="full_name")
+             .add_property("suggest", "completion", analyzer="full_name")
+        tags = MappingProperties("tags")
+        tags.add_property("weight", "integer", index="not_analyzed")
+        props.add_properties(tags)
         self.mapping(props, idx_type, analyzer=Loader.KEYWORD_ANALYZER, **options)
         return props
 
