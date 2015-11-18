@@ -22,7 +22,7 @@ class ElasticSettings:
     @classmethod
     def version(cls, cluster='default'):
         ''' Return the elastic version as a dictionary of major, minor keys. '''
-        return cls.getattr('VERSION', cluster=cluster, default={'major': 1})
+        return cls.getattr('VERSION', cluster=cluster, default={'major': 2})
 
     @classmethod
     def idx(cls, name='DEFAULT', idx_type=None, cluster='default'):
