@@ -61,6 +61,14 @@ def doc_id(doc):
 
 
 @register.filter
+def doc_idx(doc):
+    ''' Gets the document ID. '''
+    if not isinstance(doc, Document):
+        return settings.TEMPLATE_STRING_IF_INVALID
+    return doc.index()
+
+
+@register.filter
 def doc_link(doc):
     ''' Gets the document details. '''
     if not isinstance(doc, Document):
