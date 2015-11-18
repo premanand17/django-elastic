@@ -13,7 +13,7 @@ services:
   - elasticsearch
 before_install:
   - sudo service elasticsearch stop
-  - curl -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.0.0.deb && sudo dpkg -i --force-confnew elasticsearch-2.0.0.deb
+  - curl -O https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.0.0/elasticsearch-2.0.0.deb && sudo dpkg -i --force-confnew elasticsearch-2.0.0.deb
   - 'command sudo sed -i "\$apath.repo: [\"/tmp/test_snapshot/\"]" /etc/elasticsearch/elasticsearch.yml'
   - tail /etc/elasticsearch/elasticsearch.yml
   - sudo service elasticsearch restart
