@@ -83,7 +83,7 @@ class SnapshotTest(TestCase):
         requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
         self.assertFalse(Search.index_exists(IDX['MARKER']['indexName']), "Removed index")
         # restore from snapshot
-        call_command('restore_snapshot', snapshot, repo=repo)
+        call_command('restore_snapshot', snapshot, repo=repo, indices=IDX['MARKER']['indexName'])
         Search.index_refresh(IDX['MARKER']['indexName'])
         self.assertTrue(Search.index_exists(IDX['MARKER']['indexName']), "Restored index exists")
 
