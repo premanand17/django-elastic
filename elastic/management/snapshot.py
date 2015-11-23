@@ -40,14 +40,11 @@ class Snapshot():
     def wait_for_snapshot(cls, repo, snapshot, count=5, delete=False):
         ''' Wait for snapshot to exist or be deleted. '''
         for _ in range(count):
-            try:
-                if delete:
-                    if not Snapshot.exists(repo, snapshot):
-                        return
-                elif Snapshot.exists(repo, snapshot):
+            if delete:
+                if not Snapshot.exists(repo, snapshot):
                     return
-            except KeyError:
-                continue
+            elif Snapshot.exists(repo, snapshot):
+                return
             time.sleep(1)
 
     @classmethod

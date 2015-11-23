@@ -48,9 +48,10 @@ class SnapshotTest(TestCase):
     TEST_REPO = 'test_backup_'+ElasticSettings.getattr('TEST')
     TEST_REPO_DIR = ElasticSettings.getattr('TEST_REPO_DIR')
 
-    def test_show(self, snapshot=None):
+    def test_show(self):
         self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', False))
         self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', True))
+        self.assertFalse(Snapshot.show('xyzabc', '_all', False))
 
     def test_create_delete_repository(self):
         self.wait_for_running_snapshot()
