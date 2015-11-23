@@ -11,11 +11,8 @@ register = template.Library()
 @register.filter
 def doc_attr(doc, arg):
     ''' Gets attribute of an object dynamically from a string name '''
-    if not isinstance(doc, Document):
-        return settings.TEMPLATE_STRING_IF_INVALID
-    if arg not in doc.__dict__:
-        return None
-    return getattr(doc, arg)
+    return getattr(doc, arg, None) if isinstance(doc, Document) \
+        else settings.TEMPLATE_STRING_IF_INVALID
 
 
 @register.filter
@@ -39,43 +36,37 @@ def get_item(dictionary, key):
 @register.filter
 def doc_keys(doc):
     ''' Gets the keys of the document object. '''
-    if not isinstance(doc, Document):
-        return settings.TEMPLATE_STRING_IF_INVALID
-    return sorted(list(doc.__dict__.keys()))
+    return sorted(list(doc.__dict__.keys())) if isinstance(doc, Document) \
+        else settings.TEMPLATE_STRING_IF_INVALID
 
 
 @register.filter
 def doc_type(doc):
     ''' Gets the document type. '''
-    if not isinstance(doc, Document):
-        return settings.TEMPLATE_STRING_IF_INVALID
-    return doc.type()
+    return doc.type() if isinstance(doc, Document) \
+        else settings.TEMPLATE_STRING_IF_INVALID
 
 
 @register.filter
 def doc_id(doc):
     ''' Gets the document ID. '''
-    if not isinstance(doc, Document):
-        return settings.TEMPLATE_STRING_IF_INVALID
-    return doc.doc_id()
+    return doc.doc_id() if isinstance(doc, Document) \
+        else settings.TEMPLATE_STRING_IF_INVALID
 
 
 @register.filter
 def doc_idx(doc):
     ''' Gets the document ID. '''
-    if not isinstance(doc, Document):
-        return settings.TEMPLATE_STRING_IF_INVALID
-    return doc.index()
+    return doc.index() if isinstance(doc, Document) \
+        else settings.TEMPLATE_STRING_IF_INVALID
 
 
 @register.filter
 def doc_link(doc):
     ''' Gets the document details. '''
-    if not isinstance(doc, Document):
-        return settings.TEMPLATE_STRING_IF_INVALID
-
     return ElasticSettings.url() + '/' + doc.index() + '/' + doc.type() + \
-        '/' + doc.doc_id() + '?routing=' + doc.doc_id()
+        '/' + doc.doc_id() + '?routing=' + doc.doc_id() \
+        if isinstance(doc, Document) else settings.TEMPLATE_STRING_IF_INVALID
 
 
 @register.filter(name='sort')
