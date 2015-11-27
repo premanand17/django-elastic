@@ -48,9 +48,10 @@ class SnapshotTest(TestCase):
     TEST_REPO = 'test_backup_'+ElasticSettings.getattr('TEST')
     TEST_REPO_DIR = ElasticSettings.getattr('TEST_REPO_DIR')
 
-    def test_show(self, snapshot=None):
+    def test_show(self):
         self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', False))
         self.assertTrue(Snapshot.show(ElasticSettings.getattr('REPOSITORY'), '_all', True))
+        self.assertFalse(Snapshot.show('xyzabc', '_all', False))
 
     def test_create_delete_repository(self):
         self.wait_for_running_snapshot()
@@ -82,7 +83,7 @@ class SnapshotTest(TestCase):
         requests.delete(ElasticSettings.url() + '/' + IDX['MARKER']['indexName'])
         self.assertFalse(Search.index_exists(IDX['MARKER']['indexName']), "Removed index")
         # restore from snapshot
-        call_command('restore_snapshot', snapshot, repo=repo)
+        call_command('restore_snapshot', snapshot, repo=repo, indices=IDX['MARKER']['indexName'])
         Search.index_refresh(IDX['MARKER']['indexName'])
         self.assertTrue(Search.index_exists(IDX['MARKER']['indexName']), "Restored index exists")
 

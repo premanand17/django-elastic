@@ -73,6 +73,12 @@ class Document(object):
         ''' Document index. '''
         return self.__dict__['_meta']['_index']
 
+    def parent(self):
+        ''' Document parent. '''
+        if '_parent' in self.__dict__['_meta']:
+            return self.__dict__['_meta']['_parent']
+        return None
+
     def highlight(self):
         ''' Highlight match. '''
         if 'highlight' in self.__dict__['_meta']:
