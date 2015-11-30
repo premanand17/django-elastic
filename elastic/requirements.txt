@@ -1,1 +1,0 @@
--e git+http://github.com/django-tastypie/django-tastypie#egg=tastypie
