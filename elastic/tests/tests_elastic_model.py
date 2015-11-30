@@ -228,6 +228,7 @@ class ElasticModelTest(TestCase):
         docs = elastic.search().docs
         self.assertEquals(len(docs), 1)
         self.assertEquals(getattr(docs[0], 'pubmed'), 1234)
+        self.assertEquals(docs[0].parent(), '1')
         self.assertRaises(QueryError, ElasticQuery.has_parent, 'gene', 'xxxxx')
 
         ''' test has child query '''
@@ -236,6 +237,7 @@ class ElasticModelTest(TestCase):
         docs = elastic.search().docs
         self.assertEquals(len(docs), 1)
         self.assertEquals(getattr(docs[0], 'symbol'), 'PAX1')
+        self.assertEquals(docs[0].parent(), None)
         requests.delete(ElasticSettings.url() + '/' + idx)
 
     def test_range_query(self):
