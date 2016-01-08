@@ -37,6 +37,8 @@ class Search:
         define a search query.
         @type  search_query: L{ElasticQuery}
         @keyword search_query: The elastic query to search (default: None).
+        @type  aggs: L{Aggs}
+        @keyword aggs: Aggregations used in the search.
         @type  search_from: integer
         @keyword search_from: Offset used in paginations (default: 0).
         @type  size: integer
