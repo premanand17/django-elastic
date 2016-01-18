@@ -286,7 +286,7 @@ class HasChildQuery(Query):
 class BoolQuery(Query):
     ''' Bool Query - a query that matches documents matching boolean
     combinations of other queries'''
-    def __init__(self, must_arr=None, must_not_arr=None, should_arr=None, b_filter=None):
+    def __init__(self, must_arr=None, must_not_arr=None, should_arr=None, b_filter=None, minimum_should_match=None):
         ''' Bool query '''
         self.query = {"bool": {}}
         if must_arr is not None:
@@ -297,6 +297,8 @@ class BoolQuery(Query):
             self.should(should_arr)
         if b_filter is not None:
             self.filter(b_filter)
+        if minimum_should_match is not None:
+            self.minimum_should_match(minimum_should_match)
 
     def filter(self, b_filter):
         if not isinstance(b_filter, Filter):
@@ -311,6 +313,10 @@ class BoolQuery(Query):
 
     def should(self, should_arr):
         return self._update("should", should_arr)
+
+    def minimum_should_match(self, minimum_should_match):
+        self.query["bool"].update({"minimum_should_match": minimum_should_match})
+        return self
 
     def _update(self, name, qarr):
         if not isinstance(qarr, list):
