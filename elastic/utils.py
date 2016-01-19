@@ -1,5 +1,6 @@
 ''' Utility functions. '''
-from elastic.query import Query, ScoreFunction, FunctionScoreQuery
+from elastic.query import Query, ScoreFunction, FunctionScoreQuery, BoolQuery,\
+    RangeQuery, OrFilter
 from elastic.search import ElasticQuery, Search
 import random
 
@@ -39,3 +40,14 @@ class ElasticUtils(object):
             else:
                 ids.append(doc.doc_id())
         return ids
+
+    @classmethod
+    def range_overlap_query(cls, seqid, start_range, end_range,
+                            field_list=None, seqid_param="seqid", start_param="start", end_param="end"):
+        ''' Constructs a range overlap query '''
+        query_bool = BoolQuery(must_arr=[RangeQuery(start_param, lte=start_range),
+                                         RangeQuery(end_param, gte=end_range)])
+        or_filter = OrFilter(RangeQuery(start_param, gte=start_range, lte=end_range))
+        or_filter.extend(RangeQuery(end_param, gte=start_range, lte=end_range)) \
+                 .extend(query_bool)
+        return ElasticQuery.filtered(Query.term(seqid_param, seqid), or_filter, field_list)
