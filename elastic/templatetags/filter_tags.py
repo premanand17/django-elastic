@@ -22,7 +22,7 @@ def doc_attr_str(doc, arg):
     if isinstance(attr, str):
         return attr
     elif isinstance(attr, list):
-        return '; '.join(attr)
+        return '; '.join([at for at in attr if at is not None])
     else:
         return attr
 
