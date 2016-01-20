@@ -19,8 +19,8 @@ import requests
 import logging
 from elastic.result import Document, Result, Aggregation
 from elastic.elastic_settings import ElasticSettings, ElasticUrl
-from elastic.query import Query, QueryError, BoolQuery, RangeQuery, FilteredQuery,\
-    Filter, OrFilter, HasParentQuery, HasChildQuery
+from elastic.query import Query, QueryError, BoolQuery, FilteredQuery,\
+    Filter, HasParentQuery, HasChildQuery
 from builtins import classmethod
 
 # Get an instance of a logger
@@ -133,14 +133,11 @@ class Search:
     @classmethod
     def range_overlap_query(cls, seqid, start_range, end_range,
                             search_from=0, size=20, idx=ElasticSettings.idx('DEFAULT'),
-                            field_list=None):
+                            field_list=None, seqid_param="seqid", start_param="start", end_param="end"):
         ''' Constructs a range overlap query '''
-        query_bool = BoolQuery(must_arr=[RangeQuery("start", lte=start_range),
-                                         RangeQuery("end", gte=end_range)])
-        or_filter = OrFilter(RangeQuery("start", gte=start_range, lte=end_range))
-        or_filter.extend(RangeQuery("end", gte=start_range, lte=end_range)) \
-                 .extend(query_bool)
-        query = ElasticQuery.filtered(Query.term("seqid", seqid), or_filter, field_list)
+        from elastic import utils
+        query = utils.ElasticUtils.range_overlap_query(seqid, start_range, end_range, field_list=None,
+                                                       seqid_param="seqid", start_param="start", end_param="end")
         return cls(search_query=query, search_from=search_from, size=size, idx=idx)
 
     @classmethod
