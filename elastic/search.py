@@ -114,7 +114,7 @@ class Search:
         url = idx + '/' + idx_type + '/_mapping'
         response = Search.elastic_request(elastic_url, url, is_post=False)
         if "error" in response.json():
-            logger.warn(response.json())
+            logger.warning(response.json())
             return False
         return True
 
@@ -126,7 +126,7 @@ class Search:
             elastic_url = ElasticSettings.url()
         response = Search.elastic_request(elastic_url, idx + '/_refresh')
         if "error" in response.json():
-            logger.warn(response.content.decode("utf-8"))
+            logger.warning(response.content.decode("utf-8"))
             return False
         return True
 
@@ -159,7 +159,7 @@ class Search:
             json_err = json.dumps({"error": response.status_code,
                                    "response": response.content.decode("utf-8"),
                                    "url": self.mapping_url})
-            logger.warn(json_err)
+            logger.warning(json_err)
             return json_err
         return response.json()
 
@@ -177,7 +177,7 @@ class Search:
         response = Search.elastic_request(self.elastic_url, self.url, data=json.dumps(self.query))
         logger.debug("curl '" + self.elastic_url + '/' + self.url + "&pretty' -d '" + json.dumps(self.query) + "'")
         if response.status_code != 200:
-            logger.warn("Error: elastic response 200:" + self.url)
+            logger.upstream("Error: elastic response 200:" + self.url)
             json_err = json.dumps({"error": response.status_code,
                                    "response": response.content.decode("utf-8"),
                                    "url": self.url})
@@ -288,8 +288,8 @@ class Suggest(object):
         response = Search.elastic_request(elastic_url, url, data=json.dumps(suggest))
         logger.debug("curl -XPOST '" + elastic_url + '/' + url + "' -d '" + json.dumps(suggest) + "'")
         if response.status_code != 200:
-            logger.warn("Suggeter Error: elastic response 200:" + url)
-            logger.warn(response.json())
+            logger.warning("Suggeter Error: elastic response 200:" + url)
+            logger.warning(response.json())
         return response.json()
 
 
@@ -307,8 +307,8 @@ class Update(object):
 
         logger.debug("curl -XPOST '" + elastic_url + url + "' -d '" + json.dumps(part_doc) + "'")
         if response.status_code != 200:
-            logger.warn("Error: elastic response 200:" + url)
-            logger.warn(response.json())
+            logger.warning("Error: elastic response 200:" + url)
+            logger.warning(response.json())
         return response.json()
 
 
