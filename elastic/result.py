@@ -113,7 +113,7 @@ class Aggregation(object):
         doc_buckets = {}
         for bucket in buckets:
             for k in bucket:
-                if hasattr(bucket[k], '__contains__') and 'hits' in bucket[k]:
+                if k != 'key' and hasattr(bucket[k], '__contains__') and 'hits' in bucket[k]:
                     hits = bucket[k]['hits']['hits']
                     docs = [Document(hit) for hit in hits]
                     doc_buckets[bucket['key']] = {
