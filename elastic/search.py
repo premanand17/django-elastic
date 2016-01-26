@@ -269,7 +269,7 @@ class Suggest(object):
 
     @classmethod
     def suggest(cls, term, idx, elastic_url=ElasticSettings.url(),
-                name='data', field='suggest', size=5):
+                name='data', field='suggest', context=None, size=5):
         ''' Auto completion suggestions for a given term. '''
         if elastic_url is None:
             elastic_url = ElasticSettings.url()
@@ -284,6 +284,8 @@ class Suggest(object):
                 }
             }
         }
+        if context is not None:
+            suggest[name]['completion'].update(context)
         response = Search.elastic_request(elastic_url, url, data=json.dumps(suggest))
         logger.debug("curl -XPOST '" + elastic_url + '/' + url + "' -d '" + json.dumps(suggest) + "'")
         if response.status_code != 200:
