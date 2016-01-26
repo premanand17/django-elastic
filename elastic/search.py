@@ -180,12 +180,15 @@ class Search:
             logger.warning("Error: elastic response 200:" + self.url)
         return response.json()
 
-    def search(self):
+    def search(self, obj_document=Document):
         ''' Run the search and return a L{Result} that stores the
-        L{Document} and L{Aggregation} objects. '''
+        L{Document} and L{Aggregation} objects.
+        @type  obj_document: L{Document}
+        @keyword obj_document: Document object.
+        '''
         json_response = self.get_json_response()
         hits = json_response['hits']['hits']
-        docs = [Document(hit) for hit in hits]
+        docs = [obj_document(hit) for hit in hits]
         aggs = Aggregation.build_aggs(json_response)
         return Result(took=json_response['took'],
                       hits_total=json_response['hits']['total'],
