@@ -5,6 +5,15 @@ from elastic.management.loaders.exceptions import MappingError
 class MappingProperties():
     ''' Build the mapping properties for an index. '''
 
+    # context suggester
+    CONTEXT_SUGGESTER = {
+        "auth": {
+            "type": "category",
+            "path": "group_name",
+            "default": ["public"]
+        }
+    }
+
     def __init__(self, idx_type, parent=None):
         ''' For a given index type create the mapping properties. '''
         self.idx_type = idx_type
@@ -15,7 +24,7 @@ class MappingProperties():
 
     def add_property(self, name, map_type, index=None, analyzer=None,
                      index_analyzer=None, search_analyzer=None,
-                     property_format=None, index_options=None):
+                     property_format=None, index_options=None, **kwargs):
         ''' Add a property to the mapping. '''
         self.mapping_properties[self.idx_type]["properties"][name] = {"type": map_type}
         if index is not None:
@@ -32,6 +41,9 @@ class MappingProperties():
             self.mapping_properties[self.idx_type]["properties"][name].update({"format": property_format})
         if index_options is not None:
             self.mapping_properties[self.idx_type]["properties"][name].update({"index_options": index_options})
+
+        for key in kwargs:
+            self.mapping_properties[self.idx_type]["properties"][name].update({key: kwargs[key]})
 
         self.column_names.append(name)
         return self
