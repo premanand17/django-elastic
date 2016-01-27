@@ -24,7 +24,7 @@ class MarkerManager(DelimeterLoader):
              .add_property("qual", "string", index="no") \
              .add_property("filter", "string", index="no") \
              .add_property("info", "string", index="no") \
-             .add_property("suggest", "completion", context=MappingProperties.CONTEXT_SUGGESTER, analyzer="full_name")
+             .add_property("suggest", "completion", analyzer="full_name")
         tags = MappingProperties("tags")
         tags.add_property("weight", "integer", index="not_analyzed")
         props.add_properties(tags)

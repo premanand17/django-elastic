@@ -180,7 +180,8 @@ class Search:
             logger.warning("Error: elastic response 200:" + self.url)
         return response.json()
 
-    def search(self, obj_document=Document):
+    def search(self, obj_document=(Document if ElasticSettings.getattr('DOCUMENT_FACTORY') is None
+                                   else ElasticSettings.getattr('DOCUMENT_FACTORY'))):
         ''' Run the search and return a L{Result} that stores the
         L{Document} and L{Aggregation} objects.
         @type  obj_document: L{Document}
