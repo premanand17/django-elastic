@@ -139,6 +139,9 @@ class ElasticSettings:
         if idx_type_name is None:
             return idx
 
+        if idx is None or 'idx_type' not in ElasticSettings.attrs().get('IDX')[idx]:
+            return (idx, None)
+
         for k, v in ElasticSettings.attrs().get('IDX')[idx]['idx_type'].items():
             if 'type' in v and v['type'] == idx_type_name:
                 return (idx, k)
