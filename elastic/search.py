@@ -114,7 +114,7 @@ class Search:
         url = idx + '/' + idx_type + '/_mapping'
         response = Search.elastic_request(elastic_url, url, is_post=False)
         if "error" in response.json():
-            logger.warn(response.json())
+            logger.warning(response.json())
             return False
         return True
 
@@ -126,7 +126,7 @@ class Search:
             elastic_url = ElasticSettings.url()
         response = Search.elastic_request(elastic_url, idx + '/_refresh')
         if "error" in response.json():
-            logger.warn(response.content.decode("utf-8"))
+            logger.warning(response.content.decode("utf-8"))
             return False
         return True
 
@@ -160,7 +160,7 @@ class Search:
             json_err = json.dumps({"error": response.status_code,
                                    "response": response.content.decode("utf-8"),
                                    "url": self.mapping_url})
-            logger.warn(json_err)
+            logger.warning(json_err)
             return json_err
         return response.json()
 
@@ -178,15 +178,19 @@ class Search:
         response = Search.elastic_request(self.elastic_url, self.url, data=json.dumps(self.query))
         logger.debug("curl '" + self.elastic_url + '/' + self.url + "&pretty' -d '" + json.dumps(self.query) + "'")
         if response.status_code != 200:
-            logger.warn("Error: elastic response 200:" + self.url)
+            logger.warning("Error: elastic response 200:" + self.url)
         return response.json()
 
-    def search(self):
+    def search(self, obj_document=(Document if ElasticSettings.getattr('DOCUMENT_FACTORY') is None
+                                   else ElasticSettings.getattr('DOCUMENT_FACTORY'))):
         ''' Run the search and return a L{Result} that stores the
-        L{Document} and L{Aggregation} objects. '''
+        L{Document} and L{Aggregation} objects.
+        @type  obj_document: L{Document}
+        @keyword obj_document: Document object.
+        '''
         json_response = self.get_json_response()
         hits = json_response['hits']['hits']
-        docs = [Document(hit) for hit in hits]
+        docs = [obj_document(hit) for hit in hits]
         aggs = Aggregation.build_aggs(json_response)
         return Result(took=json_response['took'],
                       hits_total=json_response['hits']['total'],
@@ -267,7 +271,7 @@ class Suggest(object):
 
     @classmethod
     def suggest(cls, term, idx, elastic_url=ElasticSettings.url(),
-                name='data', field='suggest', size=5):
+                name='data', field='suggest', context=None, size=5):
         ''' Auto completion suggestions for a given term. '''
         if elastic_url is None:
             elastic_url = ElasticSettings.url()
@@ -282,11 +286,13 @@ class Suggest(object):
                 }
             }
         }
+        if context is not None:
+            suggest[name]['completion'].update(context)
         response = Search.elastic_request(elastic_url, url, data=json.dumps(suggest))
         logger.debug("curl -XPOST '" + elastic_url + '/' + url + "' -d '" + json.dumps(suggest) + "'")
         if response.status_code != 200:
-            logger.warn("Suggeter Error: elastic response 200:" + url)
-            logger.warn(response.json())
+            logger.warning("Suggeter Error: elastic response 200:" + url)
+            logger.warning(response.json())
         return response.json()
 
 
@@ -304,8 +310,8 @@ class Update(object):
 
         logger.debug("curl -XPOST '" + elastic_url + url + "' -d '" + json.dumps(part_doc) + "'")
         if response.status_code != 200:
-            logger.warn("Error: elastic response 200:" + url)
-            logger.warn(response.json())
+            logger.warning("Error: elastic response 200:" + url)
+            logger.warning(response.json())
         return response.json()
 
 

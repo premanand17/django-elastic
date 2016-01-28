@@ -107,15 +107,15 @@ class Aggregation(object):
             return self.__dict__['buckets']
         return None
 
-    def get_docs_in_buckets(self):
+    def get_docs_in_buckets(self, obj_document=Document):
         ''' Return document hits in Aggregation buckets. '''
         buckets = self.get_buckets()
         doc_buckets = {}
         for bucket in buckets:
             for k in bucket:
-                if hasattr(bucket[k], '__contains__') and 'hits' in bucket[k]:
+                if k != 'key' and hasattr(bucket[k], '__contains__') and 'hits' in bucket[k]:
                     hits = bucket[k]['hits']['hits']
-                    docs = [Document(hit) for hit in hits]
+                    docs = [obj_document(hit) for hit in hits]
                     doc_buckets[bucket['key']] = {
                         'docs': docs,
                         'doc_count': bucket['doc_count']

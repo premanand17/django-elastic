@@ -122,24 +122,38 @@ class ElasticSettings:
         return ','.join(str(e) for e in s)
 
     @classmethod
-    def get_idx_key_by_name(cls, val):
+    def get_idx_key_by_name(cls, idx_name, idx_type_name=None):
         ''' Get the index key from the name in the dictionary.
-        @type  val: value
-        @param val: A value in the dictionary.
+        @type  idx_name: index name
+        @param idx_name: A value in the dictionary.
         '''
+        idx = None
         for k, v in ElasticSettings.attrs().get('IDX').items():
-            if isinstance(v, str) and v == val:
-                return k
-            elif isinstance(v, dict) and v['name'] == val:
-                return k
+            if isinstance(v, str) and v == idx_name:
+                idx = k
+                break
+            elif isinstance(v, dict) and v['name'] == idx_name:
+                idx = k
+                break
+
+        if idx_type_name is None:
+            return idx
+
+        if idx is None or 'idx_type' not in ElasticSettings.attrs().get('IDX')[idx]:
+            return (idx, None)
+
+        for k, v in ElasticSettings.attrs().get('IDX')[idx]['idx_type'].items():
+            if 'type' in v and v['type'] == idx_type_name:
+                return (idx, k)
 
     @classmethod
     def get_label(cls, idx, idx_type=None, label='label'):
         ''' Get an index or index type label. '''
         try:
+            ind = ElasticSettings.attrs().get('IDX')[idx]
             if idx_type is not None:
-                return ElasticSettings.attrs().get('IDX')[idx]['idx_type'][idx_type][label]
-            return ElasticSettings.attrs().get('IDX')[idx][label]
+                return ind['idx_type'][idx_type][label] if label in ind['idx_type'][idx_type] else None
+            return ind[label] if label in ind else None
         except KeyError:
             raise SettingsError(label+' not found in '+idx)
 
