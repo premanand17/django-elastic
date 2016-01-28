@@ -136,8 +136,9 @@ class Search:
                             field_list=None, seqid_param="seqid", start_param="start", end_param="end"):
         ''' Constructs a range overlap query '''
         from elastic import utils
-        query = utils.ElasticUtils.range_overlap_query(seqid, start_range, end_range, field_list=None,
-                                                       seqid_param="seqid", start_param="start", end_param="end")
+        query = utils.ElasticUtils.range_overlap_query(seqid, start_range, end_range, field_list=field_list,
+                                                       seqid_param=seqid_param, start_param=start_param,
+                                                       end_param=end_param)
         return cls(search_query=query, search_from=search_from, size=size, idx=idx)
 
     @classmethod
