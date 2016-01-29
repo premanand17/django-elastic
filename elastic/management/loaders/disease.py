@@ -25,16 +25,16 @@ class DiseaseManager(Loader):
                 continue
             parts = re.split('\t', line)
             data = {"name": parts[0],
-                    "code": parts[2].lower(),
+                    "code": parts[2],
                     "description": parts[1],
                     "colour": parts[3],
                     "tier": int(parts[4])
                     }
             data['suggest'] = {}
-            data['suggest']["input"] = [parts[2].lower(), parts[0]]
+            data['suggest']["input"] = [parts[2], parts[0]]
             data['suggest']["weight"] = 250
             resp = requests.put(ElasticSettings.url()+'/' +
-                                index_name+'/disease/'+parts[2].lower(),
+                                index_name+'/disease/'+parts[2],
                                 data=json.dumps(data))
             if resp.status_code == 201:
                 logger.debug("Loaded "+parts[0])
