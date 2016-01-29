@@ -51,3 +51,9 @@ class ElasticUtils(object):
         or_filter.extend(RangeQuery(end_param, gte=start_range, lte=end_range)) \
                  .extend(query_bool)
         return ElasticQuery.filtered(Query.term(seqid_param, seqid), or_filter, field_list)
+
+    @classmethod
+    def get_docs_count(cls, idx, idx_type):
+        '''Get doc counts'''
+        elastic = Search(idx=idx, idx_type=idx_type)
+        return elastic.get_count()['count']
