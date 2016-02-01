@@ -108,7 +108,7 @@ class Aggregation(object):
         return None
 
     def get_docs_in_buckets(self, obj_document=Document):
-        ''' Return document hits in Aggregation buckets. '''
+        ''' Return documents of the top hits in a sub-aggregation of a bucket aggregation. '''
         buckets = self.get_buckets()
         doc_buckets = {}
         for bucket in buckets:
