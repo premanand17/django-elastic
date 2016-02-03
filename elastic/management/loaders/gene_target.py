@@ -1,13 +1,15 @@
 ''' Loader for gene target data. '''
+import re
+import logging
 from elastic.management.loaders.loader import DelimeterLoader
 from elastic.management.loaders.mapping import MappingProperties
 
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+
 
 class GeneTargetManager(DelimeterLoader):
-    tissue_types = ["Monocytes", "Macrophages_M0", "Macrophages_M1", "Macrophages_M2", "Neutrophils",
-                    "Megakaryocytes", "Endothelial_precursors", "Erythroblasts", "Foetal_thymus", "Naive_CD4",
-                    "Total_CD4_MF", "Total_CD4_Activated", "Total_CD4_NonActivated", "Naive_CD8", "Total_CD8",
-                    "Naive_B", "Total_B"]
+    tissue_types = []
 
     def create_load_gene_target_index(self, **options):
         ''' Index gene target data '''
@@ -17,6 +19,10 @@ class GeneTargetManager(DelimeterLoader):
         column_names = ["ensg", "name", "biotype", "strand",
                         "baitChr", "baitStart", "baitEnd", "baitID", "baitName",
                         "oeChr", "oeStart", "oeEnd", "oeID", "oeName", "dist"]
+        line = f.readline().strip()
+        line = line.decode("utf-8")
+        parts = re.split("\t", line)
+        GeneTargetManager.tissue_types = parts[len(column_names):]
         column_names.extend(GeneTargetManager.tissue_types)
 
         self.load(column_names, f, idx_name, 'gene_target')
