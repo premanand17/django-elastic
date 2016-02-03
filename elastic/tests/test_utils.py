@@ -7,7 +7,7 @@ from elastic.elastic_settings import ElasticSettings
 from elastic.utils import ElasticUtils
 from elastic.search import Search, ElasticQuery
 import requests
-from elastic.query import Query
+from elastic.query import Query, BoolQuery
 from elastic.result import Document
 
 
@@ -51,3 +51,13 @@ class UtilsTest(TestCase):
         idx_type = IDX['GFF_GENERIC']['indexType']
         ids = ElasticUtils.get_rdm_feature_ids(idx, idx_type, size=2)
         self.assertEqual(len(ids), 2, 'Retrieved one document')
+
+    def test_search_count(self):
+        ''' Test index and search counts. '''
+        idx = IDX['GFF_GENERIC']['indexName']
+        idx_type = IDX['GFF_GENERIC']['indexType']
+        count1 = ElasticUtils.get_docs_count(idx, idx_type)
+        self.assertGreater(count1, 0, 'index count')
+        search_query = ElasticQuery(BoolQuery(must_not_arr=[Query.term('seqid', 'chr1')]))
+        count2 = ElasticUtils.get_docs_count(idx, idx_type, search_query=search_query)
+        self.assertGreater(count1, count2, 'search query count')

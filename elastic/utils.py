@@ -9,6 +9,11 @@ class ElasticUtils(object):
     ''' Utility functions. '''
 
     @classmethod
+    def get_docs_count(cls, idx, idx_type, search_query=None):
+        '''Get index or search doc counts'''
+        return Search(idx=idx, idx_type=idx_type, search_query=search_query, size=0).get_count()['count']
+
+    @classmethod
     def get_rdm_feature_id(cls, idx, idx_type, qbool=Query.match_all(), sources=[], field=None):
         ''' Get a random feature id from the indices. '''
         doc = cls.get_rdm_docs(idx, idx_type, qbool=qbool, sources=sources, size=1)[0]
