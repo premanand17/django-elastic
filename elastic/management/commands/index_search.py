@@ -1,16 +1,18 @@
 ''' Used to define Elastic mapping and index data. '''
-from django.core.management.base import BaseCommand
-from optparse import make_option
 import logging
-from elastic.management.loaders.marker import MarkerManager, RsMerge
-from elastic.management.loaders.gene import GeneManager
+from optparse import make_option
+
+from django.core.management.base import BaseCommand
+
+from elastic.management.loaders.alias import AliasManager
+from elastic.management.loaders.bed import BEDManager
+from elastic.management.loaders.criteria import CriteriaManager
 from elastic.management.loaders.disease import DiseaseManager
+from elastic.management.loaders.gene import GeneManager
 from elastic.management.loaders.gene_target import GeneTargetManager
 from elastic.management.loaders.gff import GFFManager
-from elastic.management.loaders.bed import BEDManager
-from elastic.management.loaders.alias import AliasManager
-from elastic.management.loaders.criteria import CriteriaManager
 from elastic.management.loaders.json import JsonManager
+from elastic.management.loaders.marker import MarkerManager, RsMerge
 from elastic.management.loaders.region import RegionManager
 
 
