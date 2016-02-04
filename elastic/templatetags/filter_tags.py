@@ -23,6 +23,8 @@ def doc_attr_str(doc, arg):
         return attr
     elif isinstance(attr, list):
         return '; '.join([at for at in attr if at is not None])
+    elif isinstance(attr, dict):
+        return '; '.join([k + ':' + str(v) for k, v in attr.items()])
     else:
         return attr
 
