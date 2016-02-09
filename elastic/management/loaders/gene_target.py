@@ -1,10 +1,13 @@
 ''' Loader for gene target data. '''
 import logging
 import re
-import sys
 
 from elastic.management.loaders.loader import DelimeterLoader
 from elastic.management.loaders.mapping import MappingProperties
+
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 # Get an instance of a logger
@@ -27,7 +30,6 @@ class GeneTargetManager(DelimeterLoader):
         GeneTargetManager.tissue_types = parts[len(column_names):]
         column_names.extend(GeneTargetManager.tissue_types)
         self._create_gene_mapping(**options)
-
         self.load(column_names, f, idx_name, 'gene_target')
 
     def _create_gene_mapping(self, **options):

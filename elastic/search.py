@@ -136,8 +136,9 @@ class Search:
                             field_list=None, seqid_param="seqid", start_param="start", end_param="end"):
         ''' Constructs a range overlap query '''
         from elastic import utils
-        query = utils.ElasticUtils.range_overlap_query(seqid, start_range, end_range, field_list=None,
-                                                       seqid_param="seqid", start_param="start", end_param="end")
+        query = utils.ElasticUtils.range_overlap_query(seqid, start_range, end_range, field_list=field_list,
+                                                       seqid_param=seqid_param, start_param=start_param,
+                                                       end_param=end_param)
         return cls(search_query=query, search_from=search_from, size=size, idx=idx)
 
     @classmethod
@@ -323,20 +324,16 @@ class Delete(object):
     @classmethod
     def docs_by_query(cls, idx, idx_type='', query=Query.match_all()):
         ''' Delete all documents specified by a Query. '''
-        query = ElasticQuery(query, sources='_id')
-        chunk_size = 1000
-        search_from = 0
-        hits_total = 10
-        while search_from < hits_total:
-            res = Search(query, idx=idx, idx_type=idx_type, size=chunk_size, search_from=search_from).search()
-            hits_total = res.hits_total
-            search_from += chunk_size
-            docs = res.docs
+        def delete_docs(resp_json):
+            hits = resp_json['hits']['hits']
             json_data = ''
-            for doc in docs:
+            for hit in hits:
                 json_data += '{"delete": {"_index": "%s", "_type": "%s", "_id": "%s"}}\n' % \
-                             (doc.index(), doc.type(), doc.doc_id())
+                             (hit['_index'], hit['_type'], hit['_id'])
             Bulk.load(idx, idx_type, json_data)
+
+        query = ElasticQuery(query, sources='_id')
+        ScanAndScroll.scan_and_scroll(idx, idx_type=idx_type, call_fun=delete_docs, query=query)
 
 
 class Bulk(object):
