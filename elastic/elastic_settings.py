@@ -1,7 +1,12 @@
 ''' Used to manage and retrieve Elastic settings. '''
-from django.conf import settings
-from elastic.exceptions import SettingsError
 import logging
+
+from django.conf import settings
+from django.utils.module_loading import import_string
+
+from elastic.exceptions import SettingsError
+
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -156,6 +161,13 @@ class ElasticSettings:
             return ind[label] if label in ind else None
         except KeyError:
             raise SettingsError(label+' not found in '+idx)
+
+    @classmethod
+    def get_document_factory(cls):
+        ''' Get the document factory. '''
+        if ElasticSettings.getattr('DOCUMENT_FACTORY') is not None:
+            return import_string(ElasticSettings.getattr('DOCUMENT_FACTORY')).factory
+        return None
 
 
 class ElasticUrl(object):
