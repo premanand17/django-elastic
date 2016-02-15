@@ -166,7 +166,10 @@ class ElasticSettings:
     def get_document_factory(cls):
         ''' Get the document factory. '''
         if ElasticSettings.getattr('DOCUMENT_FACTORY') is not None:
-            return import_string(ElasticSettings.getattr('DOCUMENT_FACTORY')).factory
+            if isinstance(ElasticSettings.getattr('DOCUMENT_FACTORY'), str):
+                return import_string(ElasticSettings.getattr('DOCUMENT_FACTORY')).factory
+            else:
+                return ElasticSettings.getattr('DOCUMENT_FACTORY')
         return None
 
 
