@@ -12,8 +12,6 @@ NUMBER_OF_SHARDS = 1
 
 IDX = {'GENE': {'indexName': 'test__gene_'+SEARCH_SUFFIX,
                 'indexGene': SEARCH_TEST_DATA_PATH+'genenames.org.test.txt.gz', 'shards': NUMBER_OF_SHARDS},
-       'DISEASE': {'indexName': 'test__disease_'+SEARCH_SUFFIX,
-                   'indexDisease': SEARCH_TEST_DATA_PATH+'disease.list.gz', 'shards': NUMBER_OF_SHARDS},
        'MARKER': {'indexName': 'test__snp_'+SEARCH_SUFFIX,
                   'indexSNP': SEARCH_TEST_DATA_PATH+'dbsnp144_test.vcf.gz', 'shards': NUMBER_OF_SHARDS},
        'MARKER_RS_HISTORY': {'indexName': 'test__snp_'+SEARCH_SUFFIX, 'indexType': 'rs_merge',

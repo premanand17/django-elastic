@@ -1,16 +1,17 @@
 ''' Used to define Elastic mapping and index data. '''
-from django.core.management.base import BaseCommand
-from optparse import make_option
 import logging
-from elastic.management.loaders.marker import MarkerManager, RsMerge
+from optparse import make_option
+
+from django.core.management.base import BaseCommand
+
+from elastic.management.loaders.alias import AliasManager
+from elastic.management.loaders.bed import BEDManager
+from elastic.management.loaders.criteria import CriteriaManager
 from elastic.management.loaders.gene import GeneManager
-from elastic.management.loaders.disease import DiseaseManager
 from elastic.management.loaders.gene_target import GeneTargetManager
 from elastic.management.loaders.gff import GFFManager
-from elastic.management.loaders.bed import BEDManager
-from elastic.management.loaders.alias import AliasManager
-from elastic.management.loaders.criteria import CriteriaManager
 from elastic.management.loaders.json import JsonManager
+from elastic.management.loaders.marker import MarkerManager, RsMerge
 
 
 # Get an instance of a logger
@@ -26,8 +27,6 @@ class Command(BaseCommand):
            "Options for genes:\n" \
            " --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
            " --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
-           "Options for diseases:\n" \
-           " --indexName [index name] --indexDisease disease.list\n" \
            "Options for GFF/GTF:\n" \
            " --indexName [index name] --indexType [gff] --indexGFF file.gff [--isGTF]\n" \
            "Options for BED:\n" \
@@ -72,10 +71,6 @@ class Command(BaseCommand):
         make_option('--disease',
                     dest='disease',
                     help='disease code (eg: cel) '),
-        ) + (
-        make_option('--indexDisease',
-                    dest='indexDisease',
-                    help='Load disease details'),
         ) + (
         make_option('--indexGTarget',
                     dest='indexGTarget',
@@ -143,10 +138,6 @@ class Command(BaseCommand):
         elif options['indexGeneGFF']:
             gene = GeneManager()
             gene.update_gene(**options)
-
-        elif options['indexDisease']:
-            disease = DiseaseManager()
-            disease.create_disease(**options)
 
         elif options['indexGTarget']:
             gt = GeneTargetManager()
