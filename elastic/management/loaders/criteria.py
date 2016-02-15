@@ -1,3 +1,4 @@
+''' Old web-site criteria builder. '''
 from elastic.management.loaders.loader import JSONLoader, MappingProperties
 import requests
 import logging
@@ -7,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class CriteriaManager(JSONLoader):
+    ''' Code to generate criteria index used in the old web-site. '''
 
     def create_criteria(self, **options):
         ''' Create alias index mapping and load data '''
