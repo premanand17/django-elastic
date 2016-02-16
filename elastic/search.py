@@ -14,14 +14,17 @@ the factory methods in L{ElasticQuery}. If this does not provide the
 exact components needed for the query then look into building it
 from the L{Query} and L{Filter} parent and child classes.
 '''
-import json
-import requests
-import logging
-from elastic.result import Document, Result, Aggregation
-from elastic.elastic_settings import ElasticSettings, ElasticUrl
-from elastic.query import Query, QueryError, BoolQuery, FilteredQuery,\
-    Filter, HasParentQuery, HasChildQuery
 from builtins import classmethod
+import json
+import logging
+
+import requests
+
+from elastic.elastic_settings import ElasticSettings, ElasticUrl
+from elastic.query import Query, QueryError, BoolQuery, FilteredQuery, \
+    Filter, HasParentQuery, HasChildQuery
+from elastic.result import Result, Aggregation
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -181,8 +184,7 @@ class Search:
             logger.warning("Error: elastic response 200:" + self.url)
         return response.json()
 
-    def search(self, obj_document=(Document if ElasticSettings.getattr('DOCUMENT_FACTORY') is None
-                                   else ElasticSettings.getattr('DOCUMENT_FACTORY'))):
+    def search(self, obj_document=ElasticSettings.get_document_factory()):
         ''' Run the search and return a L{Result} that stores the
         L{Document} and L{Aggregation} objects.
         @type  obj_document: L{Document}
