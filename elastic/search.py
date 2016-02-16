@@ -23,7 +23,7 @@ import requests
 from elastic.elastic_settings import ElasticSettings, ElasticUrl
 from elastic.query import Query, QueryError, BoolQuery, FilteredQuery, \
     Filter, HasParentQuery, HasChildQuery
-from elastic.result import Document, Result, Aggregation
+from elastic.result import Result, Aggregation
 
 
 # Get an instance of a logger
@@ -184,8 +184,7 @@ class Search:
             logger.warning("Error: elastic response 200:" + self.url)
         return response.json()
 
-    def search(self, obj_document=(ElasticSettings.get_document_factory()
-                                   if ElasticSettings.get_document_factory() is not None else Document)):
+    def search(self, obj_document=ElasticSettings.get_document_factory()):
         ''' Run the search and return a L{Result} that stores the
         L{Document} and L{Aggregation} objects.
         @type  obj_document: L{Document}

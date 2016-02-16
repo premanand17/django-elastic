@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 
 from elastic.exceptions import SettingsError
+from elastic.result import Document
 
 
 # Get an instance of a logger
@@ -170,7 +171,7 @@ class ElasticSettings:
                 return import_string(ElasticSettings.getattr('DOCUMENT_FACTORY')).factory
             else:
                 return ElasticSettings.getattr('DOCUMENT_FACTORY')
-        return None
+        return Document
 
 
 class ElasticUrl(object):
