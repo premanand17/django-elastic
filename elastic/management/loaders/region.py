@@ -61,9 +61,18 @@ class RegionManager(object):
 
                 query = ElasticQuery(Query.match("id", row[0]))
                 result = Search(search_query=query, idx=ElasticSettings.idx('MARKER', 'MARKER')).search()
+                if result.hits_total == 0:
+                    result2 = Search(search_query=ElasticQuery(Query.match("rshigh", row[0])),
+                                     idx=ElasticSettings.idx('MARKER', 'HISTORY')).search()
+                    if result2.hits_total > 0:
+                        history_doc = result2.docs[0]
+                        new_id = getattr(history_doc, "rscurrent")
+                        query = ElasticQuery(Query.match("id", new_id))
+                        result = Search(search_query=query, idx=ElasticSettings.idx('MARKER', 'MARKER')).search()
+
                 if result.hits_total != 1:
                     message += "ERROR loading row of gwas data for "+row[0]+" - Marker cannot be found; <br />\n"
-                    continue
+
                 marker = result.docs[0]
 
                 query = ElasticQuery(Query.match("code", row[1]))
