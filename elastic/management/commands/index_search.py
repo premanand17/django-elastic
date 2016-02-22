@@ -86,10 +86,6 @@ class Command(BaseCommand):
                     dest='disease',
                     help='disease code (eg: cel) '),
         ) + (
-        make_option('--indexDisease',
-                    dest='indexDisease',
-                    help='Load disease details'),
-        ) + (
         make_option('--indexGTarget',
                     dest='indexGTarget',
                     help='Load gene targets'),
