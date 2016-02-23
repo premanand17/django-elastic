@@ -7,7 +7,6 @@ from django.core.management.base import BaseCommand
 from elastic.management.loaders.alias import AliasManager
 from elastic.management.loaders.bed import BEDManager
 from elastic.management.loaders.criteria import CriteriaManager
-from elastic.management.loaders.disease import DiseaseManager
 from elastic.management.loaders.gene import GeneManager
 from elastic.management.loaders.gene_target import GeneTargetManager
 from elastic.management.loaders.gff import GFFManager
@@ -29,8 +28,6 @@ class Command(BaseCommand):
            "Options for genes:\n" \
            " --indexName [index name] --indexGene genenames.org.txt --org=human\n" \
            " --indexName [index name] --indexGeneGFF gene.gff --build GRCh38\n" \
-           "Options for diseases:\n" \
-           " --indexName [index name] --indexDisease disease.list\n" \
            "Options for study hits:\n" \
            " --indexName [index name] --indexType [studies] --addStudyData [csv file] --study [study id]\n" \
            "Options for GFF/GTF:\n" \
@@ -156,10 +153,6 @@ class Command(BaseCommand):
         elif options['addStudyData']:
             region = RegionManager()
             region.add_study_data(**options)
-
-        elif options['indexDisease']:
-            disease = DiseaseManager()
-            disease.create_disease(**options)
 
         elif options['indexGTarget']:
             gt = GeneTargetManager()
