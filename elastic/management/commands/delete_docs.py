@@ -3,6 +3,7 @@ import logging
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from elastic.search import Delete
+import sys
 
 
 # Get an instance of a logger
@@ -28,13 +29,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         ''' Handle the user options to update elastic docs. '''
         if options['indexName']:
-            logger.debug('indexName : ' + str(options['indexName']))
             idx_type = ''
             if options['indexType']:
-                logger.debug('indexType : ' + str(options['indexType']))
                 idx_type = options['indexType']
-            else:
-                logger.debug('NO INDEX TYPE PROVIDED')
-            Delete.docs_by_query(options['indexName'], idx_type=idx_type)
+
+            sys.stdout.write("WARNING: About to delete index "+options['indexName']+'/'+idx_type+'. Continue [y/n]?')
+            choice = input().lower()
+            if choice == 'y':
+                Delete.docs_by_query(options['indexName'], idx_type=idx_type)
         else:
             print(Command.help)
