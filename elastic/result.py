@@ -1,4 +1,5 @@
 ''' Elastic L{Result}, hit L{Document} and L{Aggregation} objects. '''
+import re
 
 
 class Result(object):
@@ -84,6 +85,21 @@ class Document(object):
         if 'highlight' in self.__dict__['_meta']:
             return self.__dict__['_meta']['highlight']
         return None
+
+    @classmethod
+    def _convert(cls, text):
+        ''' Convert to an integer if a number else return string. '''
+        return int(text) if text.isdigit() else text
+
+    @classmethod
+    def sorted_alphanum(cls, l, attr):
+        ''' Sort the given object list alphanumerically by a given attribute of the object.
+        @type  l: list
+        @param l: List of objects to sort.
+        @type  attr: str
+        @param attr: Object attribute to sort by.
+        '''
+        return sorted(l, key=lambda key: [Document._convert(c) for c in re.split('([0-9]+)', getattr(key, attr))])
 
 
 class Aggregation(object):
